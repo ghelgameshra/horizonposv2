@@ -6,6 +6,7 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
+    @include('pages.produk.tambah-data')
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -25,14 +26,24 @@
                         </div>
                         <div class="col-12 col-md-6">
                             <div class="input-group d-flex">
-                                <button class="btn btn-sm flex-fill btn-primary">+ Produk</button>
+                                <button class="btn btn-sm flex-fill btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasEnd" aria-controls="offcanvasEnd" id="tambahProdukButton">
+                                    + Produk
+                                </button>
                                 <button class="btn btn-sm flex-fill btn-success">Export Excel</button>
-                                <button class="btn btn-sm flex-fill btn-dark">Mutasi Stok</button>
+                                <button class="btn btn-sm flex-fill btn-warning dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Download
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{{ url('template/template_upload_produk.xlsx') }}">Template produk</a></li>
+                                    <li><a class="dropdown-item" href="#">Panduan setting</a></li>
+                                </ul>
                             </div>
                         </div>
                         <div class="col-12 col-md-2">
                             <div class="input-group d-flex">
-                                <button class="btn btn-sm btn-primary flex-fill">+ Kategori</button>
+                                <button class="btn btn-sm flex-fill btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasEnd" aria-controls="offcanvasEnd" id="tambahKategoriButton">
+                                    + Kategori
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -142,5 +153,48 @@ function deleteProduk(plu){
         notification('error', err.responseJSON.message);
     });
 }
+
+$('#tambahProdukButton').on('click', function(){
+    $('.offcanvas-header h5').text('Tambah Data Produk');
+    showSelect2('jenis_ukuran', 'addFormOffCanvas', `{{ route('select2JenisUkuran') }}`);
+    showSelect2('id_kategori', 'addFormOffCanvas', `{{ route('select2JenisKategori') }}`);
+    showSelect2('satuan', 'addFormOffCanvas', `{{ route('select2JenisSatuan') }}`);
+})
+
+$('#addFormOffCanvas').on('submit', function(e){
+    e.preventDefault();
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: '{{ route('produk.insert') }}',
+        type: 'POST',
+        data: new FormData(this),
+        contentType: false,
+        processData: false,
+    })
+    .done((res) =>{
+        notification('success', res.pesan);
+        reloadDataTable($('.datatables-basic'));
+        $('#addFormOffCanvas')[0].reset();
+        $('.offcanvas-header button').click();
+    })
+    .fail((err) =>{
+        $.each(err.responseJSON['errors'], function(key, messages) {
+            $(`#${key}`).addClass('border-danger');
+            $(`#${key}`).siblings().addClass('border-danger');
+            // console.log(key + ': ' + messages.join(', '));
+        });
+        notification('error', err.responseJSON.message);
+    });
+})
+
+$('#harga_beli').on('keyup', function(){
+    $('#preview_harga_beli').val(formatRupiah( $('#harga_beli').val() ));
+})
+
+$('#harga_jual').on('keyup', function(){
+    $('#preview_harga_jual').val(formatRupiah( $('#harga_jual').val() ));
+})
 </script>
 @endpush

@@ -43,6 +43,13 @@ class ProdukImport implements ToModel, WithUpserts, WithHeadingRow, WithBatchIns
             ]);
         }
 
+        $satuan = DB::table('ref_satuan')->where('nama_satuan', $row['satuan'])->first();
+        if(!$satuan){
+            DB::table('ref_satuan')->insert([
+                'nama_satuan' => $row['satuan']
+            ]);
+        }
+
         return new Produk([
             'plu'               => $row['plu'],
             'nama_produk'       => strtoupper($row['nama_produk']),
