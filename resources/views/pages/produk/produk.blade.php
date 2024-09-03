@@ -7,6 +7,7 @@
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     @include('pages.produk.tambah-data')
+    @include('pages.produk.tambah-kategori')
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -41,7 +42,7 @@
                         </div>
                         <div class="col-12 col-md-2">
                             <div class="input-group d-flex">
-                                <button class="btn btn-sm flex-fill btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasEnd" aria-controls="offcanvasEnd" id="tambahKategoriButton">
+                                <button class="btn btn-sm flex-fill btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasEndKategori" aria-controls="offcanvasEndKategori" id="tambahKategoriButton">
                                     + Kategori
                                 </button>
                             </div>
@@ -187,7 +188,34 @@ $('#addFormOffCanvas').on('submit', function(e){
         });
         notification('error', err.responseJSON.message);
     });
-})
+});
+
+$('#addKategori').on('submit', function(e){
+    e.preventDefault();
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: '{{ route('kategori.insert') }}',
+        type: 'POST',
+        data: new FormData(this),
+        contentType: false,
+        processData: false,
+    })
+    .done((res) =>{
+        notification('success', res.pesan);
+        $('#addKategori')[0].reset();
+        $('.offcanvas-header button').click();
+    })
+    .fail((err) =>{
+        $.each(err.responseJSON['errors'], function(key, messages) {
+            $(`#${key}`).addClass('border-danger');
+            $(`#${key}`).siblings().addClass('border-danger');
+            // console.log(key + ': ' + messages.join(', '));
+        });
+        notification('error', err.responseJSON.message);
+    });
+});
 
 $('#harga_beli').on('keyup', function(){
     $('#preview_harga_beli').val(formatRupiah( $('#harga_beli').val() ));

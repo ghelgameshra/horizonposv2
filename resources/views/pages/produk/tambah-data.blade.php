@@ -56,8 +56,8 @@
                         </select>
                     </div>
                     <div class="btn-group d-flex">
-                        <button type="submit" class="btn flex-fill btn-primary mb-2 d-grid w-100">+ Tambah</button>
-                        <button type="button" class="btn flex-fill btn-label-secondary d-grid w-100" data-bs-dismiss="offcanvas">
+                        <button type="submit" class="btn btn-sm flex-fill btn-primary d-grid w-100">+ Tambah</button>
+                        <button type="button" class="btn btn-sm flex-fill btn-label-secondary d-grid w-100" data-bs-dismiss="offcanvas">
                             Cancel
                         </button>
                     </div>

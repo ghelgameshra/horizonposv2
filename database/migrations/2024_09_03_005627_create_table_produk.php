@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nama_kategori', 150);
             $table->text('deskripsi')->nullable();
             $table->string('addid')->nullable();
+            $table->timestamps();
         });
 
         Schema::create('ref_jenis_ukuran', function (Blueprint $table) {
@@ -23,6 +24,7 @@ return new class extends Migration
             $table->string('nama_jenis', 150);
             $table->text('deskripsi')->nullable();
             $table->string('addid')->nullable();
+            $table->timestamps();
         });
 
         Schema::create('ref_satuan', function (Blueprint $table) {
@@ -30,6 +32,7 @@ return new class extends Migration
             $table->string('nama_satuan', 150);
             $table->text('deskripsi')->nullable();
             $table->string('addid')->nullable();
+            $table->timestamps();
         });
 
         Schema::create('produk', function (Blueprint $table) {
