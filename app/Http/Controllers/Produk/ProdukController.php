@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Produk;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Insert\ProdukInsertRequest;
 use App\Imports\ProdukImport;
 use App\Models\Produk\Produk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -18,6 +20,9 @@ class ProdukController extends Controller
         ]);
 
         Excel::import(new ProdukImport, $request->file('file_produk'));
+        DB::table('produk')->update([
+            'addid' => $request->ip() . "@user" . Auth::user()->id
+        ]);
 
         return response()->json([
             'pesan' => "berhasil tambah data produk"
@@ -37,6 +42,23 @@ class ProdukController extends Controller
         Produk::where('plu', $request->plu)->delete();
         return response()->json([
             'pesan' => "berhasil hapus data PLU $request->plu"
+        ], 200);
+    }
+
+    public function insert(ProdukInsertRequest $request){
+        $data = $request->validated();
+
+        $lastProduk = DB::table('produk')->orderBy('addno', 'desc')->first();
+
+        $data['addid']          = $request->ip();
+        $data['nama_produk']    = strtoupper($data['nama_produk']);
+        $data['plu']            = now()->format('ymd') . str_pad($lastProduk->addno+1, 4, '0', STR_PAD_LEFT);
+        $data['addno']          = $lastProduk->addno + 1;
+
+        Produk::create($data);
+
+        return response()->json([
+            'pesan' => 'data produk berhasil ditambah'
         ], 200);
     }
 }

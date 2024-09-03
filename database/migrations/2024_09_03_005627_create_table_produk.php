@@ -25,6 +25,13 @@ return new class extends Migration
             $table->string('addid')->nullable();
         });
 
+        Schema::create('ref_satuan', function (Blueprint $table) {
+            $table->id();
+            $table->string('nama_satuan', 150);
+            $table->text('deskripsi')->nullable();
+            $table->string('addid')->nullable();
+        });
+
         Schema::create('produk', function (Blueprint $table) {
             $table->id();
             $table->string('plu', 10)->unique()->nullable();
@@ -56,5 +63,6 @@ return new class extends Migration
         Schema::dropIfExists('produk');
         Schema::dropIfExists('ref_kategori');
         Schema::dropIfExists('ref_jenis_ukuran');
+        Schema::dropIfExists('ref_satuan');
     }
 };
