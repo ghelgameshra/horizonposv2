@@ -32,7 +32,7 @@ class ProdukController extends Controller
     public function get()
     {
         $produk = DB::table('produk AS p')->join('ref_kategori AS k', 'p.id_kategori', 'k.id')
-        ->orderBy('created_at', 'desc')->select(['p.plu', 'p.nama_produk', 'k.nama_kategori', 'p.harga_jual', 'p.stok', 'p.plu_aktif', 'p.jual_minus'])->get();
+        ->orderBy('p.created_at', 'desc')->select(['p.plu', 'p.nama_produk', 'k.nama_kategori', 'p.harga_jual', 'p.stok', 'p.plu_aktif', 'p.jual_minus'])->get();
         return response()->json([
             'data' => $produk
         ], 200);
@@ -49,11 +49,12 @@ class ProdukController extends Controller
         $data = $request->validated();
 
         $lastProduk = DB::table('produk')->orderBy('addno', 'desc')->first();
+        $lastAddNo = $lastProduk ? $lastProduk->addno + 1 : 1;
 
         $data['addid']          = $request->ip();
         $data['nama_produk']    = strtoupper($data['nama_produk']);
-        $data['plu']            = now()->format('ymd') . str_pad($lastProduk->addno+1, 4, '0', STR_PAD_LEFT);
-        $data['addno']          = $lastProduk->addno + 1;
+        $data['plu']            = now()->format('ymd') . str_pad($lastAddNo, 4, '0', STR_PAD_LEFT);
+        $data['addno']          = $lastAddNo;
 
         Produk::create($data);
 

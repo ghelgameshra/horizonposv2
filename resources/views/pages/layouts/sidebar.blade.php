@@ -40,73 +40,33 @@
         </li>
 
         <li class="menu-item">
-            <a href="{{ route('dashboard') }}" class="menu-link">
+            <a href="{{ route('kasir.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-calculator"></i>
                 <div data-i18n="Kasir">Kasir</div>
             </a>
         </li>
 
         <!-- Layouts -->
-        <li class="menu-item">
+        <li class="menu-item {{ Request::is('produk') ? 'active open' : '' }} {{ Request::is('member') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ti ti-database"></i>
                 <div data-i18n="Master">Master</div>
             </a>
 
             <ul class="menu-sub">
-                <li class="menu-item">
+                <li class="menu-item {{ Request::is('produk') ? 'active' : '' }}">
                     <a href="{{ route('produk.index') }}" class="menu-link">
-                        <div data-i18n="Produk">Produk</div>
+                        <div data-i18n="Produk & Kategori">Produk & Kategori</div>
                     </a>
                 </li>
-                <li class="menu-item">
-                    <a href="#" class="menu-link">
-                        <div data-i18n="Kategori">Kategori</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="#" class="menu-link">
+                <li class="menu-item {{ Request::is('member') ? 'active' : '' }}">
+                    <a href="{{ route('member.index') }}" class="menu-link">
                         <div data-i18n="Member">Member</div>
                     </a>
                 </li>
                 <li class="menu-item">
                     <a href="#" class="menu-link">
                         <div data-i18n="Promosi">Promosi</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-        <!-- Front Pages -->
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons ti ti-files"></i>
-                <div data-i18n="Front Pages">Front Pages</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="../front-pages/landing-page.html" class="menu-link" target="_blank">
-                        <div data-i18n="Landing">Landing</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="../front-pages/pricing-page.html" class="menu-link" target="_blank">
-                        <div data-i18n="Pricing">Pricing</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="../front-pages/payment-page.html" class="menu-link" target="_blank">
-                        <div data-i18n="Payment">Payment</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="../front-pages/checkout-page.html" class="menu-link" target="_blank">
-                        <div data-i18n="Checkout">Checkout</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="../front-pages/help-center-landing.html" class="menu-link" target="_blank">
-                        <div data-i18n="Help Center">Help Center</div>
                     </a>
                 </li>
             </ul>
@@ -129,6 +89,24 @@
             </a>
         </li>
 
+
+        <li class="menu-header small text-uppercase {{ Request::is('kasir') ? '' : 'd-none' }}">
+            <span class="menu-header-text" data-i18n="User">User</span>
+        </li>
+        <li class="menu-item {{ Request::is('kasir') ? '' : 'd-none' }}">
+            <a href="#" class="menu-link" id="logOutButton">
+                <i class="menu-icon tf-icons ti ti-logout"></i>
+                <div data-i18n="Log Out">Log Out</div>
+            </a>
+        </li>
     </ul>
 </aside>
 <!-- / Menu -->
+
+@push('js')
+<script>
+$('#logOutButton').on('click', function(){
+    $('#formLogOut').submit();
+})
+</script>
+@endpush
