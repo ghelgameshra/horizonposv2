@@ -6,8 +6,14 @@ function notification(status, message, title = null, timer = 5000) {
 
     if (status === 'error') {
         toastr.error(message, title, options);
-    } else if (status === 'success') {
+    }
+
+    if (status === 'success') {
         toastr.success(message, title, options);
+    }
+
+    if (status === 'info'){
+        toastr.info(message, title, options);
     }
 }
 

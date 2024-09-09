@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             UkuranSatuanSeeder::class,
             ConstSeeder::class,
+            PromoSeeder::class
         ]);
     }
 }
