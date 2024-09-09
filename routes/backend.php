@@ -3,6 +3,7 @@
 use App\Http\Controllers\Administrasi\MemberController;
 use App\Http\Controllers\Produk\KategoriController;
 use App\Http\Controllers\Produk\ProdukController;
+use App\Http\Controllers\Produk\PromoController;
 use App\Http\Controllers\Select2\Select2Controller;
 use Illuminate\Support\Facades\Route;
 
@@ -32,8 +33,16 @@ Route::get('select2-satuan-produk', [Select2Controller::class, 'select2JenisSatu
 Route::delete('member', [MemberController::class, 'destroy'])->name('member.delete');
 Route::post('member', [MemberController::class, 'insert'])->name('member.insert');
 
+
+/*
+    Promo Route
+*/
+Route::delete('promo', [PromoController::class, 'destroy'])->name('promo.delete');
+
+
 /*
     Datatable ajx route
 */
 Route::get('/get-produk', [ProdukController::class, 'get'])->name('produk.get');
 Route::get('/get-member', [MemberController::class, 'get'])->name('member.get');
+Route::get('/get-promo', [PromoController::class, 'get'])->name('promo.get');

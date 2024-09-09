@@ -22,4 +22,9 @@ class FeController extends Controller
     {
         return view('pages.member.member');
     }
+
+    public function promosi(): View
+    {
+        return view('pages.promosi.promosi');
+    }
 }

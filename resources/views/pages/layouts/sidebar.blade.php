@@ -47,25 +47,25 @@
         </li>
 
         <!-- Layouts -->
-        <li class="menu-item {{ Request::is('produk') ? 'active open' : '' }} {{ Request::is('member') ? 'active open' : '' }}">
+        <li class="menu-item {{ Request::is('*master/*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ti ti-database"></i>
                 <div data-i18n="Master">Master</div>
             </a>
 
             <ul class="menu-sub">
-                <li class="menu-item {{ Request::is('produk') ? 'active' : '' }}">
+                <li class="menu-item {{ Request::is('master/produk') ? 'active' : '' }}">
                     <a href="{{ route('produk.index') }}" class="menu-link">
                         <div data-i18n="Produk & Kategori">Produk & Kategori</div>
                     </a>
                 </li>
-                <li class="menu-item {{ Request::is('member') ? 'active' : '' }}">
+                <li class="menu-item {{ Request::is('master/member') ? 'active' : '' }}">
                     <a href="{{ route('member.index') }}" class="menu-link">
                         <div data-i18n="Member">Member</div>
                     </a>
                 </li>
-                <li class="menu-item">
-                    <a href="#" class="menu-link">
+                <li class="menu-item {{ Request::is('master/promosi') ? 'active' : '' }}">
+                    <a href="{{ route('promosi.index') }}" class="menu-link">
                         <div data-i18n="Promosi">Promosi</div>
                     </a>
                 </li>
