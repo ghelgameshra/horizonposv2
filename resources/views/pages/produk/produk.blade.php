@@ -6,8 +6,6 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    @include('pages.produk.tambah-data')
-    @include('pages.produk.tambah-kategori')
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -72,6 +70,8 @@
         </div>
     </div>
 </div>
+@include('pages.produk.tambah-data')
+@include('pages.produk.tambah-kategori')
 @endsection
 
 @push('js')

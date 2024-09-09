@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Administrasi\MemberController;
 use App\Http\Controllers\Produk\KategoriController;
 use App\Http\Controllers\Produk\ProdukController;
 use App\Http\Controllers\Select2\Select2Controller;
@@ -26,6 +27,13 @@ Route::get('select2-satuan-produk', [Select2Controller::class, 'select2JenisSatu
 
 
 /*
+    Member Route
+*/
+Route::delete('member', [MemberController::class, 'destroy'])->name('member.delete');
+Route::post('member', [MemberController::class, 'insert'])->name('member.insert');
+
+/*
     Datatable ajx route
 */
 Route::get('/get-produk', [ProdukController::class, 'get'])->name('produk.get');
+Route::get('/get-member', [MemberController::class, 'get'])->name('member.get');
