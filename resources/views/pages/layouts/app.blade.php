@@ -4,6 +4,9 @@
     data-theme="theme-default" data-assets-path="{{ asset('lib') }}/assets/" data-template="vertical-menu-template">
 
 <head>
+    {{-- @if (env('APP_DEBUG'))
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+    @endif --}}
     <meta charset="utf-8" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport"

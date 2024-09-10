@@ -17,7 +17,11 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             UkuranSatuanSeeder::class,
             ConstSeeder::class,
-            PromoSeeder::class
+            PromoSeeder::class,
+            PendidikanSeeder::class,
+            AgamaSeeder::class,
+            JabatanSeeder::class,
+            KaryawanSeeder::class,
         ]);
     }
 }

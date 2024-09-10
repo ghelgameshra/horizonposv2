@@ -69,19 +69,146 @@
                         <div data-i18n="Promosi">Promosi</div>
                     </a>
                 </li>
+                <li class="menu-item {{ Request::is('master/karyawan') ? 'active' : '' }}">
+                    <a href="{{ route('karyawan.index') }}" class="menu-link">
+                        <div data-i18n="Pegawai">Pegawai</div>
+                    </a>
+                </li>
             </ul>
+        </li>
+
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-report-analytics"></i>
+                <div data-i18n="Transaksi">Transaksi</div>
+            </a>
+
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ route('produk.index') }}" class="menu-link">
+                        <div data-i18n="Pelunasan">Pelunasan</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('member.index') }}" class="menu-link">
+                        <div data-i18n="Reprint Trx">Reprint Trx</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-arrows-sort"></i>
+                <div data-i18n="Pesanan">Pesanan</div>
+            </a>
+
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ route('member.index') }}" class="menu-link">
+                        <div data-i18n="Monitoring Pesanan">Monitoring Pesanan</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('produk.index') }}" class="menu-link">
+                        <div data-i18n="Work Order">Work Order</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-report"></i>
+                <div data-i18n="Laporan">Laporan</div>
+            </a>
+
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ route('member.index') }}" class="menu-link">
+                        <div data-i18n="Ringkasan Penjualan">Ringkasan Penjualan</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('produk.index') }}" class="menu-link">
+                        <div data-i18n="Laporan Penjualan">Laporan Penjualan</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('produk.index') }}" class="menu-link">
+                        <div data-i18n="Laporan Pengeluaran">Laporan Pengeluaran</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('member.index') }}" class="menu-link">
+                        <div data-i18n="Laporan Kas">Laporan Kas</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('member.index') }}" class="menu-link">
+                        <div data-i18n="Piutang">Piutang</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="menu-item">
+            <a href="{{ route('kasir.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-coins"></i>
+                <div data-i18n="Pengeluaran">Pengeluaran</div>
+            </a>
+        </li>
+
+        <li class="menu-item">
+            <a href="{{ route('kasir.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-checkup-list"></i>
+                <div data-i18n="Tutup Harian">Tutup Harian</div>
+            </a>
         </li>
 
         <!-- Apps & Pages -->
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text" data-i18n="Apps & Pages">Apps &amp; Pages</span>
         </li>
+
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-settings"></i>
+                <div data-i18n="Pengaturan">Pengaturan</div>
+            </a>
+
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ route('member.index') }}" class="menu-link">
+                        <div data-i18n="Lisensi">Lisensi</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('produk.index') }}" class="menu-link">
+                        <div data-i18n="Toko">Toko</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('member.index') }}" class="menu-link">
+                        <div data-i18n="Printer">Printer</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('member.index') }}" class="menu-link">
+                        <div data-i18n="Server">Server</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         <li class="menu-item">
             <a href="app-email.html" class="menu-link">
-                <i class="menu-icon tf-icons ti ti-mail"></i>
-                <div data-i18n="Email">Email</div>
+                <i class="menu-icon tf-icons ti ti-lifebuoy"></i>
+                <div data-i18n="Bantuan">Bantuan</div>
             </a>
         </li>
+
         <li class="menu-item">
             <a href="app-chat.html" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-messages"></i>
