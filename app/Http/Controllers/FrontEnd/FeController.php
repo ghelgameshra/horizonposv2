@@ -27,4 +27,9 @@ class FeController extends Controller
     {
         return view('pages.promosi.promosi');
     }
+
+    public function karyawan(): View
+    {
+        return view('pages.karyawan.karyawan');
+    }
 }
