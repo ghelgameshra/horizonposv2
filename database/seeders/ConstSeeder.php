@@ -21,6 +21,10 @@ class ConstSeeder extends Seeder
             'AUPR' => [
                 'keterangan'    => 'otomatis cetak struk setelah selesai kasiran',
                 'docno'         => 0
+            ],
+            'CKBJ' => [
+                'keterangan'    => 'proses cek plu bisa jual untuk semua plu',
+                'docno'         => 1
             ]
         ];
 

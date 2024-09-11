@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Route;
 Route::post('/produk', [ProdukController::class, 'upsert'])->name('produk.upsert');
 Route::post('/produk-add', [ProdukController::class, 'insert'])->name('produk.insert');
 Route::delete('/delete-produk', [ProdukController::class, 'destroy'])->name('produk.delete');
+Route::put('/produk-activate-status/{plu}', [ProdukController::class, 'activateStatus'])->name('activateStatus');
+Route::put('/produk-activate-status-jual-minus/{plu}', [ProdukController::class, 'activateStatusJual'])->name('activateStatusJual');
 
 /*
     Kategori Route

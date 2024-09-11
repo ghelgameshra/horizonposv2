@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Insert\ProdukInsertRequest;
 use App\Imports\ProdukImport;
 use App\Models\Produk\Produk;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +33,7 @@ class ProdukController extends Controller
     public function get()
     {
         $produk = DB::table('produk AS p')->join('ref_kategori AS k', 'p.id_kategori', 'k.id')
-        ->orderBy('p.created_at', 'desc')->select(['p.plu', 'p.nama_produk', 'k.nama_kategori', 'p.harga_jual', 'p.stok', 'p.plu_aktif', 'p.jual_minus'])->get();
+        ->orderBy('p.created_at', 'desc')->select(['p.plu', 'p.nama_produk', 'k.nama_kategori', 'p.harga_jual', 'p.stok', 'p.plu_aktif', 'p.jual_minus', 'p.bisa_jual'])->get();
         return response()->json([
             'data' => $produk
         ], 200);
@@ -62,4 +63,60 @@ class ProdukController extends Controller
             'pesan' => 'data produk berhasil ditambah'
         ], 200);
     }
+
+    public function activateStatus($plu): JsonResponse
+    {
+        $data = Produk::where('plu', $plu)->first();
+        $status = !$data->plu_aktif ? 'diaktifkan' : 'dinonaktifkan dan tidak bisa dijual';
+
+        $data->update([
+            'plu_aktif' => !$data->plu_aktif ? true : false,
+            'addid'     => Auth::user()->email
+        ]);
+
+        $this->setStatusBisaJual($data);
+
+        return response()->json([
+            'pesan' => "PLU $plu $status"
+        ], 200);
+    }
+
+    public function activateStatusJual($plu): JsonResponse
+    {
+        $data = Produk::where('plu', $plu)->first();
+
+        // Menentukan status jual minus dan pesan terkait
+        $isJualMinus = !$data->jual_minus;
+        $status = $isJualMinus ? "bisa jual minus diaktifkan. PLU $plu bisa dijual" : "bisa jual minus dinonaktifkan";
+
+        // Update data produk
+        $data->update([
+            'jual_minus' => $isJualMinus,
+            'addid'      => Auth::user()->email
+        ]);
+
+        // Menentukan pesan berdasarkan stok dan jual minus
+        if (!$isJualMinus && $data->stok <= 0) {
+            $bisaJual = "PLU tidak bisa dijual karena stok tidak mencukupi";
+        } elseif ($data->stok > 0) {
+            $bisaJual = "PLU bisa dijual karena stok lebih dari 0";
+        } else {
+            $bisaJual = '';
+        }
+
+        // Memperbarui status bisa jual
+        $this->setStatusBisaJual($data);
+
+        return response()->json([
+            'pesan' => "PLU $plu $status. $bisaJual",
+        ], 200);
+    }
+
+
+    private function setStatusBisaJual($data): void
+    {
+        $data->bisa_jual = $data->plu_aktif && ($data->jual_minus || $data->stok > 0);
+        $data->save();
+    }
+
 }

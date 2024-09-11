@@ -54,12 +54,13 @@
                                         <th>no</th>
                                         <th></th>
                                         <th>plu</th>
+                                        <th>bisa jual</th>
+                                        <th>aktif</th>
+                                        <th>jual minus</th>
+                                        <th>qty</th>
                                         <th>nama produk</th>
                                         <th>kategori</th>
                                         <th>harga jual</th>
-                                        <th>qty</th>
-                                        <th>aktif</th>
-                                        <th>jual minus</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -78,6 +79,7 @@
 <script src="{{ asset('lib') }}/assets/vendor/libs/select2/select2.js"></script>
 <script>
 $(function(){
+
     var table = $('.datatables-basic').DataTable({
         processing: true,
         paging: true,
@@ -105,12 +107,35 @@ $(function(){
                 `
             }},
             {data: (data) =>{return data.plu}},
+            {data: (data) =>{
+                return data.bisa_jual ? `<span class="badge text-bg-success">Y</span>` : `<span class="badge text-bg-danger">N</span>`;
+            }},
+            {data: (data) =>{
+                return `
+                    <label class="switch switch-square">
+                        <input type="checkbox" class="switch-input" ${ data.plu_aktif ? 'checked' : '' } onclick="changeStatusActive('${data.plu}')" />
+                        <span class="switch-toggle-slider">
+                            <span class="switch-on"></span>
+                            <span class="switch-off"></span>
+                        </span>
+                    </label>
+                `;
+            }},
+            {data: (data) =>{
+                return `
+                    <label class="switch switch-square">
+                        <input type="checkbox" class="switch-input" ${ data.jual_minus ? 'checked' : '' } onclick="changeStatusJual('${data.plu}')" ${data.plu_aktif ? '' : 'disabled'} />
+                        <span class="switch-toggle-slider">
+                            <span class="switch-on"></span>
+                            <span class="switch-off"></span>
+                        </span>
+                    </label>
+                `;
+            }},
+            {data: (data) =>{return data.stok}},
             {data: (data) =>{return data.nama_produk}},
             {data: (data) =>{return data.nama_kategori}},
             {data: (data) =>{return formatRupiah(data.harga_jual)}},
-            {data: (data) =>{return data.stok}},
-            {data: (data) =>{return data.plu_aktif ? 'Y' : 'N'}},
-            {data: (data) =>{return data.jual_minus ? 'Y' : 'N'}},
         ],
     });
 
@@ -184,7 +209,6 @@ $('#addFormOffCanvas').on('submit', function(e){
         $.each(err.responseJSON['errors'], function(key, messages) {
             $(`#${key}`).addClass('border-danger');
             $(`#${key}`).siblings().addClass('border-danger');
-            // console.log(key + ': ' + messages.join(', '));
         });
         notification('error', err.responseJSON.message);
     });
@@ -211,7 +235,6 @@ $('#addKategori').on('submit', function(e){
         $.each(err.responseJSON['errors'], function(key, messages) {
             $(`#${key}`).addClass('border-danger');
             $(`#${key}`).siblings().addClass('border-danger');
-            // console.log(key + ': ' + messages.join(', '));
         });
         notification('error', err.responseJSON.message);
     });
@@ -224,5 +247,51 @@ $('#harga_beli').on('keyup', function(){
 $('#harga_jual').on('keyup', function(){
     $('#preview_harga_jual').val(formatRupiah( $('#harga_jual').val() ));
 })
+
+function changeStatusActive(plu){
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: `{{ url('produk-activate-status/${plu}') }}`,
+        type: 'PUT',
+        data: plu,
+        contentType: false,
+        processData: false,
+    })
+    .done((res) =>{
+        notification('success', res.pesan, null, 30000);
+
+        setTimeout(() => {
+            reloadDataTable($('.datatables-basic'));
+        }, 1000);
+    })
+    .fail((err) =>{
+        notification('error', err.responseJSON.message);
+    });
+}
+
+function changeStatusJual(plu){
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: `{{ url('produk-activate-status-jual-minus/${plu}') }}`,
+        type: 'PUT',
+        data: plu,
+        contentType: false,
+        processData: false,
+    })
+    .done((res) =>{
+        notification('success', res.pesan, null, 30000);
+
+        setTimeout(() => {
+            reloadDataTable($('.datatables-basic'));
+        }, 1000);
+    })
+    .fail((err) =>{
+        notification('error', err.responseJSON.message);
+    });
+}
 </script>
 @endpush
