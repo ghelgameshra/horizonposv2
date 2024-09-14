@@ -6,6 +6,8 @@ use App\Http\Controllers\Produk\KategoriController;
 use App\Http\Controllers\Produk\ProdukController;
 use App\Http\Controllers\Produk\PromoController;
 use App\Http\Controllers\Select2\Select2Controller;
+use App\Http\Controllers\Transaksi\TransaksiController;
+use App\Models\Transaksi\Transaksi;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -53,11 +55,22 @@ Route::post('karyawan', [KaryawanController::class, 'upsert'])->name('karyawan.u
 Route::post('karyawan-baru', [KaryawanController::class, 'insert'])->name('karyawan.insert');
 Route::delete('karyawan', [KaryawanController::class, 'delete'])->name('karyawan.delete');
 
+/*
+    Kasir Route
+*/
+Route::get('kasir/transaksi-baru-detail', [TransaksiController::class, 'transaksiBaruDetail'])->name('transaksiBaruDetail');
+Route::post('kasir/transaksi-baru/{user}', [TransaksiController::class, 'transaksiBaru'])->name('transaksiBaru');
+Route::post('kasir/transaksi-baru-log', [TransaksiController::class, 'transaksiLog'])->name('transaksiLog');
+Route::delete('kasir/transaksi-baru-log', [TransaksiController::class, 'transaksiLogDelete'])->name('transaksiLogDelete');
+Route::post('kasir/transaksi-tambah-qty', [TransaksiController::class, 'tambahQty'])->name('tambahQty');
+Route::post('kasir/transaksi-cek-promo', [TransaksiController::class, 'cekPromo'])->name('cekPromo');
+Route::put('kasir/transaksi-baru', [TransaksiController::class, 'transaksiSelesai'])->name('transaksiSelesai');
 
 /*
     Datatable ajx route
 */
-Route::get('/get-produk', [ProdukController::class, 'get'])->name('produk.get');
-Route::get('/get-member', [MemberController::class, 'get'])->name('member.get');
-Route::get('/get-promo', [PromoController::class, 'get'])->name('promo.get');
-Route::get('/get-karyawan', [KaryawanController::class, 'get'])->name('karyawan.get');
+Route::get('get-produk', [ProdukController::class, 'get'])->name('produk.get');
+Route::get('get-member', [MemberController::class, 'get'])->name('member.get');
+Route::get('get-promo', [PromoController::class, 'get'])->name('promo.get');
+Route::get('get-karyawan', [KaryawanController::class, 'get'])->name('karyawan.get');
+Route::get('get-produk-jual', [TransaksiController::class, 'getProdukJual'])->name('getProdukJual');

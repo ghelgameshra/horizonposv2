@@ -17,6 +17,7 @@ class PromoSeeder extends Seeder
         DB::table('promo')->delete();
         Promo::create([
             'kode_promo'            => 'MBRTKP24',
+            'promo_aktif'           => true,
             'item_syarat'           => '*',
             'promo_member'          => true,
             'minimal_belanja'       => 50000,
