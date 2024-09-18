@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Administrasi\KaryawanController;
 use App\Http\Controllers\Administrasi\MemberController;
+use App\Http\Controllers\Administrasi\StrukController;
+use App\Http\Controllers\Administrasi\TokoController;
 use App\Http\Controllers\Produk\KategoriController;
 use App\Http\Controllers\Produk\ProdukController;
 use App\Http\Controllers\Produk\PromoController;
@@ -65,6 +67,15 @@ Route::delete('kasir/transaksi-baru-log', [TransaksiController::class, 'transaks
 Route::post('kasir/transaksi-tambah-qty', [TransaksiController::class, 'tambahQty'])->name('tambahQty');
 Route::post('kasir/transaksi-cek-promo', [TransaksiController::class, 'cekPromo'])->name('cekPromo');
 Route::put('kasir/transaksi-baru', [TransaksiController::class, 'transaksiSelesai'])->name('transaksiSelesai');
+
+/*
+    Pengaturan toko route
+*/
+Route::get('toko', [TokoController::class, 'get'])->name('toko.get');
+Route::get('toko/pesan-struk', [StrukController::class, 'getPesanStruk'])->name('getPesanStruk');
+Route::put('toko', [TokoController::class, 'update'])->name('toko.update');
+Route::put('toko/change-logo', [TokoController::class, 'changeLogo'])->name('toko.changeLogo');
+
 
 /*
     Datatable ajx route
