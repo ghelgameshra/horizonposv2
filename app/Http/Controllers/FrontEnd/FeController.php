@@ -32,4 +32,9 @@ class FeController extends Controller
     {
         return view('pages.karyawan.karyawan');
     }
+
+    public function toko(): View
+    {
+        return view('pages.toko.setting');
+    }
 }
