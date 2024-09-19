@@ -77,15 +77,15 @@
             </ul>
         </li>
 
-        <li class="menu-item">
+        <li class="menu-item {{ Request::is('*transaksi/*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ti ti-report-analytics"></i>
                 <div data-i18n="Transaksi">Transaksi</div>
             </a>
 
             <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="{{ route('produk.index') }}" class="menu-link">
+                <li class="menu-item {{ Request::is('transaksi/pelunasan') ? 'active' : '' }}">
+                    <a href="{{ route('pelunasan.index') }}" class="menu-link">
                         <div data-i18n="Pelunasan">Pelunasan</div>
                     </a>
                 </li>

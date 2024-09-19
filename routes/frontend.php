@@ -10,3 +10,4 @@ Route::get('master/promosi', [FeController::class, 'promosi'])->name('promosi.in
 Route::get('master/karyawan', [FeController::class, 'karyawan'])->name('karyawan.index');
 Route::get('pengaturan/toko', [FeController::class, 'toko'])->name('toko.index');
 Route::get('pengaturan/printer', [FeController::class, 'printer'])->name('printer.index');
+Route::get('transaksi/pelunasan', [FeController::class, 'pelunasan'])->name('pelunasan.index');

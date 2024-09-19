@@ -300,6 +300,7 @@ class TransaksiController extends Controller
                 'tipe_bayar'    => $request->tipe_bayar,
                 'status_order'  => 'DALAM ANTRIAN',
                 'addid'         => $request->ip(),
+                'tipe_bayar_pelunasan'    => $request->tipe_bayar,
             ]);
         }
 

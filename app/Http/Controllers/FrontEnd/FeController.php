@@ -42,4 +42,9 @@ class FeController extends Controller
     {
         return view('pages.printer.index');
     }
+
+    public function pelunasan(): View
+    {
+        return view('pages.pelunasan.index');
+    }
 }
