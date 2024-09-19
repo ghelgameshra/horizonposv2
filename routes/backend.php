@@ -9,6 +9,7 @@ use App\Http\Controllers\Produk\KategoriController;
 use App\Http\Controllers\Produk\ProdukController;
 use App\Http\Controllers\Produk\PromoController;
 use App\Http\Controllers\Select2\Select2Controller;
+use App\Http\Controllers\Transaksi\PelunasanController;
 use App\Http\Controllers\Transaksi\TransaksiController;
 use App\Models\Transaksi\Transaksi;
 use Illuminate\Support\Facades\Route;
@@ -90,6 +91,13 @@ Route::put('printer-struk-setting', [StrukController::class, 'changeStatus'])->n
 
 
 /*
+    Pelunasan route
+*/
+Route::get('pelunasan', [PelunasanController::class, 'detail'])->name('pelunasan.detail');
+Route::put('pelunasan', [PelunasanController::class, 'update'])->name('pelunasan.update');
+
+
+/*
     Datatable ajx route
 */
 Route::get('get-produk', [ProdukController::class, 'get'])->name('produk.get');
@@ -97,3 +105,4 @@ Route::get('get-member', [MemberController::class, 'get'])->name('member.get');
 Route::get('get-promo', [PromoController::class, 'get'])->name('promo.get');
 Route::get('get-karyawan', [KaryawanController::class, 'get'])->name('karyawan.get');
 Route::get('get-produk-jual', [TransaksiController::class, 'getProdukJual'])->name('getProdukJual');
+Route::get('get-transaksi-pending', [PelunasanController::class, 'get'])->name('pelunasan.get');
