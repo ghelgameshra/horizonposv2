@@ -37,4 +37,9 @@ class FeController extends Controller
     {
         return view('pages.toko.setting');
     }
+
+    public function printer(): View
+    {
+        return view('pages.printer.index');
+    }
 }

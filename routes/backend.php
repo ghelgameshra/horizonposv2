@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Administrasi\KaryawanController;
 use App\Http\Controllers\Administrasi\MemberController;
+use App\Http\Controllers\Administrasi\PrinterController;
 use App\Http\Controllers\Administrasi\StrukController;
 use App\Http\Controllers\Administrasi\TokoController;
 use App\Http\Controllers\Produk\KategoriController;
@@ -75,6 +76,17 @@ Route::get('toko', [TokoController::class, 'get'])->name('toko.get');
 Route::get('toko/pesan-struk', [StrukController::class, 'getPesanStruk'])->name('getPesanStruk');
 Route::put('toko', [TokoController::class, 'update'])->name('toko.update');
 Route::put('toko/change-logo', [TokoController::class, 'changeLogo'])->name('toko.changeLogo');
+
+
+/*
+    Printer route
+*/
+
+Route::get('printer', [PrinterController::class, 'printer'])->name('printer.get');
+Route::post('printer', [PrinterController::class, 'insert'])->name('printer.insert');
+Route::delete('printer', [PrinterController::class, 'destroy'])->name('printer.delete');
+Route::get('printer-struk-setting', [StrukController::class, 'getPrinterSetting'])->name('getPrinterSetting');
+Route::put('printer-struk-setting', [StrukController::class, 'changeStatus'])->name('printer.changeStatus');
 
 
 /*
