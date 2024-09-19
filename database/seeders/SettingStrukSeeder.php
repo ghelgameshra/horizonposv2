@@ -19,6 +19,7 @@ class SettingStrukSeeder extends Seeder
         ];
 
         $settings = [
+            'AUPR' => 'auto print struk',
             'LOGS' => 'logo struk',
             'HEDS' => 'header struk',
             'ISIS' => 'isi struk',
@@ -31,7 +32,7 @@ class SettingStrukSeeder extends Seeder
 
         foreach ($settings as $key => $value) {
             DB::table('setting_struk')->insert(array_merge([
-                'nama_setting'  => $value,
+                'nama_setting'  => strtoupper($value),
                 'key'           => $key
             ], $time));
         }

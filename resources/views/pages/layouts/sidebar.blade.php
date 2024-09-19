@@ -172,7 +172,7 @@
             <span class="menu-header-text" data-i18n="Apps & Pages">Apps &amp; Pages</span>
         </li>
 
-        <li class="menu-item {{ Request::is('*toko/*') ? 'active open' : '' }}">
+        <li class="menu-item {{ Request::is('*pengaturan/*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ti ti-settings"></i>
                 <div data-i18n="Pengaturan">Pengaturan</div>
@@ -189,8 +189,8 @@
                         <div data-i18n="Toko">Toko</div>
                     </a>
                 </li>
-                <li class="menu-item">
-                    <a href="{{ route('member.index') }}" class="menu-link">
+                <li class="menu-item {{ Request::is('pengaturan/printer') ? 'active open' : '' }}">
+                    <a href="{{ route('printer.index') }}" class="menu-link">
                         <div data-i18n="Printer">Printer</div>
                     </a>
                 </li>
