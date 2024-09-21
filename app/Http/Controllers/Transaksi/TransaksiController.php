@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Transaksi;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Struk\PrintStrukController;
 use App\Http\Requests\Update\TransaksiSelesaiRequest;
 use App\Models\Produk\Produk;
 use App\Models\Produk\Promo;
@@ -315,6 +316,12 @@ class TransaksiController extends Controller
             $promo->update([
                 'total_penggunaan'  => $promo->total_penggunaan + 1
             ]);
+        }
+
+        $cetakStruk = DB::table('setting_struk')->where('key', 'AUPR')->first();
+        if($cetakStruk->status){
+            $initPrint = new PrintStrukController($transaksi->invno);
+            $initPrint->print();
         }
 
         return response()->json([

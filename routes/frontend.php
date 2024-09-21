@@ -11,3 +11,4 @@ Route::get('master/karyawan', [FeController::class, 'karyawan'])->name('karyawan
 Route::get('pengaturan/toko', [FeController::class, 'toko'])->name('toko.index');
 Route::get('pengaturan/printer', [FeController::class, 'printer'])->name('printer.index');
 Route::get('transaksi/pelunasan', [FeController::class, 'pelunasan'])->name('pelunasan.index');
+Route::get('transaksi/reprint-transaksi', [FeController::class, 'reprintTrx'])->name('transaksi.reprint');
