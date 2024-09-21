@@ -3,14 +3,15 @@
 namespace App\Http\Controllers\Administrasi;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Struk\PrintStrukController;
 use App\Http\Requests\Insert\PrinterInsertRequest;
 use App\Models\Administrasi\PrinterSetting;
 use App\Models\Administrasi\StrukSetting;
+use App\Models\Transaksi\Transaksi;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Crypt;
 
 require __DIR__ . '../../../../../vendor/autoload.php';
 use Mike42\Escpos\Printer;
@@ -57,6 +58,24 @@ class StrukController extends Controller
 
         return response()->json([
             'pesan'  => "berhasil update status $request->key"
+        ]);
+    }
+
+    public function getTransaksi(): JsonResponse
+    {
+        $data = Transaksi::with('kasir')->where('tipe_bayar', '!=', null)->orderBy('created_at', 'desc')->get();
+        return response()->json([
+            'data'  => $data
+        ]);
+    }
+
+    public function reprint($invno): JsonResponse
+    {
+        $initPrint = new PrintStrukController($invno);
+        $initPrint->print();
+
+        return response()->json([
+            'pesan'     => "berhasil reprint struk invno $invno",
         ]);
     }
 }

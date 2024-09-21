@@ -47,4 +47,9 @@ class FeController extends Controller
     {
         return view('pages.pelunasan.index');
     }
+
+    public function reprintTrx(): View
+    {
+        return view('pages.transaksi.index');
+    }
 }

@@ -96,10 +96,15 @@ Route::put('printer-struk-setting', [StrukController::class, 'changeStatus'])->n
 Route::get('pelunasan', [PelunasanController::class, 'detail'])->name('pelunasan.detail');
 Route::put('pelunasan', [PelunasanController::class, 'update'])->name('pelunasan.update');
 
+/*
+    Reprint route
+*/
+Route::get('reprint-transaksi/{invno?}', [StrukController::class, 'reprint'])->name('reprint-transaksi.print');
 
 /*
     Datatable ajx route
 */
+Route::get('list-transaksi', [StrukController::class, 'getTransaksi'])->name('transaksi.list');
 Route::get('get-produk', [ProdukController::class, 'get'])->name('produk.get');
 Route::get('get-member', [MemberController::class, 'get'])->name('member.get');
 Route::get('get-promo', [PromoController::class, 'get'])->name('promo.get');
