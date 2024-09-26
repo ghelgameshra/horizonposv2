@@ -52,4 +52,9 @@ class FeController extends Controller
     {
         return view('pages.transaksi.index');
     }
+
+    public function pengeluaran(): View
+    {
+        return view('pages.pengeluaran.index');
+    }
 }

@@ -153,8 +153,8 @@
             </ul>
         </li>
 
-        <li class="menu-item">
-            <a href="{{ route('kasir.index') }}" class="menu-link">
+        <li class="menu-item {{ Request::is('pengeluaran') ? 'active' : '' }}">
+            <a href="{{ route('pengeluaran.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-coins"></i>
                 <div data-i18n="Pengeluaran">Pengeluaran</div>
             </a>
