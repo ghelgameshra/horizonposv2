@@ -139,4 +139,26 @@ class Select2Controller extends Controller
             'data' => $data
         ], 200);
     }
+
+    public function select2JenisPengeluaran(Request $request)
+    {
+        $searchTerm = $request->input('search', '');
+
+        // Ambil data dari tabel guru dan format hasilnya
+        $data = DB::table('ref_jenis_pengeluaran')
+            ->where('nama_pengeluaran', 'LIKE', "%{$searchTerm}%")
+            ->select('id', 'nama_pengeluaran')
+            ->get()
+            ->map(function ($data) {
+                return [
+                    'id' => $data->nama_pengeluaran,
+                    'text' => $data->nama_pengeluaran,
+                ];
+            });
+
+        // Kembalikan respons dalam format JSON
+        return response()->json([
+            'data' => $data
+        ], 200);
+    }
 }

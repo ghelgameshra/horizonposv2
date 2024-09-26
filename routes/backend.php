@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Administrasi\KaryawanController;
 use App\Http\Controllers\Administrasi\MemberController;
+use App\Http\Controllers\Administrasi\PengeluaranController;
 use App\Http\Controllers\Administrasi\PrinterController;
 use App\Http\Controllers\Administrasi\StrukController;
 use App\Http\Controllers\Administrasi\TokoController;
@@ -11,7 +12,6 @@ use App\Http\Controllers\Produk\PromoController;
 use App\Http\Controllers\Select2\Select2Controller;
 use App\Http\Controllers\Transaksi\PelunasanController;
 use App\Http\Controllers\Transaksi\TransaksiController;
-use App\Models\Transaksi\Transaksi;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -37,6 +37,7 @@ Route::get('select2-satuan-produk', [Select2Controller::class, 'select2JenisSatu
 Route::get('select2-jabatan', [Select2Controller::class, 'select2Jabatan'])->name('select2Jabatan');
 Route::get('select2-agama', [Select2Controller::class, 'select2Agama'])->name('select2Agama');
 Route::get('select2-pendidikan-terakhir', [Select2Controller::class, 'select2Pendidikan'])->name('select2Pendidikan');
+Route::get('select2-jenis-pengeluaran', [Select2Controller::class, 'select2JenisPengeluaran'])->name('select2JenisPengeluaran');
 
 
 /*
@@ -102,6 +103,15 @@ Route::put('pelunasan', [PelunasanController::class, 'update'])->name('pelunasan
 Route::get('reprint-transaksi/{invno?}', [StrukController::class, 'reprint'])->name('reprint-transaksi.print');
 
 /*
+    Pengeluaran route
+*/
+Route::post('jenis-pengeluaran', [PengeluaranController::class, 'insertJenis'])->name('jenis-pengeluaran.insert');
+Route::post('pengeluaran', [PengeluaranController::class, 'insert'])->name('pengeluaran.insert');
+Route::delete('pengeluaran', [PengeluaranController::class, 'destroy'])->name('pengeluaran.delete');
+Route::post('upload-pengeluaran-ref', [PengeluaranController::class, 'uploadRef'])->name('pengeluaran.uploadRef');
+
+
+/*
     Datatable ajx route
 */
 Route::get('list-transaksi', [StrukController::class, 'getTransaksi'])->name('transaksi.list');
@@ -111,3 +121,4 @@ Route::get('get-promo', [PromoController::class, 'get'])->name('promo.get');
 Route::get('get-karyawan', [KaryawanController::class, 'get'])->name('karyawan.get');
 Route::get('get-produk-jual', [TransaksiController::class, 'getProdukJual'])->name('getProdukJual');
 Route::get('get-transaksi-pending', [PelunasanController::class, 'get'])->name('pelunasan.get');
+Route::get('get-pengeluaran', [PengeluaranController::class, 'get'])->name('pengeluaran.get');
