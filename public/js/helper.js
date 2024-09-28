@@ -1,44 +1,44 @@
 function notification(status, message, title = null, timer = 5000) {
     const options = {
         timeOut: timer,
-        progressBar: true
+        progressBar: true,
     };
 
-    if (status === 'error') {
+    if (status === "error") {
         toastr.error(message, title, options);
     }
 
-    if (status === 'success') {
+    if (status === "success") {
         toastr.success(message, title, options);
     }
 
-    if (status === 'info'){
+    if (status === "info") {
         toastr.info(message, title, options);
     }
 }
 
 function formatRupiah(value) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        currencyDisplay: 'symbol', // Menampilkan simbol mata uang (Rp)
-        minimumFractionDigits: 0
+    return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        currencyDisplay: "symbol", // Menampilkan simbol mata uang (Rp)
+        minimumFractionDigits: 0,
     }).format(value);
 }
 
-function reloadDataTable(item){
+function reloadDataTable(item) {
     item.DataTable().ajax.reload();
 }
 
-function showSelect2(idInput, dropdownParent, url){
+function showSelect2(idInput, dropdownParent, url) {
     $(`#${idInput}`).select2({
         dropdownParent: `#${dropdownParent}`,
         ajax: {
-        url: url,
-        data: function (params) {
-            var query = {
-                search: params.term,
-                }
+            url: url,
+            data: function (params) {
+                var query = {
+                    search: params.term,
+                };
                 return query;
             },
             processResults: function (data) {
@@ -46,7 +46,7 @@ function showSelect2(idInput, dropdownParent, url){
                     results: data.data,
                 };
             },
-            cache: true
+            cache: true,
         },
     });
 }

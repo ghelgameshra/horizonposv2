@@ -61,14 +61,6 @@ class StrukController extends Controller
         ]);
     }
 
-    public function getTransaksi(): JsonResponse
-    {
-        $data = Transaksi::with('kasir')->where('tipe_bayar', '!=', null)->orderBy('created_at', 'desc')->get();
-        return response()->json([
-            'data'  => $data
-        ]);
-    }
-
     public function reprint($invno): JsonResponse
     {
         $initPrint = new PrintStrukController($invno);

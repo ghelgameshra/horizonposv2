@@ -13,7 +13,7 @@ class StatusOrderSeeder extends Seeder
      */
     public function run(): void
     {
-        $data = ['DALAM ANTRIAN','CETAK','FINISHING','PACKING','PESANAN DIAMBIL'];
+        $data = ['DALAM ANTRIAN','CETAK','FINISHING','PACKING', 'SELESAI', 'PESANAN DIAMBIL'];
         $table = 'ref_status_order';
 
         echo "[*] Truncate tabel $table\n";

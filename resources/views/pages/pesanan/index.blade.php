@@ -7,7 +7,7 @@
             <div class="card">
                 <div class="card-header">
                     <div class="d-flex justify-content-between">
-                        <small class="d-block mb-1 text-muted">Reprint Transaksi</small>
+                        <small class="d-block mb-1 text-muted">Ambil Pesanan</small>
                     </div>
                 </div>
                 <div class="card-body">
@@ -17,7 +17,9 @@
                                 <thead>
                                     <tr>
                                         <th>no</th>
-                                        <th></th>
+                                        <th class="text-center">
+                                            <i class="menu-icon tf-icons ti ti-settings"></i>
+                                        </th>
                                         <th>invno</th>
                                         <th>nama customer</th>
                                         <th>tanggal trx</th>
@@ -34,7 +36,7 @@
         </div>
     </div>
 </div>
-@include('pages.transaksi.modal-show')
+@include('pages.pesanan.modal-show')
 @endsection
 
 @push('js')
@@ -61,9 +63,6 @@ $(function(){
                     <button class="btn btn-xs btn-outline-primary" onclick="showDetail('${data.invno}')">
                         <i class="ti ti-eye d-block"></i>
                     </button>
-                    <button class="btn btn-xs btn-outline-info" onclick="reprintStruk('${data.invno}')">
-                        <i class="ti ti-receipt d-block"></i>
-                    </button>
                 </div>
                 `
             }},
@@ -80,16 +79,6 @@ $(function(){
         ],
     });
 })
-
-function reprintStruk(invno){
-    $.get(`{{ route('reprint-transaksi.print')}}/${invno}`)
-    .done((response) => {
-        notification('success', response.pesan);
-    })
-    .fail((response) => {
-        notification('error', response.responseJSON.message);
-    });
-}
 
 function showDetail(invno = '#'){
     $.get(`{{ route('pengeluaran.show') }}/${invno}`)
@@ -157,6 +146,26 @@ function showDetailTransaksi(data){
             }},
         ]
     })
+}
+
+function ambilPesanan(){
+    var invno = $('#invno').val();
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: `{{ route('pesanan.ambil') }}/${invno}`,
+        type: 'PUT',
+    })
+    .done((res) =>{
+        notification('success', res.pesan, null, 3000);
+        $('.datatables-basic').DataTable().ajax.reload();
+    })
+    .fail((err) =>{
+        notification('error', err.responseJSON.message, null, 3500);
+    });
+
+    $('#modalPelunasan').modal('hide');
 }
 </script>
 @endpush

@@ -13,7 +13,7 @@ class PelunasanController extends Controller
 {
     public function get(): JsonResponse
     {
-        $data = DB::table('transaksi')->where('uang_muka', '>', 0)->where('terima', 0)->get();
+        $data = DB::table('transaksi')->whereNull('tipe_bayar_pelunasan')->whereNotNull('invno')->get();
 
         return response()->json([
             'data'  => $data

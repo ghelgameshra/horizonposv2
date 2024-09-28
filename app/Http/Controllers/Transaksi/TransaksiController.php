@@ -17,6 +17,14 @@ use Illuminate\Support\Facades\DB;
 
 class TransaksiController extends Controller
 {
+    public function getTransaksi(Request $request): JsonResponse
+    {
+        $data = Transaksi::with('kasir')->where('tipe_bayar', '!=', null)->orderBy('created_at', 'desc')->get();
+        return response()->json([
+            'data'  => $data
+        ]);
+    }
+
     public function transaksiBaru($user): JsonResponse
     {
         // Mencari transaksi yang belum dibayar dan memiliki total 0 untuk kasir tertentu
@@ -327,5 +335,46 @@ class TransaksiController extends Controller
         return response()->json([
             'pesan' => "Pesanan baru selesai dibuat dan dalam pengerjaan",
         ], 200);
+    }
+
+    public function show(String $invno): JsonResponse
+    {
+        $data = Transaksi::with(['transaksiLog', 'kasir'])->where('invno', $invno)->first();
+
+        return response()->json([
+            'pesan' => "berhasil ambil data detail $invno",
+            'data'  => $data
+        ]);
+    }
+
+    public function ambil(String $invno): JsonResponse
+    {
+        $data = Transaksi::where('invno', $invno)->first();
+        $statusOrder = $data->status_order;
+
+        if ($statusOrder === "PESANAN DIAMBIL"){
+            throw new HttpResponseException(response([
+                'message' => "Pesanan dengan no $invno sudah diambil pada $data->updated_at"
+            ], 422));
+        }
+
+        if ($statusOrder !== "SELESAI"){
+            throw new HttpResponseException(response([
+                'message' => "Pesanan dengan no $invno belum selesai, masih " . strtolower($statusOrder)
+            ], 422));
+        }
+
+        if ($data->terima === 0){
+            throw new HttpResponseException(response([
+                'message' => "Pesanan dengan no $invno belum selesai pembayaran"
+            ], 422));
+        }
+
+        $data->status_order = "PESANAN DIAMBIL";
+        $data->save();
+
+        return response()->json([
+            'pesan' => "Pesanan dengan no $invno berhasil diambil",
+        ]);
     }
 }
