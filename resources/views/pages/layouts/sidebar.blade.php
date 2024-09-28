@@ -94,19 +94,24 @@
                         <div data-i18n="Reprint Trx">Reprint Trx</div>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="{{ route('pelunasan.index') }}" class="menu-link">
+                        <div data-i18n="Pembatalan">Pembatalan</div>
+                    </a>
+                </li>
             </ul>
         </li>
 
-        <li class="menu-item">
+        <li class="menu-item {{ Request::is('*pesanan/*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ti ti-arrows-sort"></i>
                 <div data-i18n="Pesanan">Pesanan</div>
             </a>
 
             <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="{{ route('member.index') }}" class="menu-link">
-                        <div data-i18n="Monitoring Pesanan">Monitoring Pesanan</div>
+                <li class="menu-item {{ Request::is('pesanan/pengambilan') ? 'active' : '' }}">
+                    <a href="{{ route('pengambilan.index') }}" class="menu-link">
+                        <div data-i18n="Ambil Pesanan">Ambil Pesanan</div>
                     </a>
                 </li>
                 <li class="menu-item">

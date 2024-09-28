@@ -57,4 +57,9 @@ class FeController extends Controller
     {
         return view('pages.pengeluaran.index');
     }
+
+    public function pengambilan(): View
+    {
+        return view('pages.pesanan.index');
+    }
 }

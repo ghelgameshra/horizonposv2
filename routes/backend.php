@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Administrasi\DashboardController;
 use App\Http\Controllers\Administrasi\KaryawanController;
 use App\Http\Controllers\Administrasi\MemberController;
 use App\Http\Controllers\Administrasi\PengeluaranController;
@@ -101,6 +102,8 @@ Route::put('pelunasan', [PelunasanController::class, 'update'])->name('pelunasan
     Reprint route
 */
 Route::get('reprint-transaksi/{invno?}', [StrukController::class, 'reprint'])->name('reprint-transaksi.print');
+Route::get('transaksi/{invno?}', [TransaksiController::class, 'show'])->name('pengeluaran.show');
+Route::put('pesanan/pengambilan/{invno?}', [TransaksiController::class, 'ambil'])->name('pesanan.ambil');
 
 /*
     Pengeluaran route
@@ -114,7 +117,7 @@ Route::post('upload-pengeluaran-ref', [PengeluaranController::class, 'uploadRef'
 /*
     Datatable ajx route
 */
-Route::get('list-transaksi', [StrukController::class, 'getTransaksi'])->name('transaksi.list');
+Route::get('list-transaksi', [TransaksiController::class, 'getTransaksi'])->name('transaksi.list');
 Route::get('get-produk', [ProdukController::class, 'get'])->name('produk.get');
 Route::get('get-member', [MemberController::class, 'get'])->name('member.get');
 Route::get('get-promo', [PromoController::class, 'get'])->name('promo.get');
@@ -122,3 +125,9 @@ Route::get('get-karyawan', [KaryawanController::class, 'get'])->name('karyawan.g
 Route::get('get-produk-jual', [TransaksiController::class, 'getProdukJual'])->name('getProdukJual');
 Route::get('get-transaksi-pending', [PelunasanController::class, 'get'])->name('pelunasan.get');
 Route::get('get-pengeluaran', [PengeluaranController::class, 'get'])->name('pengeluaran.get');
+
+
+/*
+    Dashboard data
+*/
+Route::get('dashboard-data', [DashboardController::class, 'data'])->name('dashboard.data');
