@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Administrasi\AntrianController;
 use App\Http\Controllers\Administrasi\DashboardController;
 use App\Http\Controllers\Administrasi\KaryawanController;
 use App\Http\Controllers\Administrasi\MemberController;
@@ -131,3 +132,7 @@ Route::get('get-pengeluaran', [PengeluaranController::class, 'get'])->name('peng
     Dashboard data
 */
 Route::get('dashboard-data', [DashboardController::class, 'data'])->name('dashboard.data');
+Route::get('antrian-customer', [AntrianController::class, 'data'])->name('antrian.data');
+Route::get('antrian-customer-repeat', [AntrianController::class, 'repeat'])->name('antrian.repeat');
+Route::post('antrian-customer', [AntrianController::class, 'create'])->name('antrian.create');
+Route::put('antrian-customer', [AntrianController::class, 'update'])->name('antrian.update');
