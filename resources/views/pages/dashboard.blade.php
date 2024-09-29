@@ -28,6 +28,7 @@
 @endsection
 
 @push('js')
+@include('layouts.antrian')
 <script src="{{ asset('lib') }}/assets/vendor/libs/flatpickr/flatpickr.js"></script>
 <script src="{{ asset('lib') }}/assets/vendor/libs/moment/moment.js"></script>
 <script src="{{ asset('js/chart.umd.min.js') }}"></script>
@@ -44,12 +45,14 @@ $(function(){
 
     getData();
     setGetData();
+    getDataAntrian();
 })
 
 function setGetData(){
     let timeInterval = $('#interval_get_data').val() * 60000;
     setInterval(() => {
         getData();
+        getDataAntrian();
     }, timeInterval);
 }
 
@@ -117,8 +120,7 @@ function showDataDashboard(data){
     createChartProduk(data);
     createChartPenjualan(data);
 }
-</script>
-<script>
+
 let chartJualKategori, chartJualProduk, chartPenjualan;
 function createChartKategori(data) {
     let backgroundColor = [
@@ -347,11 +349,5 @@ function createChartPenjualan(data) {
         }
     });
 }
-
-function buatAntrian(){
-    notification('info', 'buat antrian');
-}
-
 </script>
-
 @endpush

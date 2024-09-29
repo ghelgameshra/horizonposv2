@@ -1,3 +1,84 @@
+<div class="row mb-3 g-2">
+    <div class="col-12 col-md-3">
+        <div class="card bg-success">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="content-left">
+                        <h4 class="mb-0 text-white" id="jumlahAntrian">0</h4>
+                        <small class="text-white">Jumlah Antrian Hari Ini</small>
+                    </div>
+                    <span class="badge bg-label-primary rounded-circle p-2">
+                        <i class="ti ti-list-numbers ti-md"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-3">
+        <div class="card bg-info">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="content-left">
+                        <h4 class="mb-0 text-white" id="antrianAktif">0</h4>
+                        <small class="text-white">Antrian Terpanggil</small>
+                    </div>
+                    <span class="badge bg-label-primary rounded-circle p-2">
+                        <i class="ti ti-list-check ti-md"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-2">
+        <div class="card bg-warning" onmouseover="this.style.cursor='pointer'" onclick="panggilAntrianLanjut()">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="content-left">
+                        <h4 class="mb-0 text-white" id="panggilAntrianLanjut">0</h4>
+                        <small class="text-white">Selanjutnya</small>
+                    </div>
+                    <span class="badge bg-label-primary rounded-circle p-2">
+                        <i class="ti ti-volume ti-md"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-2">
+        <div class="card bg-warning" onmouseover="this.style.cursor='pointer'" onclick="panggilAntrian()">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="content-left">
+                        <h4 class="mb-0 text-white" id="panggilAntrian">0</h4>
+                        <small class="text-white">Panggil Antrian</small>
+                    </div>
+                    <span class="badge bg-label-primary rounded-circle p-2">
+                        <i class="ti ti-refresh ti-md"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-2">
+        <div class="card bg-primary" onmouseover="this.style.cursor='pointer'" onclick="buatAntrian()">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="content-left">
+                        <h4 class="mb-0 text-white" id="tambahAntrian">0</h4>
+                        <small class="text-white">Buat Antrian</small>
+                    </div>
+                    <span class="badge bg-label-primary rounded-circle p-2">
+                        <i class="ti ti-plus ti-md"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row mb-3 g-1">
     <div class="col-12 col-md-5">
         <div class="input-group">
@@ -24,53 +105,7 @@
         </div>
     </div>
 </div>
-<div class="row mb-3 g-2">
-    <div class="col-12 col-md-4">
-        <div class="card bg-success">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="content-left">
-                        <h4 class="mb-0 text-white" id="jumlahAntrian">0</h4>
-                        <small class="text-white">Jumlah Antrian Hari Ini</small>
-                    </div>
-                    <span class="badge bg-label-primary rounded-circle p-2">
-                        <i class="ti ti-list-numbers ti-md"></i>
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-12 col-md-4">
-        <div class="card bg-info">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="content-left">
-                        <h4 class="mb-0 text-white" id="antrianAktif">0</h4>
-                        <small class="text-white">Antrian Terpanggil</small>
-                    </div>
-                    <span class="badge bg-label-primary rounded-circle p-2">
-                        <i class="ti ti-list-check ti-md"></i>
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-12 col-md-4">
-        <div class="card bg-primary" onmouseover="this.style.cursor='pointer'" onclick="buatAntrian()">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="content-left">
-                        <h4 class="mb-0 text-white" id="tambahAntrian">0</h4>
-                        <small class="text-white">Buat Antrian</small>
-                    </div>
-                    <span class="badge bg-label-primary rounded-circle p-2">
-                        <i class="ti ti-plus ti-md"></i>
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+
 <div class="row mb-4 g-2">
     <div class="col-sm-6 col-xl-3">
         <div class="card">

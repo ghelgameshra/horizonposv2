@@ -22,9 +22,13 @@ class ConstSeeder extends Seeder
                 'keterangan'    => 'otomatis cetak struk setelah selesai kasiran',
                 'docno'         => 0
             ],
-            'CKBJ' => [
-                'keterangan'    => 'proses cek plu bisa jual untuk semua plu',
-                'docno'         => 1
+            'ANTR' => [
+                'keterangan'    => 'antrian customer',
+                'docno'         => 0,
+            ],
+            'ANTP' => [
+                'keterangan'    => 'antrian customer terpanggil',
+                'docno'         => 0,
             ]
         ];
 
@@ -34,6 +38,7 @@ class ConstSeeder extends Seeder
             DB::table('const')->insert([
                 'key'           => $key,
                 'docno'         => $value['docno'],
+                'periode'       => now(),
                 'keterangan'    => $value['keterangan'],
                 'created_at'    => now(),
                 'updated_at'    => now()
