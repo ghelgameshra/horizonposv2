@@ -22,6 +22,7 @@
                         <div class="input-group">
                             <select name="jenis_printer" id="jenis_printer" class="form-select">
                                 <option value="">Jenis ... </option>
+                                <option value="ANTRIAN">ANTRIAN</option>
                                 <option value="STRUK">STRUK</option>
                                 <option value="LABEL">LABEL</option>
                                 <option value="INK">INK</option>

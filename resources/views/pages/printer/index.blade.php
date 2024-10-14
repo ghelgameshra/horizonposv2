@@ -49,8 +49,8 @@
                                             <th>nama printer</th>
                                             <th>jenis printer</th>
                                             <th>ip printer</th>
-                                            <th>default</th>
-                                            <th>
+                                            <th class="text-center">default</th>
+                                            <th class="text-center">
                                                 <i class="menu-icon tf-icons ti ti-settings"></i>
                                             </th>
                                         </tr>
@@ -138,15 +138,32 @@ $(function(){
             }},
             {data: (data) => {
                 return `
+                <div class="btn-group">
+                    <button class="btn btn-xs btn-outline-primary" onclick="testPrint('${data.jenis_printer}')">
+                        <i class="ti ti-printer d-block"></i>
+                    </button>
                     <button class="btn btn-xs btn-outline-danger" onclick="deletePrinter(${data.id})">
                         <i class="ti ti-trash d-block"></i>
                     </button>
+                </div>
                 `;
             }}
         ],
         dom: ''
     })
 })
+
+function testPrint(printer){
+    $.get(`{{ route('printer.test') }}`, {
+        'jenis_printer': printer
+    })
+    .done((res) =>{
+        notification('success', res.pesan);
+    })
+    .fail((err) =>{
+        notification('error', err.responseJSON.message);
+    });
+}
 
 function getDataToko(){
     $.get(`{{ route('toko.get') }}`)
