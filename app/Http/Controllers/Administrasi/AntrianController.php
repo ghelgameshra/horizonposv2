@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Administrasi;
 
 use App\Http\Controllers\Controller;
-use App\Models\ConstApp;
-use Carbon\Carbon;
+use App\Models\Administrasi\Antrian;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,79 +14,105 @@ class AntrianController extends Controller
 {
     public function data(): JsonResponse
     {
-        $jumlahAntrian = ConstApp::where('key', 'ANTR')->first();
-        $antrianAktif = ConstApp::where('key', 'ANTP')->first();
+        $jumlahAntrianDesain = Antrian::where('key', 'ATRD')->first();
+        $antrianDesainTerpanggil = Antrian::where('key', 'ATPD')->first();
 
-        if (Carbon::parse($jumlahAntrian->periode)->lt(Carbon::today())) {
-            $jumlahAntrian->update(['periode' => now(),'docno' => 0]);
-            $antrianAktif->update(['periode' => now(),'docno' => 0]);
+        $jumlahAntrianCetak = Antrian::where('key', 'ATRS')->first();
+        $antrianCetakTerpanggil = Antrian::where('key', 'ATPS')->first();
+
+        if ($jumlahAntrianDesain->periode !== now()->format('Y-m-d') || $jumlahAntrianCetak->periode !== now()->format('Y-m-d')) {
+            DB::table('antrian')->update([
+                'periode' => now(),
+                'docno' => 0,
+                'meja'  => 0
+            ]);
         }
+
+        $nomorMeja = DB::table('users')->whereNotNull('nomor_meja')
+        ->select(['nomor_meja'])->get();
 
         return response()->json([
             'data'  => [
-                'jumlahAntrian'     => $jumlahAntrian->docno,
-                'antrianAktif'      => $antrianAktif->docno,
-                'panggilAntrian'    => $antrianAktif->docno,
+                'jumlahAntrianDesain'       => $jumlahAntrianDesain->docno,
+                'jumlahAntrianCetak'        => $jumlahAntrianCetak->docno,
+                'antrianDesainTerpanggil'   => $antrianDesainTerpanggil->docno,
+                'antrianCetakTerpanggil'    => $antrianCetakTerpanggil->docno,
+                'nomorMeja'                 => $nomorMeja,
             ],
         ]);
     }
 
-    public function create(): JsonResponse
+    public function create(Request $request): JsonResponse
     {
-        $antrianBaru = ConstApp::where('key', 'ANTR')->first();
+        $antrianBaru = Antrian::where('key', $request->tipe_antrian)->first();
         $antrianBaru->update(['docno' => $antrianBaru->docno+1]);
 
         return response()->json([
-            'pesan' => "No antrian $antrianBaru->docno berhasil dibuat"
+            'pesan' => "$antrianBaru->keterangan no $antrianBaru->docno berhasil dibuat"
         ], 201);
     }
 
-    public function update(): JsonResponse
+    public function update(Request $request): JsonResponse
     {
-        $antrianBaru = ConstApp::where('key', 'ANTP')->first();
-        $antrianLanjut = ConstApp::where('key', 'ANTR')->first();
+        $request->validate([
+            'tipe_antrian' => ['required', 'string'],
+            'nomor_meja' => ['required', 'string'],
+        ]);
+        $noAntrian = Antrian::where('key', $request->tipe_antrian)->first();
+        $reference = '';
 
-        if($antrianBaru->docno === $antrianLanjut->docno){
+        if($request->tipe_antrian === 'ATPD'){
+            $reference = DB::table('antrian')->where('key', 'ATRD')->first();
+        }
+
+        if($request->tipe_antrian === 'ATPS'){
+            $reference = DB::table('antrian')->where('key', 'ATRS')->first();
+        }
+
+        if($noAntrian->docno + 1 > $reference->docno){
             throw new HttpResponseException(response([
-                'message' => 'Belum ada nomor antrian baru'
+                'message' => 'belum ada antrian baru'
             ], 422));
         }
 
-        $antrianBaru->docno += 1;
-        $antrianBaru->save();
+        $kalimat = $noAntrian->pengucapan;
+        $kalimat = str_replace(['{noAntri}'], $noAntrian->docno + 1, $kalimat);
+        $kalimat = str_replace(['{noMeja}'], $request->nomor_meja, $kalimat);
+
+        $noAntrian->docno += 1;
+        $noAntrian->meja = $request->nomor_meja;
+        $noAntrian->save();
 
         return response()->json([
-            'pesan' => "berhasil panggil antrian selanjunya"
+            'pesan'     => "berhasil panggil antrian selanjunya",
+            'kalimat'   => $kalimat
         ], 201);
     }
 
-    public function repeat(): JsonResponse
+    public function repeat(Request $request): JsonResponse
     {
-        $antrianBaru = ConstApp::where('key', 'ANTP')->first();
-        $antrian = $antrianBaru->docno;
+        $request->validate(['jenis_antrian' => ['required', 'string']]);
+        $noAntrian = Antrian::where('key', $request->jenis_antrian)->first();
 
-        if($antrian === 0){
+        if($request->ganti_meja){
+            $noAntrian->meja = $request->ganti_meja;
+            $noAntrian->save();
+        }
+
+        $kalimat = $noAntrian->pengucapan;
+        $kalimat = str_replace(['{noAntri}'], $noAntrian->docno, $kalimat);
+        $kalimat = str_replace(['{noMeja}'], $noAntrian->meja, $kalimat);
+
+        if($noAntrian->docno === 0 || $noAntrian->meja === 0){
             throw new HttpResponseException(response([
                 'message' => 'Belum ada nomor antrian'
             ], 422));
         }
 
-        $nomorMeja = $this->cekNomorMeja();
-
         return response()->json([
-            'pesan' => "Nomor antrian $antrian silahkan menuju ke meja desainer nomor $nomorMeja"
+            'pesan'     => "berhasil panggil ulang antrian",
+            'kalimat'   => $kalimat
         ], 201);
-    }
-
-    private function cekNomorMeja(): int
-    {
-        if(!Auth::user()->nomor_meja){
-            throw new HttpResponseException(response([
-                'message' => 'Nomor meja user belum disetting'
-            ], 403));
-        }
-
-        return Auth::user()->nomor_meja;
     }
 
 }
