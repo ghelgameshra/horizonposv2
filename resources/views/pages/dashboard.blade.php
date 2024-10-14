@@ -2,6 +2,7 @@
 
 @section('css')
 <link rel="stylesheet" href="{{ asset('lib') }}/assets/vendor/libs/flatpickr/flatpickr.css" />
+<link rel="stylesheet" href="{{ asset('lib') }}/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 @endsection
 
 @section('content')
@@ -11,7 +12,7 @@
     @include('pages.dashboard.chart')
 </div>
 <div id="loadingSpinner" class="d-none">
-    <div class="position-absolute top-50 start-50" style="z-index: 99999">
+    <div class="position-absolute top-50 start-50" style="z-index: 9999999">
         <!-- Chase -->
         <div class="sk-chase sk-primary">
             <div class="sk-chase-dot"></div>
@@ -24,11 +25,15 @@
     </div>
     <div class="offcanvas-backdrop fade show bg-light"></div>
 </div>
+
+@include('pages.dashboard.modal-panggil-antrian')
+@include('pages.dashboard.modal-ulang-antrian')
 <!-- / Content -->
 @endsection
 
 @push('js')
-@include('layouts.antrian')
+@include('pages.dashboard.antrian')
+<script src="{{ asset('lib') }}/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
 <script src="{{ asset('lib') }}/assets/vendor/libs/flatpickr/flatpickr.js"></script>
 <script src="{{ asset('lib') }}/assets/vendor/libs/moment/moment.js"></script>
 <script src="{{ asset('js/chart.umd.min.js') }}"></script>

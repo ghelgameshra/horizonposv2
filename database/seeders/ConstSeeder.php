@@ -22,18 +22,9 @@ class ConstSeeder extends Seeder
                 'keterangan'    => 'otomatis cetak struk setelah selesai kasiran',
                 'docno'         => 0
             ],
-            'ANTR' => [
-                'keterangan'    => 'antrian customer',
-                'docno'         => 0,
-            ],
-            'ANTP' => [
-                'keterangan'    => 'antrian customer terpanggil',
-                'docno'         => 0,
-            ]
         ];
 
         DB::table('const')->truncate();
-
         foreach ($data as $key => $value) {
             DB::table('const')->insert([
                 'key'           => $key,

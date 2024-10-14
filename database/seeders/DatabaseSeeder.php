@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             StatusOrderSeeder::class,
             TokoSeeder::class,
             SettingStrukSeeder::class,
+            AntrianSeeder::class,
         ]);
     }
 }

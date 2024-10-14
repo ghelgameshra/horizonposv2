@@ -1,79 +1,86 @@
 <div class="row mb-3 g-2">
     <div class="col-12 col-md-3">
-        <div class="card bg-success">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="content-left">
-                        <h4 class="mb-0 text-white" id="jumlahAntrian">0</h4>
-                        <small class="text-white">Jumlah Antrian Hari Ini</small>
-                    </div>
-                    <span class="badge bg-label-primary rounded-circle p-2">
-                        <i class="ti ti-list-numbers ti-md"></i>
+        <div class="d-flex flex-column gap-1">
+            <div>
+                <button class="w-100 btn btn-sm btn-success d-flex gap-1 text-uppercase fw-bold">
+                    <span class="flex-fill" id="jumlahAntrianDesain">0 antrian desain</span>
+                    <span class="flex-fill">
+                        <i class="ti ti-arrows-sort"></i>
                     </span>
-                </div>
+                </button>
+            </div>
+            <div>
+                <button class="w-100 btn btn-sm btn-success d-flex gap-1 text-uppercase fw-bold">
+                    <span class="flex-fill" id="jumlahAntrianCetak">0 antrian cetak</span>
+                    <span class="flex-fill">
+                        <i class="ti ti-sort-ascending-numbers"></i>
+                    </span>
+                </button>
             </div>
         </div>
     </div>
+
+
     <div class="col-12 col-md-3">
-        <div class="card bg-info">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="content-left">
-                        <h4 class="mb-0 text-white" id="antrianAktif">0</h4>
-                        <small class="text-white">Antrian Terpanggil</small>
-                    </div>
-                    <span class="badge bg-label-primary rounded-circle p-2">
-                        <i class="ti ti-list-check ti-md"></i>
+        <div class="d-flex flex-column gap-1">
+            <div>
+                <button class="w-100 btn btn-sm btn-info d-flex gap-1 text-uppercase fw-bold">
+                    <span class="flex-fill" id="antrianDesainTerpanggil">desain 0 dipanggil</span>
+                    <span class="flex-fill">
+                        <i class="ti ti-list"></i>
                     </span>
-                </div>
+                </button>
+            </div>
+            <div>
+                <button class="w-100 btn btn-sm btn-info d-flex gap-1 text-uppercase fw-bold">
+                    <span class="flex-fill" id="antrianCetakTerpanggil">cetak 0 dipanggil</span>
+                    <span class="flex-fill">
+                        <i class="ti ti-list-numbers"></i>
+                    </span>
+                </button>
             </div>
         </div>
     </div>
 
-    <div class="col-6 col-md-2">
-        <div class="card bg-warning" onmouseover="this.style.cursor='pointer'" onclick="panggilAntrianLanjut()">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="content-left">
-                        <h4 class="mb-0 text-white" id="panggilAntrianLanjut">0</h4>
-                        <small class="text-white">Selanjutnya</small>
-                    </div>
-                    <span class="badge bg-label-primary rounded-circle p-2">
-                        <i class="ti ti-volume ti-md"></i>
+
+    <div class="col-12 col-md-3">
+        <div class="d-flex flex-column gap-1">
+            <div>
+                <button class="w-100 btn btn-sm btn-warning d-flex gap-1 text-uppercase fw-bold" onclick="panggilAntrianLanjut()">
+                    <span class="flex-fill">selanjutnya</span>
+                    <span class="flex-fill">
+                        <i class="ti ti-volume"></i>
                     </span>
-                </div>
+                </button>
+            </div>
+            <div>
+                <button class="w-100 btn btn-sm btn-warning d-flex gap-1 text-uppercase fw-bold" onclick="panggilAntrian()">
+                    <span class="flex-fill">panggil ulang</span>
+                    <span class="flex-fill">
+                        <i class="ti ti-refresh"></i>
+                    </span>
+                </button>
             </div>
         </div>
     </div>
 
-    <div class="col-6 col-md-2">
-        <div class="card bg-warning" onmouseover="this.style.cursor='pointer'" onclick="panggilAntrian()">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="content-left">
-                        <h4 class="mb-0 text-white" id="panggilAntrian">0</h4>
-                        <small class="text-white">Panggil Antrian</small>
-                    </div>
-                    <span class="badge bg-label-primary rounded-circle p-2">
-                        <i class="ti ti-refresh ti-md"></i>
+    <div class="col-12 col-md-3">
+        <div class="d-flex flex-column gap-1">
+            <div>
+                <button class="w-100 btn btn-sm btn-primary btn-info d-flex gap-1 text-uppercase fw-bold" onclick="buatAntrian('ATRD')">
+                    <span class="flex-fill">antrian desain</span>
+                    <span class="flex-fill">
+                        <i class="ti ti-circle-plus"></i>
                     </span>
-                </div>
+                </button>
             </div>
-        </div>
-    </div>
-
-    <div class="col-6 col-md-2">
-        <div class="card bg-primary" onmouseover="this.style.cursor='pointer'" onclick="buatAntrian()">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="content-left">
-                        <h4 class="mb-0 text-white" id="tambahAntrian">0</h4>
-                        <small class="text-white">Buat Antrian</small>
-                    </div>
-                    <span class="badge bg-label-primary rounded-circle p-2">
-                        <i class="ti ti-plus ti-md"></i>
+            <div>
+                <button class="w-100 btn btn-sm btn-primary btn-info d-flex gap-1 text-uppercase fw-bold" onclick="buatAntrian('ATRS')">
+                    <span class="flex-fill">antrian cetak</span>
+                    <span class="flex-fill">
+                        <i class="ti ti-circle-plus"></i>
                     </span>
-                </div>
+                </button>
             </div>
         </div>
     </div>
