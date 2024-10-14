@@ -12,6 +12,7 @@ use App\Http\Controllers\Produk\KategoriController;
 use App\Http\Controllers\Produk\ProdukController;
 use App\Http\Controllers\Produk\PromoController;
 use App\Http\Controllers\Select2\Select2Controller;
+use App\Http\Controllers\Struk\TestPrinterController;
 use App\Http\Controllers\Transaksi\PelunasanController;
 use App\Http\Controllers\Transaksi\TransaksiController;
 use Illuminate\Support\Facades\Route;
@@ -91,6 +92,7 @@ Route::post('printer', [PrinterController::class, 'insert'])->name('printer.inse
 Route::delete('printer', [PrinterController::class, 'destroy'])->name('printer.delete');
 Route::get('printer-struk-setting', [StrukController::class, 'getPrinterSetting'])->name('getPrinterSetting');
 Route::put('printer-struk-setting', [StrukController::class, 'changeStatus'])->name('printer.changeStatus');
+Route::get('test-print', [TestPrinterController::class, 'test'])->name('printer.test');
 
 
 /*

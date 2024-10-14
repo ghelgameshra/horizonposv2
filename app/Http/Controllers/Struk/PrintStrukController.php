@@ -22,7 +22,7 @@ class PrintStrukController extends Controller
     private $connector;
     private $printer;
 
-    public function __construct($invno){
+    public function __construct($invno = 0){
         $this->toko = DB::table('toko')->first();
         $this->settingStruk = DB::table('setting_struk')->where('key', '!=', 'AUPR')->get();
         $this->pesanStruk = DB::table('setting_pesan_struk')->get();
@@ -179,6 +179,21 @@ class PrintStrukController extends Controller
     {
         $this->printer->setJustification(Printer::JUSTIFY_CENTER);
         $this->printer -> qrCode('TEST');
+    }
+
+    public function test(): void
+    {
+        $this->printer = new Printer($this->connector);
+
+        $this->printer->setJustification(Printer::JUSTIFY_CENTER);
+        $this->printer->setEmphasis(true);
+        $this->printer->text($this->toko->nama_perusahaan . "\n");
+        $this->printer->setEmphasis(false);
+        $this->printer->text($this->toko->alamat_lengkap . "\n");
+        $this->printer->text("\n");
+        $this->printer->text("\n");
+        $this->printer->text("\n");
+        $this->printer->close();
     }
 
 }

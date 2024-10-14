@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Administrasi;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Struk\AntrianStrukController;
 use App\Models\Administrasi\Antrian;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
@@ -46,6 +47,9 @@ class AntrianController extends Controller
     {
         $antrianBaru = Antrian::where('key', $request->tipe_antrian)->first();
         $antrianBaru->update(['docno' => $antrianBaru->docno+1]);
+
+        $label = new AntrianStrukController($antrianBaru->docno, $antrianBaru->keterangan);
+        $label->print();
 
         return response()->json([
             'pesan' => "$antrianBaru->keterangan no $antrianBaru->docno berhasil dibuat"
