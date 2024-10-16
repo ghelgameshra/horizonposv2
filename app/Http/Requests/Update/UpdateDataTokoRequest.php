@@ -31,6 +31,7 @@ class UpdateDataTokoRequest extends FormRequest
             'tiktok'                => ['required', 'string', 'max:100'],
             'web'                   => ['required', 'string', 'max:200'],
             'alamat_lengkap'        => ['required', 'string', 'max:300'],
+            'qr_wa_text'            => ['nullable', 'string', 'max:300'],
         ];
     }
 }
