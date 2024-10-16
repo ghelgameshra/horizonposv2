@@ -40,6 +40,8 @@ class TokoController extends Controller
             'file' => ['required', 'mimes:png', 'max:2048'],
         ]);
 
+        $pesan = '';
+
         if($request->hasFile('file') && $request->jenis === 'logo'){
             $extension = $request->file('file')->extension();
 
@@ -49,6 +51,8 @@ class TokoController extends Controller
             Toko::first()->update([
                 'logo'  => $path
             ]);
+
+            $pesan = 'Logo perusahaan berhasil diubah';
         }
 
         if($request->hasFile('file') && $request->jenis === 'qr'){
@@ -60,10 +64,12 @@ class TokoController extends Controller
             Toko::first()->update([
                 'qr_wa'  => $path
             ]);
+
+            $pesan = 'QR whatsapp berhasil diubah';
         }
 
         return response()->json([
-            'pesan' =>"logo berhasil diubah"
+            'pesan' => $pesan
         ]);
     }
 }

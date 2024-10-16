@@ -22,5 +22,6 @@ class Toko extends Model
         'alamat_lengkap',
         'logo',
         'qr_wa',
+        'qr_wa_text',
     ];
 }

@@ -30,6 +30,7 @@
 
 
     <div class="row">
+        <input type="text" name="qr_wa_text" id="qr_wa_text" hidden>
         <div class="mb-2 col-12 col-md-6">
             <label for="nama_perusahaan" class="form-label">Nama Perusahaan</label>
             <input class="form-control" autocomplete="off" type="text" id="nama_perusahaan" name="nama_perusahaan" autofocus placeholder="nama perusahaan" />

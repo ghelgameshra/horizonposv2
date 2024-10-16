@@ -22,7 +22,8 @@ class PrintStrukController extends Controller
     private $connector;
     private $printer;
 
-    public function __construct($invno = 0){
+    public function __construct($invno = 0)
+    {
         $this->toko = DB::table('toko')->first();
         $this->settingStruk = DB::table('setting_struk')->where('key', '!=', 'AUPR')->get();
         $this->pesanStruk = DB::table('setting_pesan_struk')->get();
@@ -53,7 +54,7 @@ class PrintStrukController extends Controller
         }
     }
 
-    public function print()
+    public function print(): void
     {
         $this->printer = new Printer($this->connector);
         $this->printer->cut();
@@ -83,7 +84,7 @@ class PrintStrukController extends Controller
         $this->printer->text($this->toko->alamat_lengkap . "\n");
     }
 
-    private function printBody()
+    private function printBody(): void
     {
         $this->printer->text("\n");
         $this->printer->text("================================\n");
@@ -157,7 +158,7 @@ class PrintStrukController extends Controller
         $this->printer->text("\n");
     }
 
-    private function printFooter()
+    private function printFooter(): void
     {
         $this->printer->setJustification(Printer::JUSTIFY_CENTER);
         $this->printer->text("Telp. " . $this->toko->telepone . "\n");
@@ -167,7 +168,8 @@ class PrintStrukController extends Controller
         $this->printer->text("\n");
     }
 
-    private function printMessage(){
+    private function printMessage(): void
+    {
         $this->printer->setJustification(Printer::JUSTIFY_CENTER);
         foreach ($this->pesanStruk as $value) {
             $this->printer->text($value->pesan . "\n");
@@ -175,10 +177,14 @@ class PrintStrukController extends Controller
         $this->printer->text("\n");
     }
 
-    private function printQr()
+    private function printQr(): void
     {
+        $text = $this->toko->qr_wa_text;
+        if(!$this->toko->qr_wa_text){
+            $text = 'https://wa.me/qr/JVD7HJNTTDKMI1';
+        }
         $this->printer->setJustification(Printer::JUSTIFY_CENTER);
-        $this->printer -> qrCode('TEST');
+        $this->printer -> qrCode($text);
     }
 
     public function test(): void

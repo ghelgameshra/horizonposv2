@@ -100,24 +100,40 @@ $('#antrianForm').on('submit', function(e){
     })
 })
 
-function speakAntrian($text) {
+function speakAntrian(text) {
     // Check if browser supports speech synthesis
     if ("speechSynthesis" in window) {
-        const utterance = new SpeechSynthesisUtterance($text);
+        // If speaking, cancel any current speech
+        if (speechSynthesis.speaking) {
+            speechSynthesis.cancel();
+        }
 
-        // Optional: Set voice options
-        utterance.lang = "id-ID"; // Set the language
-        utterance.pitch = 1; // Pitch of the voice
-        utterance.rate = 1; // Speed rate of the speech
-        utterance.volume = 1; // Volume level
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        // Set voice options
+        utterance.lang = "id-ID"; // Indonesian language
+        utterance.pitch = 1; // Normal pitch
+        utterance.rate = 1; // Normal speed
+        utterance.volume = 1; // Maximum volume
+
+        // Handle speech events
+        utterance.onstart = () => {
+            console.log("Speech started.");
+        };
+
+        utterance.onend = () => {
+            console.log("Speech ended.");
+        };
+
+        utterance.onerror = (event) => {
+            console.error("Speech synthesis error:", event.error);
+            notification("error", "Error occurred during speech synthesis.");
+        };
 
         // Speak the text
         speechSynthesis.speak(utterance);
     } else {
-        notification(
-            "error",
-            "Sorry, your browser doesn't support text to speech."
-        );
+        notification("error", "Sorry, your browser doesn't support text to speech.");
     }
 }
 </script>

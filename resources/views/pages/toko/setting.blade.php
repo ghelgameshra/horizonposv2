@@ -25,9 +25,12 @@
         </div>
     </div>
 </div>
+<div id="reader" style="display: none;"></div> <!-- Elemen ini dibutuhkan oleh html5-qrcode -->
+
 @endsection
 
 @push('js')
+<script src="{{ asset('js/html5-qrcode.min.js') }}"></script>
 <script>
 Dropzone.autoDiscover = false;
 
@@ -70,6 +73,21 @@ $(function(){
             notification('error', res.message);
         },
         complete: function(file){
+            // Mendapatkan file gambar dari Dropzone
+            const imageFile = file; // File object langsung dari Dropzone
+
+                // Inisialisasi html5-qrcode
+                const html5QrCode = new Html5Qrcode("reader");
+                html5QrCode.scanFile(imageFile, true) // Mengirim File object, bukan data URL
+                .then(decodedText => {
+                    // Menampilkan hasil scan ke console
+                    $('#qr_wa_text').val(decodedText);
+                    $('#infoToko').submit();
+                })
+                .catch(err => {
+                    console.log("Error scanning file. ", err);
+                });
+
             setTimeout(() => {
                 this.removeFile(file);
             }, 2000);
