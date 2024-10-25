@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             TokoSeeder::class,
             AntrianSeeder::class,
             JenisPengeluaranSeeder::class,
+            UserApiSeeder::class
         ]);
     }
 }
