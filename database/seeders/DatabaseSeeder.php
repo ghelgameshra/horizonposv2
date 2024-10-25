@@ -23,9 +23,11 @@ class DatabaseSeeder extends Seeder
             JabatanSeeder::class,
             KaryawanSeeder::class,
             StatusOrderSeeder::class,
-            TokoSeeder::class,
             SettingStrukSeeder::class,
+            TokoSeeder::class,
             AntrianSeeder::class,
+            JenisPengeluaranSeeder::class,
+            UserApiSeeder::class
         ]);
     }
 }
