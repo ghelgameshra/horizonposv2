@@ -107,6 +107,7 @@ Route::put('pelunasan', [PelunasanController::class, 'update'])->name('pelunasan
 Route::get('reprint-transaksi/{invno?}', [StrukController::class, 'reprint'])->name('reprint-transaksi.print');
 Route::get('transaksi/{invno?}', [TransaksiController::class, 'show'])->name('pengeluaran.show');
 Route::put('pesanan/pengambilan/{invno?}', [TransaksiController::class, 'ambil'])->name('pesanan.ambil');
+Route::post('transaksi/{invno?}', [TransaksiController::class, 'cancel'])->name('transaksi.cancel');
 
 /*
     Pengeluaran route

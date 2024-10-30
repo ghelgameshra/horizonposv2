@@ -7,7 +7,7 @@
             <div class="card">
                 <div class="card-header">
                     <div class="d-flex justify-content-between">
-                        <small class="d-block mb-1 text-muted">Reprint Transaksi</small>
+                        <small class="d-block mb-1 text-muted">Reprint Transaksi/ Cancel Transaksi</small>
                     </div>
                 </div>
                 <div class="card-body">
@@ -35,6 +35,7 @@
     </div>
 </div>
 @include('pages.transaksi.modal-show')
+@include('pages.transaksi.modal-cancel')
 @endsection
 
 @push('js')
@@ -64,6 +65,9 @@ $(function(){
                     <button class="btn btn-xs btn-outline-info" onclick="reprintStruk('${data.invno}')">
                         <i class="ti ti-receipt d-block"></i>
                     </button>
+                    <button class="btn btn-xs btn-outline-danger" onclick="cancelSales('${data.invno}')">
+                        <i class="ti ti-circle-minus d-block"></i>
+                    </button>
                 </div>
                 `
             }},
@@ -74,7 +78,11 @@ $(function(){
                 return data.terima > 0 ? `<span class="badge text-bg-success">LUNAS</span>` : `<span class="badge text-bg-danger">BELUM</span>`;
             }},
             {data: (data) =>{
-                return data.status_order === "DALAM ANTRIAN" ? `<span class="badge text-bg-warning w-100">${data.status_order}</span>` : `<span class="badge text-bg-success w-100">${data.status_order}</span>`;
+                return data.status_order === "DALAM ANTRIAN"
+                ? `<span class="badge text-bg-warning w-100">${data.status_order}</span>`
+                : data.status_order === "CANCEL SALES"
+                ? `<span class="badge text-bg-danger w-100">${data.status_order}</span>`
+                : `<span class="badge text-bg-success w-100">${data.status_order}</span>`;
             }},
             {data: (data) =>{return data.kasir.name}},
         ],
@@ -82,12 +90,25 @@ $(function(){
 })
 
 function reprintStruk(invno){
-    $.get(`{{ route('reprint-transaksi.print')}}/${invno}`)
-    .done((response) => {
-        notification('success', response.pesan);
-    })
-    .fail((response) => {
-        notification('error', response.responseJSON.message);
+    Swal.fire({
+        text: "Reprint invoice ?",
+        showCancelButton: true,
+        confirmButtonText: 'Reprint',
+        customClass: {
+            confirmButton: 'btn btn-primary waves-effect waves-light',
+            cancelButton: 'btn btn-label-danger waves-effect waves-light'
+        },
+        buttonsStyling: false
+    }).then(function (result) {
+        if (result.value) {
+            $.get(`{{ route('reprint-transaksi.print')}}/${invno}`)
+            .done((response) => {
+                notification('success', response.pesan);
+            })
+            .fail((response) => {
+                notification('error', response.responseJSON.message, 'Gagal Print');
+            });
+        }
     });
 }
 
@@ -158,5 +179,39 @@ function showDetailTransaksi(data){
         ]
     })
 }
+
+var invnoCancel;
+function cancelSales(invno){
+    invnoCancel = invno;
+    $('#modalCancelSalesTitle').text(`Cancel Sales ${invno}`)
+    $('#modalCancelSales').modal('show');
+}
+
+$('#CancelSalesForm').on('submit', function(e){
+    e.preventDefault();
+
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: `{{ route('transaksi.cancel') }}/${invnoCancel}`,
+        type: 'POST',
+        data: {
+            password: $('#user_password').val()
+        }
+    })
+    .done((response) => {
+        reloadDataTable($('.datatables-basic'));
+        $('#modalCancelSales').modal('hide');
+        notification('success', response.pesan, null, 2000);
+    })
+    .fail((response) => {
+        notification('error', response.responseJSON.message, null, 3500);
+    })
+})
+
+$('#modalCancelSales').on('hidden.bs.modal', function(){
+    $('#CancelSalesForm')[0].reset();
+})
 </script>
 @endpush

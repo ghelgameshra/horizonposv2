@@ -315,30 +315,45 @@ $('#terima').on('keyup', function(){
 $('#formKasir').on('submit', function(e){
     e.preventDefault();
 
-    $.ajax({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    Swal.fire({
+        text: "Simpan transaksi ?",
+        showCancelButton: true,
+        confirmButtonText: 'simpan',
+        customClass: {
+            confirmButton: 'btn btn-primary waves-effect waves-light',
+            cancelButton: 'btn btn-label-danger waves-effect waves-light'
         },
-        url: `{{ route('transaksiSelesai') }}`,
-        type: 'PUT',
-        data: $(this).serialize(),
-        "Content-Type": "application/x-www-form-urlencoded"
-    })
-    .done((res) =>{
-        notification('success', res.pesan);
-    })
-    .fail((err) =>{
-        $.each(err.responseJSON['errors'], function(key, messages) {
-            $(`#${key}`).addClass('border-danger');
-            $(`#${key}`).siblings().addClass('border-danger');
-        });
-        notification('error', err.responseJSON.message);
-        return;
+        buttonsStyling: false
+    }).then(function (result) {
+        if (result.value) {
+
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: `{{ route('transaksiSelesai') }}`,
+                type: 'PUT',
+                data: $(this).serialize(),
+                "Content-Type": "application/x-www-form-urlencoded"
+            })
+            .done((res) =>{
+                notification('success', res.pesan);
+                setTimeout(() => {
+                    window.location.href = '';
+                }, 1000);
+            })
+            .fail((err) =>{
+                $.each(err.responseJSON['errors'], function(key, messages) {
+                    $(`#${key}`).addClass('border-danger');
+                    $(`#${key}`).siblings().addClass('border-danger');
+                });
+                notification('error', err.responseJSON.message);
+                return;
+            });
+
+        }
     });
 
-    setTimeout(() => {
-        window.location.href = '';
-    }, 1000);
 });
 </script>
 @endpush

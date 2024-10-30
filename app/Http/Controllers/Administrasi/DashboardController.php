@@ -21,7 +21,7 @@ class DashboardController extends Controller
         $tgl_awal = $request->tgl_awal;
         $tgl_akhir = $request->tgl_akhir;
         $data = DB::table('transaksi')->whereBetween('tanggal_transaksi', [$tgl_awal, $tgl_akhir])
-        ->whereNotNull('invno')->get();
+        ->whereNotNull('invno')->where('status_order', '!=', 'CANCEL SALES')->get();
 
 
         $totalPesanan           = $data->count();

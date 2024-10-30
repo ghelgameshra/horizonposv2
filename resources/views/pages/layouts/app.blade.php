@@ -46,6 +46,7 @@
     <link rel="stylesheet" href="{{ asset('lib') }}/assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css" />
     <link rel="stylesheet" href="{{ asset('lib') }}/assets/vendor/libs/toastr/toastr.css" />
     <link rel="stylesheet" href="{{ asset('lib') }}/assets/vendor/libs/spinkit/spinkit.css" />
+    <link rel="stylesheet" href="{{ asset('lib') }}/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 
     <!-- Page CSS -->
     <link rel="stylesheet" href="{{ asset('lib') }}/assets/vendor/css/pages/cards-advance.css" />
@@ -114,6 +115,7 @@
 
     <!-- Page JS -->
     <script src="{{ asset('lib') }}/assets/vendor/libs/toastr/toastr.js"></script>
+    <script src="{{ asset('lib') }}/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
     <script src="{{ asset('js/helper.js') }}"></script>
     @stack('js')
 </body>
