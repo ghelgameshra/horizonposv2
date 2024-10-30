@@ -91,12 +91,7 @@
                 </li>
                 <li class="menu-item {{ Request::is('transaksi/reprint-transaksi') ? 'active' : '' }}">
                     <a href="{{ route('transaksi.reprint') }}" class="menu-link">
-                        <div data-i18n="Reprint Trx">Reprint Trx</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ route('pelunasan.index') }}" class="menu-link">
-                        <div data-i18n="Pembatalan">Pembatalan</div>
+                        <div data-i18n="Reprint & Cancel">Reprint & Cancel</div>
                     </a>
                 </li>
             </ul>

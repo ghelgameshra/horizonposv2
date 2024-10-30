@@ -13,7 +13,10 @@ use Carbon\Carbon;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+
 
 class TransaksiController extends Controller
 {
@@ -375,6 +378,35 @@ class TransaksiController extends Controller
 
         return response()->json([
             'pesan' => "Pesanan dengan no $invno berhasil diambil",
+        ]);
+    }
+
+    public function cancel(String $invno, Request $request): JsonResponse
+    {
+        $request->validate([
+            'password' => ['required', 'string']
+        ]);
+
+        $user = Auth::user();
+        if(!Hash::check($request->password, $user->password)){
+            throw new HttpResponseException(response([
+                'message' => "Password tidak sesuai"
+            ], 422));
+        }
+
+        $transaksi = Transaksi::where('invno', $invno)->first();
+        if($transaksi->status_order === 'CANCEL SALES'){
+            throw new HttpResponseException(response([
+                'message' => "Status transaksi sudah cancel"
+            ], 422));
+        }
+
+        $transaksi->update([
+            'status_order'  => 'CANCEL SALES',
+        ]);
+
+        return response()->json([
+            'pesan' => "Pesanan dengan no $invno berhasil di cancel",
         ]);
     }
 }
