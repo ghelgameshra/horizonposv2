@@ -24,7 +24,7 @@ $(document).keydown(function(event) {
     }
 });
 
-$(function(){
+$(function(){;
     getTransaksi();
 
     const userName = '{{ auth()->user()->name }}'; // Ambil nama pengguna dari server-side
@@ -42,62 +42,13 @@ $(function(){
         $('#nameTag').val(formattedTime + ' | ' + userName);
     }, 1000); // Perbarui setiap 1 detik
 
-    setTimeout(() => {
+    setTimeout( () => {
         getProdukJual();
-        let idTrx = $('#id_transaksi').val();
-        let table = $('.datatables-basic').DataTable({
-            processing: true,
-            paging: true,
-            ajax: {
-                url: `{{ route('transaksiBaruDetail') }}?id_transaksi=${idTrx}`,
-            },
-            columns: [
-                {
-                    data: null, // Tidak ada data yang terkait
-                    render: function(data, type, row, meta) {
-                        return meta.row + 1; // Menambahkan 1 untuk nomor urut (index mulai dari 0)
-                    },
-                    title: 'No'
-                },
-                {data: (data) =>{
-                    return data.nama_produk.split(' ').slice(0, 2).join(' ');
-                }},
-                {data: (data) =>{return data.plu}},
-                {data: (data) =>{
-                    return `
-                        <div class="input-group input-group-sm text-center">
-                            <input type="text" class="form-control" placeholder="nama file" name="namaFilePlu_${data.plu}" id="namaFilePlu_${data.plu}" value="${data.namafile ? data.namafile : ''}" autocomplete="off" ${data.satuan === 'UNIT' ? 'disabled' : 'required' }>
-                            <input type="text" class="form-control" placeholder="100x100" name="ukuranPlu_${data.plu}" id="ukuranPlu_${data.plu}" value="${data.ukuran ? data.ukuran : ''}" autocomplete="off" ${data.satuan === 'UNIT' ? 'disabled' : 'required' } onchange="tambahQty('${data.plu}')">
-                        </div>
-                    `
-                }},
-                {data: (data) =>{return formatRupiah(data.harga_jual)}},
-                {data: (data) =>{
-                    return `
-                        <div class="input-group input-group-sm text-center">
-                            <input type="text" inputmode="numeric" class="form-control" name="" id="tambahQtyPlu_${data.plu}" autocomplete="off" value="${data.jumlah}" onchange="tambahQty('${data.plu}')" data-old-value="${data.jumlah}">
-                        </div>
-                    `
-                }},
-                {data: (data) =>{return formatRupiah(data.total)}},
-                {data: (data) =>{
-                    return `
-                    <div class="btn-group">
-                        <button class="btn btn-xs btn-outline-danger" onclick="deleteDataSales('${data.plu}')">
-                            <i class="ti ti-trash"></i>
-                        </button>
-                    </div>
-                    `
-                }},
-            ],
-            dom: '',
-            ordering: false
-        });
     }, 500);
-
 });
 
 function getTransaksi(){
+    showLoading();
     const user = {{ auth()->user()->id }};
     $.ajax({
         headers: {
@@ -111,11 +62,76 @@ function getTransaksi(){
     .done((res) =>{
         $('#total_view').val(`${formatRupiah(res.data['subtotal'])}`);
         $('#id_transaksi').val(res.data['id']);
+
+        getTransaksiDetail(res.data['id']);
     })
     .fail((err) =>{
         notification('error', err.responseJSON.message);
+    })
+}
+
+function getTransaksiDetail(id){
+    $.get(`{{ route('transaksiBaruDetail') }}?id_transaksi=${id}`)
+    .done((response) => {
+        hideLoading()
+        loadDataSales(response.data);
+    })
+    .fail((response) => {
+        hideLoading()
+        notification('error', response.responseJSON)
+    })
+}
+
+
+/* load data detail */
+function loadDataSales(data){
+    tableSales = $('.datatables-basic').DataTable({
+        dom: '',
+        ordering: false,
+        destroy: true,
+        data: data,
+        columns: [
+            {
+                data: null, // Tidak ada data yang terkait
+                render: function(data, type, row, meta) {
+                    return meta.row + 1; // Menambahkan 1 untuk nomor urut (index mulai dari 0)
+                },
+                title: 'No'
+            },
+            {data: (data) =>{
+                return data.nama_produk.split(' ').slice(0, 2).join(' ');
+            }},
+            {data: (data) =>{return data.plu}},
+            {data: (data) =>{
+                return `
+                    <div class="input-group input-group-sm text-center">
+                        <input type="text" class="form-control" placeholder="nama file" name="namaFilePlu_${data.plu}" id="namaFilePlu_${data.plu}" value="${data.namafile ? data.namafile : ''}" autocomplete="off" ${data.satuan === 'UNIT' ? 'disabled' : 'required' }>
+                        <input type="text" class="form-control" placeholder="100x100" name="ukuranPlu_${data.plu}" id="ukuranPlu_${data.plu}" value="${data.ukuran ? data.ukuran : ''}" autocomplete="off" ${data.satuan === 'UNIT' ? 'disabled' : 'required' } onchange="tambahQty('${data.plu}')">
+                    </div>
+                `
+            }},
+            {data: (data) =>{return formatRupiah(data.harga_jual)}},
+            {data: (data) =>{
+                return `
+                    <div class="input-group input-group-sm text-center">
+                        <input type="text" inputmode="numeric" class="form-control" name="" id="tambahQtyPlu_${data.plu}" autocomplete="off" value="${data.jumlah}" onchange="tambahQty('${data.plu}')" data-old-value="${data.jumlah}">
+                    </div>
+                `
+            }},
+            {data: (data) =>{return formatRupiah(data.total)}},
+            {data: (data) =>{
+                return `
+                <div class="btn-group">
+                    <button class="btn btn-xs btn-outline-danger" onclick="deleteDataSales('${data.plu}')">
+                        <i class="ti ti-trash"></i>
+                    </button>
+                </div>
+                `
+            }},
+        ],
     });
 }
+
 
 $('#terima').on('keyup', function(){
     $('#terima_view').val(formatRupiah($(this).val()))
@@ -159,7 +175,11 @@ function getProdukJual(){
             {data: (data) =>{return data.kategori['nama_kategori']}},
             {data: (data) =>{return formatRupiah(data.harga_jual)}},
             {data: (data) =>{
-                return `<input type="checkbox" onclick="tambahDataSales('${data.plu}')">`;
+                return `
+                <button class="btn btn-xs btn-success d-block" onclick="tambahDataSales('${data.plu}')">
+                    <i class="ti ti-circle-plus"></i>
+                </button>
+                `;
             }},
         ],
         dom: 'ftp',
@@ -170,6 +190,7 @@ function getProdukJual(){
 }
 
 function tambahDataSales(plu){
+    showLoading()
     const idTrx = $('#id_transaksi').val();
 
     $('#addDataModal').modal('hide');
@@ -177,17 +198,18 @@ function tambahDataSales(plu){
         '_token': $('meta[name="csrf-token"]').attr('content'),
     })
     .done((res) =>{
+        getTransaksi();
         notification('success', res.pesan, null, 1000);
     })
     .fail((err) =>{
+        hideLoading()
         notification('error', err.responseJSON.message);
     });
-    reloadData();
 }
 
 function deleteDataSales(plu){
     const idTrx = $('#id_transaksi').val();
-
+    showLoading()
     $.ajax({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -201,15 +223,16 @@ function deleteDataSales(plu){
     })
     .done((res) =>{
         notification('success', res.pesan, null, 1000);
+        getTransaksi();
     })
     .fail((err) =>{
         notification('error', err.responseJSON.message);
+        hideLoading()
     });
-
-    reloadData();
 }
 
 function tambahQty(plu) {
+    showLoading()
     let idTrx = $('#id_transaksi').val();
     const idInput = `#tambahQtyPlu_${plu}`;
     let value = parseInt($(idInput).val(), 10); // Ambil nilai input
@@ -250,17 +273,13 @@ function tambahQty(plu) {
     })
     .done((res) =>{
         notification('success', res.pesan, null, 1000);
+        getTransaksi();
     })
     .fail((err) =>{
         notification('error', err.responseJSON.message);
+        hideLoading()
     });
 
-    reloadData();
-}
-
-function reloadData(){
-    getTransaksi();
-    $('.datatables-basic').DataTable().ajax.reload();
 }
 
 $('#nomor_telepone').on('keyup', function(){
@@ -289,12 +308,12 @@ $('#nomor_telepone').on('keyup', function(){
 
         $('#terima').val(res.data['total']);
         $('#terima_view').val(formatRupiah(res.data['total']));
+
+        getTransaksi();
     })
     .fail((err) =>{
         notification('error', err.responseJSON.message);
     });
-
-    reloadData();
 });
 
 $('#terima').on('keyup', function(){
@@ -326,21 +345,19 @@ $('#formKasir').on('submit', function(e){
         buttonsStyling: false
     }).then(function (result) {
         if (result.value) {
-
+            showLoading()
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 url: `{{ route('transaksiSelesai') }}`,
                 type: 'PUT',
-                data: $(this).serialize(),
+                data: $('#formKasir').serialize(),
                 "Content-Type": "application/x-www-form-urlencoded"
             })
             .done((res) =>{
                 notification('success', res.pesan);
-                setTimeout(() => {
-                    window.location.href = '';
-                }, 1000);
+                resetFormKasir();
             })
             .fail((err) =>{
                 $.each(err.responseJSON['errors'], function(key, messages) {
@@ -348,6 +365,7 @@ $('#formKasir').on('submit', function(e){
                     $(`#${key}`).siblings().addClass('border-danger');
                 });
                 notification('error', err.responseJSON.message);
+                hideLoading()
                 return;
             });
 
@@ -355,5 +373,10 @@ $('#formKasir').on('submit', function(e){
     });
 
 });
+
+function resetFormKasir(){
+    $('#formKasir')[0].reset();
+    getTransaksi();
+}
 </script>
 @endpush

@@ -5,7 +5,7 @@
                 <div class="col-12 text-center mb-1">
                     <div class="row g-1">
                         <div class="col-md-4">
-                            <input type="text" class="form-control bg-primary text-center fw-bold text-white py-4" style="font-size: 2em" value="Rp. 876.540.000" disabled id="total_view">
+                            <input type="text" class="form-control bg-primary text-center fw-bold text-white py-4" style="font-size: 2em" value="Rp. 0" disabled id="total_view">
                         </div>
                         <div class="col-md-8">
                             <form action="" id="formKasir" method="POST">
@@ -23,35 +23,35 @@
                                                 <i class="menu-icon tf-icons ti ti-phone"></i>
                                             </span>
                                             <input type="text" class="form-control" value="" id="nomor_telepone" name="nomor_telepone" placeholder="Nomor telepone customer">
-
-                                            <span class="input-group-text">Diskon</span>
-                                            <input type="text" class="form-control" value="Rp. 0" disabled id="diskon_view">
                                         </div>
                                     </div>
 
                                     <div class="col-12">
                                         <div class="input-group input-group-sm mb-1">
-                                            <span class="input-group-text">Tipe Bayar</span>
+                                            <span class="input-group-text" style="width: 13%">Diskon</span>
+                                            <input type="text" class="form-control" value="Rp. 0" disabled id="diskon_view">
+
+                                            <span class="input-group-text" style="width: 13%">Total Bayar</span>
+                                            <input type="text" class="form-control" value="Rp. 0" disabled id="total_bayar_view">
+                                            <input type="text" class="form-control" value="Rp. 0" disabled id="total_bayar" hidden>
+
+                                            <span class="input-group-text" style="width: 13%">Tipe Bayar</span>
                                             <select name="tipe_bayar" id="tipe_bayar" class="form-select">
                                                 <option value="CSH">CASH</option>
                                                 <option value="DPCSH">DPCSH</option>
                                                 <option value="DPTRF">DPTRF</option>
                                                 <option value="TRF">TRF</option>
                                             </select>
-
-                                            <span class="input-group-text">Total Bayar</span>
-                                            <input type="text" class="form-control" value="Rp. 0" disabled id="total_bayar_view">
-                                            <input type="text" class="form-control" value="Rp. 0" disabled id="total_bayar" hidden>
                                         </div>
                                     </div>
 
                                     <div class="col-12">
                                         <div class="input-group input-group-sm mb-1">
-                                            <span class="input-group-text">Bayar</span>
+                                            <span class="input-group-text" style="width: 13%">Bayar</span>
                                             <input type="text" class="form-control" value="0" id="terima" placeholder="23000" autocomplete="off" name="terima" inputmode="numeric">
                                             <input type="text" class="form-control" value="Rp. 0" id="terima_view" disabled>
 
-                                            <span class="input-group-text">Kembali</span>
+                                            <span class="input-group-text" style="width: 13%">Kembali</span>
                                             <input type="text" class="form-control" value="Rp. 0" disabled id="kembali_view">
                                             <button class="btn btn-xs btn-success" type="submit">Proses Pesanan</button>
                                         </div>
@@ -79,7 +79,7 @@
                                     <th>plu</th>
                                     <th class="text-center">nama file | ukuran</th>
                                     <th>Harga</th>
-                                    <th style="width: 10%">qty</th>
+                                    <th style="width: 13%">qty</th>
                                     <th>subtotal</th>
                                     <th class="text-center">
                                         <i class="menu-icon tf-icons ti ti-table-minus"></i>
