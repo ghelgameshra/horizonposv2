@@ -50,6 +50,7 @@
 
     <!-- Page CSS -->
     <link rel="stylesheet" href="{{ asset('lib') }}/assets/vendor/css/pages/cards-advance.css" />
+    <link rel="stylesheet" href="{{ asset('lib') }}/assets/vendor/libs/spinkit/spinkit.css" />
     @yield('css')
 
     <!-- Helpers -->
@@ -63,6 +64,39 @@
 </head>
 
 <body>
+
+    <style>
+        #loadingBackdrop{
+            position: absolute;
+            width: 100%;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.1);
+            z-index: 9998;
+        }
+
+        #loadingIcon{
+            z-index: 9999;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+    <div id="loadingScreen" hidden>
+        <div id="loadingIcon">
+            <div class="d-flex justify-content-center">
+                <div class="sk-chase sk-primary">
+                    <div class="sk-chase-dot"></div>
+                    <div class="sk-chase-dot"></div>
+                    <div class="sk-chase-dot"></div>
+                    <div class="sk-chase-dot"></div>
+                    <div class="sk-chase-dot"></div>
+                    <div class="sk-chase-dot"></div>
+                </div>
+            </div>
+        </div>
+        <div id="loadingBackdrop"></div>
+    </div>
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
@@ -118,6 +152,15 @@
     <script src="{{ asset('lib') }}/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
     <script src="{{ asset('js/helper.js') }}"></script>
     @stack('js')
+    <script>
+    function showLoading() {
+        $("#loadingScreen").attr("hidden", false);
+    }
+
+    function hideLoading() {
+        $("#loadingScreen").attr("hidden", true);
+    }
+    </script>
 </body>
 
 </html>

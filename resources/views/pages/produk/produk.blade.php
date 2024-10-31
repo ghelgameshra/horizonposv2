@@ -140,6 +140,7 @@ $(function(){
     });
 
     $('#addForm').on('submit', function(e){
+        showLoading();
         e.preventDefault();
         $.ajax({
             headers: {
@@ -152,11 +153,13 @@ $(function(){
             processData: false,
         })
         .done((res) =>{
+            hideLoading();
             notification('success', res.pesan);
             reloadDataTable($('.datatables-basic'));
         })
         .fail((err) =>{
             notification('error', err.responseJSON.message);
+            hideLoading();
         });
     });
 })
@@ -249,6 +252,7 @@ $('#harga_jual').on('keyup', function(){
 })
 
 function changeStatusActive(plu){
+    showLoading();
     $.ajax({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -260,13 +264,14 @@ function changeStatusActive(plu){
         processData: false,
     })
     .done((res) =>{
+        hideLoading();
         notification('success', res.pesan, null, 30000);
-
         setTimeout(() => {
             reloadDataTable($('.datatables-basic'));
         }, 1000);
     })
     .fail((err) =>{
+        hideLoading();
         notification('error', err.responseJSON.message);
     });
 }
