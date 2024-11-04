@@ -27,6 +27,7 @@ class Produk extends Model
         'retur',
         'kode_suppllier',
         'addid',
+        'updid'
     ];
 
     public function kategori(): BelongsTo

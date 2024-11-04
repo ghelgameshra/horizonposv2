@@ -47,6 +47,73 @@ https://getcomposer.org/download/
 # List netplan configuration file, ex. 1-network-manager-all.yaml
 ls /etc/netplan
 sudo nano /etc/netplan/1-network-manager-all.yaml
+~~~
+
+6. Config webserver with nginx
+~~~bash  
+sudo nano /etc/nginx/sites-available/pos.conf
+
+# Setup your server
+server {
+    listen 85;
+    listen [::]:85;
+    server_name example.com;
+    root /var/www/app/LaravelApp/horizonposv2/public;
+ 
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-Content-Type-Options "nosniff";
+ 
+    index index.php;
+ 
+    charset utf-8;
+ 
+    location / {
+        # Header and cors option
+        add_header 'Access-Control-Allow-Origin' '*' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT' always;
+        add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type, X-Requested-With' always;
+        add_header 'Access-Control-Allow-Credentials' 'true' always;
+        try_files $uri $uri/ /index.php?$query_string;
+
+        if ($request_method = OPTIONS) {
+            add_header 'Access-Control-Allow-Origin' '*' always;
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT' always;
+            add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type, X-Requested-With' always;
+            add_header 'Access-Control-Allow-Credentials' 'true' always;
+            add_header 'Content-Length' 0;
+            add_header 'Content-Type' 'text/plain; charset=utf-8';
+            return 204;
+        }
+    }
+ 
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+ 
+    error_page 404 /index.php;
+ 
+    # php fpm process
+    location ~ \.php$ {
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_hide_header X-Powered-By;
+    }
+ 
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+
+    # this is route for static file
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico)$ {
+        try_files /storage$uri /storage$uri/;
+        access_log off;
+        log_not_found off;
+    }
+}
+
+sudo ln -s /etc/nginx/sites-available/pos.conf /etc/nginx/sites-enabled
+sudo systemctl restart nginx
+~~~
 
 # Use this to config static IP in terminal linux
 network:

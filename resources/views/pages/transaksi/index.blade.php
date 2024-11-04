@@ -113,6 +113,7 @@ function reprintStruk(invno){
 }
 
 function showDetail(invno = '#'){
+    showLoading();
     $.get(`{{ route('pengeluaran.show') }}/${invno}`)
     .done((response) => {
         showDetailTransaksi(response.data);
@@ -189,7 +190,7 @@ function cancelSales(invno){
 
 $('#CancelSalesForm').on('submit', function(e){
     e.preventDefault();
-
+    showLoading();
     $.ajax({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

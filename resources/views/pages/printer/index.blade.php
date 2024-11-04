@@ -150,10 +150,11 @@ $(function(){
             }}
         ],
         dom: ''
-    })
+    });
 })
 
 function testPrint(printer){
+    showLoading();
     $.get(`{{ route('printer.test') }}`, {
         'jenis_printer': printer
     })
@@ -198,6 +199,7 @@ function getDataToko(){
 }
 
 function getPreviewStrukPesan(data){
+    $('#pesan_struk').children().remove();
     data.forEach((el, index) => {
         $('#pesan_struk').append(`<p class="mb-0">${el.pesan}</p>`)
     });
@@ -234,6 +236,7 @@ function setPreviewStruk(){
 
 $('#addFormOffCanvas').on('submit', function(e){
     e.preventDefault();
+    showLoading();
     $.ajax({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -260,6 +263,7 @@ $('#addFormOffCanvas').on('submit', function(e){
 });
 
 function changeStatusSetting(key){
+    showLoading();
     $.ajax({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -272,15 +276,17 @@ function changeStatusSetting(key){
     })
     .done((res) =>{
         notification('success', res.pesan);
+        reloadDataTable($('.datatables-basic'));
+        getDataToko();
     })
     .fail((err) =>{
+        reloadDataTable($('.datatables-basic'));
         notification('error', err.responseJSON.message);
     });
-
-    reloadDataTable($('.datatables-basic'));
 }
 
 function deletePrinter(id){
+    showLoading();
     $.ajax({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -293,12 +299,11 @@ function deletePrinter(id){
     })
     .done((res) =>{
         notification('success', res.pesan);
+        reloadDataTable($('#listPrinterTable'));
     })
     .fail((err) =>{
         notification('error', err.responseJSON.message);
     });
-
-    reloadDataTable($('#listPrinterTable'));
 }
 </script>
 @endpush

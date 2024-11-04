@@ -73,7 +73,11 @@ $(function(){
                 return data.terima > 0 ? `<span class="badge text-bg-success">LUNAS</span>` : `<span class="badge text-bg-danger">BELUM</span>`;
             }},
             {data: (data) =>{
-                return data.status_order === "DALAM ANTRIAN" ? `<span class="badge text-bg-warning w-100">${data.status_order}</span>` : `<span class="badge text-bg-success w-100">${data.status_order}</span>`;
+                return data.status_order === "DALAM ANTRIAN"
+                ? `<span class="badge text-bg-warning w-100">${data.status_order}</span>`
+                : data.status_order === "CANCEL SALES"
+                ? `<span class="badge text-bg-danger w-100">${data.status_order}</span>`
+                : `<span class="badge text-bg-success w-100">${data.status_order}</span>`;
             }},
             {data: (data) =>{return data.kasir.name}},
         ],

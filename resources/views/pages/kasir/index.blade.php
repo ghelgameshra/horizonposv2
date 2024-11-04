@@ -54,18 +54,21 @@ function getTransaksi(){
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
-        url: `{{ url('kasir/transaksi-baru/${user}') }}`,
+        url: `{{ route('transaksiBaru') }}/${user}`,
         type: 'POST',
         contentType: false,
         processData: false,
     })
     .done((res) =>{
-        $('#total_view').val(`${formatRupiah(res.data['subtotal'])}`);
+        const total = res.data['subtotal'];
+
+        $('#total_view').val(`${formatRupiah(total)}`);
         $('#id_transaksi').val(res.data['id']);
 
         getTransaksiDetail(res.data['id']);
     })
     .fail((err) =>{
+        hideLoading();
         notification('error', err.responseJSON.message);
     })
 }
@@ -245,6 +248,7 @@ function tambahQty(plu) {
         if(namaFile === '' || ukuran === ''){
             notification('error', 'Inputan tidak sesuai. Nama file dan ukuran harus diisi');
             $(`#tambahQtyPlu_${plu}`).val(oldValue);
+            hideLoading();
             return;
         }
     }
@@ -253,12 +257,14 @@ function tambahQty(plu) {
         // Jika inputan bukan angka, tampilkan notifikasi dan kembalikan nilai input ke yang lama
         notification('error', 'Inputan tidak sesuai. Silahkan input angka');
         $(idInput).val(oldValue); // Kembalikan ke nilai sebelumnya
+        hideLoading();
         return; // Keluar dari fungsi
     }
 
     if (value < oldValue) {
         notification('info', 'Tidak bisa input kurang');
         $(idInput).val(oldValue); // Kembalikan ke nilai sebelumnya
+        hideLoading();
         return;
     }
 
@@ -277,7 +283,7 @@ function tambahQty(plu) {
     })
     .fail((err) =>{
         notification('error', err.responseJSON.message);
-        hideLoading()
+        hideLoading();
     });
 
 }
@@ -291,6 +297,7 @@ $('#nomor_telepone').on('keyup', function(){
     if(charCount <= 6 ){
         return;
     }
+    showLoading();
 
     $.post(`{{ route('cekPromo') }}`, {
         '_token': $('meta[name="csrf-token"]').attr('content'),
@@ -298,20 +305,21 @@ $('#nomor_telepone').on('keyup', function(){
         'nomor_telepone': inputVal
     })
     .done((res) =>{
+        hideLoading();
         if(res.data['potonganHarga'] > 0){
             notification('success', res.pesan, null, 1000);
         }
 
         $('#diskon_view').val(formatRupiah(res.data['potonganHarga']));
-        $('#total_bayar_view').val(formatRupiah(res.data['total']));
+        $('#total_bayar_view').val(formatRupiah(res.data['subtotal']));
         $('#total_bayar').val(res.data['total']);
+        $('#total_view').val(`${formatRupiah(res.data['total'])}`);
 
         $('#terima').val(res.data['total']);
         $('#terima_view').val(formatRupiah(res.data['total']));
-
-        getTransaksi();
     })
     .fail((err) =>{
+        hideLoading();
         notification('error', err.responseJSON.message);
     });
 });
@@ -371,7 +379,6 @@ $('#formKasir').on('submit', function(e){
 
         }
     });
-
 });
 
 function resetFormKasir(){

@@ -61,9 +61,9 @@ class ProdukImport implements ToModel, WithUpserts, WithHeadingRow, WithBatchIns
             'addno'             => $row['addno'],
             'jenis_ukuran'      => $row['jenis_ukuran'],
             'satuan'            => strtoupper($row['satuan']),
-            'plu_aktif'         => $row['plu_aktif'],
-            'jual_minus'        => $row['jual_minus'],
-            'retur'             => $row['retur'] ? $row['retur'] : false,
+            'plu_aktif'         => $row['plu_aktif'] === 'Y' ? true : false,
+            'jual_minus'        => $row['jual_minus'] === 'Y' ? true : false,
+            'retur'             => $row['retur'] === 'Y' ? true : false,
             'kode_supplier'     => strtoupper($row['kode_supplier']),
         ]);
     }

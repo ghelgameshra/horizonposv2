@@ -42,11 +42,12 @@ function showSelect2(idInput, dropdownParent, url) {
                 return query;
             },
             processResults: function (data) {
+                console.log(data.data);
                 return {
                     results: data.data,
                 };
             },
             cache: true,
         },
-    });
+    })
 }
