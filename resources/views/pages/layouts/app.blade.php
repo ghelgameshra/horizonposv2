@@ -65,37 +65,19 @@
 
 <body>
 
-    <style>
-        #loadingBackdrop{
-            position: absolute;
-            width: 100%;
-            height: 100vh;
-            background-color: rgba(0, 0, 0, 0.1);
-            z-index: 9998;
-        }
-
-        #loadingIcon{
-            z-index: 9999;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-    </style>
-    <div id="loadingScreen" hidden>
-        <div id="loadingIcon">
-            <div class="d-flex justify-content-center">
-                <div class="sk-chase sk-primary">
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                </div>
+    <div id="loadingSpinner" class="d-none">
+        <div class="position-absolute top-50 start-50" style="z-index: 9999999">
+            <!-- Chase -->
+            <div class="sk-chase sk-primary position-fixed">
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
             </div>
         </div>
-        <div id="loadingBackdrop"></div>
+        <div class="offcanvas-backdrop fade show bg-light"></div>
     </div>
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
@@ -154,12 +136,16 @@
     @stack('js')
     <script>
     function showLoading() {
-        $("#loadingScreen").attr("hidden", false);
+        $("#loadingSpinner").removeClass('d-none');
     }
 
     function hideLoading() {
-        $("#loadingScreen").attr("hidden", true);
+        $("#loadingSpinner").addClass('d-none');
     }
+
+    $( document ).on( "ajaxStop", function() {
+        hideLoading();
+    } );
     </script>
 </body>
 

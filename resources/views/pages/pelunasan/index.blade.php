@@ -71,31 +71,34 @@ $(function(){
             {data: (data) =>{return formatRupiah(data.uang_muka)}},
             {data: (data) =>{return data.tipe_bayar}},
         ],
-    });
-
-    $('#addForm').on('submit', function(e){
-        e.preventDefault();
-        $.ajax({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            url: '{{ route('member.insert') }}',
-            type: 'POST',
-            data: new FormData(this),
-            contentType: false,
-            processData: false,
-        })
-        .done((res) =>{
-            notification('success', res.pesan);
-            reloadDataTable($('.datatables-basic'));
-        })
-        .fail((err) =>{
-            notification('error', err.responseJSON.message);
-        });
+    }).on('draw.dt', function(){
+        hideLoading();
     });
 })
 
+$('#addForm').on('submit', function(e){
+    showLoading();
+    e.preventDefault();
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: '{{ route('member.insert') }}',
+        type: 'POST',
+        data: new FormData(this),
+        contentType: false,
+        processData: false,
+    })
+    .done((res) =>{
+        reloadDataTable($('.datatables-basic'));
+    })
+    .fail((err) =>{
+        notification('error', err.responseJSON.message);
+    });
+});
+
 function showModalPelunasan(invno){
+    showLoading();
     $.get('{{ route('pelunasan.detail', ['invno']) }}', {
         'invno': invno
     })
@@ -186,6 +189,7 @@ $('#terima').on('keyup', function(){
 });
 
 $('#pelunasanForm').on('submit', function(e){
+    showLoading();
     e.preventDefault();
     $.ajax({
         headers: {
@@ -198,7 +202,7 @@ $('#pelunasanForm').on('submit', function(e){
     .done((res) =>{
         notification('success', res.pesan);
         $('#modalPelunasan').modal('hide');
-        $('.datatables-basic').DataTable().ajax.reload();
+        $('.datatables-basic').DataTable().ajax.reload()
     })
     .fail((err) =>{
         notification('error', err.responseJSON.message);

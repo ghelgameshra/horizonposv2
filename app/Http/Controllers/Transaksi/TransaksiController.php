@@ -237,7 +237,8 @@ class TransaksiController extends Controller
             'pesan'         => "Transaksi mendapatkan promo Rp. " . number_format($potonganHarga, 0, ',', '.'),
             'data'          => [
                 'potonganHarga' => $transaksi->diskon,
-                'total'         => $transaksi->total
+                'total'         => $transaksi->total,
+                'subtotal'      => $transaksi->subtotal
             ],
         ], 201);
     }
@@ -269,7 +270,7 @@ class TransaksiController extends Controller
     */
     public function transaksiLogDelete(Request $request): JsonResponse
     {
-        $transaksiLog = TransaksiLog::where('plu', $request->plu)->first();
+        $transaksiLog = TransaksiLog::where('plu', $request->plu)->where('id_transaksi', $request->idTransaksi)->first();
 
         /* update stok produk */
         Produk::where('plu', $request->plu)->update([
@@ -300,7 +301,7 @@ class TransaksiController extends Controller
                 'uang_muka'     => $request->terima,
                 'tipe_bayar'    => $request->tipe_bayar,
                 'status_order'  => 'DALAM ANTRIAN',
-                'addid'         => $request->ip(),
+                'addid'         => env('DB_USERNAME') . "@" . $request->ip() . ':' . Auth::user()->email,
             ]);
         } else {
             $transaksi->update([
@@ -311,7 +312,7 @@ class TransaksiController extends Controller
                 'kembali'       => $request->terima - $transaksi->total,
                 'tipe_bayar'    => $request->tipe_bayar,
                 'status_order'  => 'DALAM ANTRIAN',
-                'addid'         => $request->ip(),
+                'addid'         => env('DB_USERNAME') . "@" . $request->ip() . ':' . Auth::user()->email,
                 'tipe_bayar_pelunasan'    => $request->tipe_bayar,
             ]);
         }
@@ -361,15 +362,15 @@ class TransaksiController extends Controller
             ], 422));
         }
 
-        if ($statusOrder !== "SELESAI"){
+        if ($data->terima === 0 || $data->status_order === "CANCEL SALES"){
             throw new HttpResponseException(response([
-                'message' => "Pesanan dengan no $invno belum selesai, masih " . strtolower($statusOrder)
+                'message' => "Pesanan dengan no $invno belum selesai pembayaran/ pesanan cancel"
             ], 422));
         }
 
-        if ($data->terima === 0){
+        if ($statusOrder !== "SELESAI"){
             throw new HttpResponseException(response([
-                'message' => "Pesanan dengan no $invno belum selesai pembayaran"
+                'message' => "Pesanan dengan no $invno belum selesai, masih " . strtolower($statusOrder)
             ], 422));
         }
 

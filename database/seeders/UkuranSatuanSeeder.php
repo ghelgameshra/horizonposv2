@@ -22,7 +22,7 @@ class UkuranSatuanSeeder extends Seeder
             ]);
         }
 
-        $satuan = ['UNIT', 'LUAS', 'KELILING'];
+        $satuan = ['UNIT', 'LUAS', 'KELILING', 'PCS'];
         foreach ($satuan as $value) {
             DB::table('ref_satuan')->insert([
                 'nama_satuan'    => $value,

@@ -39,15 +39,20 @@
             </h2>
             <div id="previewStrukMenu" class="accordion-collapse {{ Request::is('pengaturan/printer') ? 'show' : 'collapse' }}">
                 <div class="col-12 bg-body px-3">
+                    <div class="row">
+                        <div class="col-6 col-md-5 mx-auto">
+                            <picture id="logo_struk">
+                                <img src="" alt="struk_logo_perusahaan" id="struk_logo_perusahaan" class="img-fluid my-3" style="filter: grayscale(1)">
+                            </picture>
+                        </div>
+                    </div>
+
                     <div class="row text-center" id="header_struk">
-                        <picture class="mb-2" id="logo_struk">
-                            <img src="" alt="struk_logo_perusahaan" id="struk_logo_perusahaan" width="30%" style="filter: grayscale(1)">
-                        </picture>
                         <p id="struk_nama_perusahaan" class="fw-bold mb-0">Nama Perusahaan</p>
                         <p id="struk_alamat_perusahaan" class="mb-0">Alamat perusahaan</p>
                     </div>
 
-                    <div class="col pt-4">
+                    <div class="col pt-3">
                         <table class="table table-sm text-left table-borderless">
                             <tbody>
                                 <tr>
@@ -97,7 +102,7 @@
                         </div>
                     </div>
 
-                    <div class="col my-4 text-center">
+                    <div class="col my-2 text-center">
                         <p class="mb-0">=============================</p>
                     </div>
 

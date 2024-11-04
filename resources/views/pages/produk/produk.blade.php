@@ -97,7 +97,7 @@ $(function(){
             {data: (data) =>{
                 return `
                 <div class="btn-group">
-                    <button class="btn btn-xs btn-outline-warning" onclick="showProdukl(${data.plu})">
+                    <button class="btn btn-xs btn-outline-warning" onclick="getProduk(${data.plu})">
                         <i class="ti ti-edit d-block"></i>
                     </button>
                     <button class="btn btn-xs btn-outline-danger" onclick="deleteProduk(${data.plu})">
@@ -153,13 +153,13 @@ $(function(){
             processData: false,
         })
         .done((res) =>{
-            hideLoading();
+
             notification('success', res.pesan);
             reloadDataTable($('.datatables-basic'));
         })
         .fail((err) =>{
             notification('error', err.responseJSON.message);
-            hideLoading();
+
         });
     });
 })
@@ -192,6 +192,13 @@ $('#tambahProdukButton').on('click', function(){
 
 $('#addFormOffCanvas').on('submit', function(e){
     e.preventDefault();
+
+    if($('#pluUbahProduk').val()){ // run saveEditProduk() if this value not null
+        saveEditProduk();
+        return;
+    }
+
+    showLoading();
     $.ajax({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -219,6 +226,7 @@ $('#addFormOffCanvas').on('submit', function(e){
 
 $('#addKategori').on('submit', function(e){
     e.preventDefault();
+    showLoading();
     $.ajax({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -264,19 +272,19 @@ function changeStatusActive(plu){
         processData: false,
     })
     .done((res) =>{
-        hideLoading();
+
         notification('success', res.pesan, null, 30000);
         setTimeout(() => {
             reloadDataTable($('.datatables-basic'));
         }, 1000);
     })
     .fail((err) =>{
-        hideLoading();
         notification('error', err.responseJSON.message);
     });
 }
 
 function changeStatusJual(plu){
+    showLoading();
     $.ajax({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -297,6 +305,73 @@ function changeStatusJual(plu){
     .fail((err) =>{
         notification('error', err.responseJSON.message);
     });
+}
+
+function getProduk(plu){
+    showLoading();
+    $.get(`{{ route('produk.data') }}/${plu}`)
+    .done((response) => {
+        showProduk(response.data.produk);
+    })
+    .fail((response) => {
+        notification('error', response.responseJSON.message);
+    })
+}
+
+function showProduk(produk){
+    $('#tambahProdukButton').click();
+    $('#offcanvasEndLabel').text('Edit data produk');
+
+    $('#addFormOffCanvas').append(`<input type="text" id="pluUbahProduk" hidden value="${produk.plu}">`);
+    $('#nama_produk').val(produk.nama_produk);
+
+    $('#id_kategori').children().remove();
+    $('#id_kategori').append(`<option value="${produk.kategori.id}" selected>${produk.kategori.nama_kategori}</option>`)
+    showSelect2('id_kategori', 'addFormOffCanvas', `{{ route('select2JenisKategori') }}`);
+
+    $('#harga_beli').val(produk.harga_beli);
+    $('#preview_harga_beli').val(formatRupiah(produk.harga_beli));
+
+    $('#harga_jual').val(produk.harga_jual);
+    $('#preview_harga_jual').val(formatRupiah(produk.harga_jual));
+
+    $('#merk').val(produk.merk);
+
+    $('#jenis_ukuran').children().remove();
+    $('#jenis_ukuran').append(`<option value="${produk.jenis_ukuran}" selected>${produk.jenis_ukuran}</option>`)
+    showSelect2('jenis_ukuran', 'addFormOffCanvas', `{{ route('select2JenisUkuran') }}`);
+
+
+    $('#satuan').children().remove();
+    $('#satuan').append(`<option value="${produk.satuan}" selected>${produk.satuan}</option>`)
+    showSelect2('satuan', 'addFormOffCanvas', `{{ route('select2JenisSatuan') }}`);
+
+    $('#kode_supplier').children().remove();
+    $('#kode_supplier').append(`<option value="${produk.kode_supplier ?? ''}" selected>${produk.kode_supplier ?? ''}</option>`);
+
+    $('#simpanProduk').text(`+ Simpan`);
+}
+
+function saveEditProduk(){
+    showLoading();
+    var plu = $('#pluUbahProduk').val();
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: `{{ route('produk.update') }}/${plu}`,
+        type: 'PUT',
+        data: $('#addFormOffCanvas').serialize(),
+    })
+    .done((response) => {
+        $('#pluUbahProduk').remove();
+        $('#addFormOffCanvas')[0].reset();
+        $('.offcanvas-header button').click();
+        reloadDataTable($('.datatables-basic'));
+    })
+    .fail((response) => {
+        notification('error', response.responseJSON.message);
+    })
 }
 </script>
 @endpush

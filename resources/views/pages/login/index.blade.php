@@ -42,6 +42,7 @@
     <!-- Page CSS -->
     <!-- Page -->
     <link rel="stylesheet" href="{{ asset('lib') }}/assets/vendor/css/pages/page-auth.css" />
+    <link rel="stylesheet" href="{{ asset('lib') }}/assets/vendor/libs/spinkit/spinkit.css" />
 
     <!-- Helpers -->
     <script src="{{ asset('lib') }}/assets/vendor/js/helpers.js"></script>
@@ -50,10 +51,26 @@
     <script src="{{ asset('lib') }}/assets/vendor/js/template-customizer.js"></script>
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{{ asset('lib') }}/assets/js/config.js"></script>
+    <link rel="stylesheet" href="{{ asset('lib') }}/assets/vendor/libs/toastr/toastr.css" />
 </head>
 
 <body>
     <!-- Content -->
+
+    <div id="loadingSpinner" class="d-none">
+        <div class="position-absolute top-50 start-50" style="z-index: 9999999">
+            <!-- Chase -->
+            <div class="sk-chase sk-primary position-fixed">
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+            </div>
+        </div>
+        <div class="offcanvas-backdrop fade show bg-light"></div>
+    </div>
 
     <div class="authentication-wrapper authentication-cover authentication-bg">
         <div class="authentication-inner row">
@@ -84,7 +101,7 @@
                     </div>
                     <!-- /Logo -->
                     <h3 class="mb-1">Welcome to {{ env('APP_NAME') }} 👋</h3>
-                    <p class="mb-4">Please sign-in to your account and start the adventure</p>
+                    <p class="mb-4">Please sign-in to your account</p>
 
                     <form id="formAuthentication" class="mb-3" action="{{ route('login') }}" method="POST">
                         @csrf
@@ -104,21 +121,8 @@
                                 <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="remember-me" />
-                                <label class="form-check-label" for="remember-me"> Remember Me </label>
-                            </div>
-                        </div>
                         <button class="btn btn-primary d-grid w-100">Sign in</button>
                     </form>
-
-                    <p class="text-center">
-                        <span>New on our platform?</span>
-                        <a href="{{ route('register') }}">
-                            <span>Create an account</span>
-                        </a>
-                    </p>
                 </div>
             </div>
             <!-- /Login -->
@@ -151,7 +155,50 @@
     <script src="{{ asset('lib') }}/assets/js/main.js"></script>
 
     <!-- Page JS -->
-    <script src="{{ asset('lib') }}/assets/js/pages-auth.js"></script>
+    <script src="{{ asset('js/helper.js') }}"></script>
+    <script src="{{ asset('lib') }}/assets/vendor/libs/toastr/toastr.js"></script>
+    <script>
+    function showLoading() {
+        $("#loadingSpinner").removeClass('d-none');
+    }
+
+    function hideLoading() {
+        $("#loadingSpinner").addClass('d-none');
+    }
+
+    $('#formAuthentication').on('submit', function(e){
+        e.preventDefault();
+
+        if(!$('#email').val() || !$('#password').val()) {
+            notification('error', 'Email dan password wajib diisi!');
+            return;
+        }
+
+        showLoading();
+        $.ajax({
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            url: `{{ route('login') }}`,
+            type: 'POST',
+            data: {
+                password: $('#password').val(),
+                email: $('#email').val(),
+
+            }
+        })
+        .done((response) => {
+            window.location.href = '{{ route('dashboard') }}';
+        })
+        .fail((response) => {
+            notification('error', response.responseJSON.message)
+        })
+    })
+
+    $(document).on('ajaxStop', function(){
+        hideLoading();
+    })
+    </script>
 </body>
 
 </html>

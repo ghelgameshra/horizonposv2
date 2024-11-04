@@ -13,7 +13,8 @@ class PelunasanController extends Controller
 {
     public function get(): JsonResponse
     {
-        $data = DB::table('transaksi')->whereNull('tipe_bayar_pelunasan')->whereNotNull('invno')->get();
+        $data = DB::table('transaksi')->whereNull('tipe_bayar_pelunasan')->whereNotNull('invno')
+        ->where('status_order', '!=', 'CANCEL SALES')->get();
 
         return response()->json([
             'data'  => $data

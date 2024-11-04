@@ -21,7 +21,9 @@ use Illuminate\Support\Facades\Route;
     Produk route
 */
 Route::post('/produk', [ProdukController::class, 'upsert'])->name('produk.upsert');
+Route::get('/produk/{plu?}', [ProdukController::class, 'data'])->name('produk.data');
 Route::post('/produk-add', [ProdukController::class, 'insert'])->name('produk.insert');
+Route::put('/produk-add/{plu?}', [ProdukController::class, 'update'])->name('produk.update');
 Route::delete('/delete-produk', [ProdukController::class, 'destroy'])->name('produk.delete');
 Route::put('/produk-activate-status/{plu}', [ProdukController::class, 'activateStatus'])->name('activateStatus');
 Route::put('/produk-activate-status-jual-minus/{plu}', [ProdukController::class, 'activateStatusJual'])->name('activateStatusJual');
@@ -67,7 +69,7 @@ Route::delete('karyawan', [KaryawanController::class, 'delete'])->name('karyawan
     Kasir Route
 */
 Route::get('kasir/transaksi-baru-detail', [TransaksiController::class, 'transaksiBaruDetail'])->name('transaksiBaruDetail');
-Route::post('kasir/transaksi-baru/{user}', [TransaksiController::class, 'transaksiBaru'])->name('transaksiBaru');
+Route::post('kasir/transaksi-baru/{user?}', [TransaksiController::class, 'transaksiBaru'])->name('transaksiBaru');
 Route::post('kasir/transaksi-baru-log', [TransaksiController::class, 'transaksiLog'])->name('transaksiLog');
 Route::delete('kasir/transaksi-baru-log', [TransaksiController::class, 'transaksiLogDelete'])->name('transaksiLogDelete');
 Route::post('kasir/transaksi-tambah-qty', [TransaksiController::class, 'tambahQty'])->name('tambahQty');

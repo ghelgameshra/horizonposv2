@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Produk;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Insert\ProdukInsertRequest;
+use App\Http\Requests\Update\UpdateProdukRequest;
 use App\Imports\ProdukImport;
 use App\Models\Produk\Produk;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +23,7 @@ class ProdukController extends Controller
 
         Excel::import(new ProdukImport, $request->file('file_produk'));
         DB::table('produk')->update([
-            'addid' => $request->ip() . "@user" . Auth::user()->id
+            'addid' => env('DB_USERNAME') . "@" . $request->ip() . ':' . Auth::user()->email
         ]);
 
         return response()->json([
@@ -52,7 +53,7 @@ class ProdukController extends Controller
         $lastProduk = DB::table('produk')->orderBy('addno', 'desc')->first();
         $lastAddNo = $lastProduk ? $lastProduk->addno + 1 : 1;
 
-        $data['addid']          = $request->ip();
+        $data['addid']          = env('DB_USERNAME') . "@" . $request->ip() . ':' . Auth::user()->email;
         $data['nama_produk']    = strtoupper($data['nama_produk']);
         $data['plu']            = now()->format('ymd') . str_pad($lastAddNo, 4, '0', STR_PAD_LEFT);
         $data['addno']          = $lastAddNo;
@@ -64,14 +65,14 @@ class ProdukController extends Controller
         ], 200);
     }
 
-    public function activateStatus($plu): JsonResponse
+    public function activateStatus($plu, Request $request): JsonResponse
     {
         $data = Produk::where('plu', $plu)->first();
         $status = !$data->plu_aktif ? 'diaktifkan' : 'dinonaktifkan dan tidak bisa dijual';
 
         $data->update([
             'plu_aktif' => !$data->plu_aktif ? true : false,
-            'addid'     => Auth::user()->email
+            'updid'     => env('DB_USERNAME') . "@" . $request->ip() . ':' . Auth::user()->email
         ]);
 
         $this->setStatusBisaJual($data);
@@ -81,7 +82,7 @@ class ProdukController extends Controller
         ], 200);
     }
 
-    public function activateStatusJual($plu): JsonResponse
+    public function activateStatusJual($plu, Request $request): JsonResponse
     {
         $data = Produk::where('plu', $plu)->first();
 
@@ -91,8 +92,8 @@ class ProdukController extends Controller
 
         // Update data produk
         $data->update([
-            'jual_minus' => $isJualMinus,
-            'addid'      => Auth::user()->email
+            'jual_minus'    => $isJualMinus,
+            'updid'         => env('DB_USERNAME') . "@" . $request->ip() . ':' . Auth::user()->email
         ]);
 
         // Menentukan pesan berdasarkan stok dan jual minus
@@ -119,4 +120,28 @@ class ProdukController extends Controller
         $data->save();
     }
 
+    public function data(String $plu): JsonResponse
+    {
+        $produk = Produk::with('kategori')->where('plu', $plu)->first();
+        return response()->json([
+            'pesan' => 'berhasil ambil detail produk',
+            'data'  => [
+                'produk'    => $produk
+            ]
+        ]);
+    }
+
+    public function update(String $plu, UpdateProdukRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+        $data['nama_produk']  = strtoupper($data['nama_produk']);
+        $data['updid'] = env('DB_USERNAME') . "@" . $request->ip() . ':' . Auth::user()->email;
+
+        $produk = Produk::where('plu', $plu)->first();
+        $produk->update($data);
+
+        return response()->json([
+            'pesan' => 'berhasil ambil detail produk',
+        ]);
+    }
 }
