@@ -25,6 +25,7 @@ class KaryawanInsertRequest extends FormRequest
             'nama_lengkap'          => ['required', 'string', 'max:150'],
             'jabatan'               => ['required', 'string', 'max:150'],
             'tempat_lahir'          => ['required', 'string', 'max:150'],
+            'email'                 => ['required', 'string', 'max:150'],
             'tanggal_lahir'         => ['required', 'date'],
             'alamat_domisili'       => ['required', 'string', 'max:300'],
             'telepone'              => ['required', 'string', 'max:14', 'unique:karyawan,telepone'],

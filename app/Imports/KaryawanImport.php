@@ -26,6 +26,7 @@ class KaryawanImport implements ToModel, WithUpserts, WithHeadingRow, WithBatchI
             'nama_lengkap'          => $row['nama_lengkap'],
             'jabatan'               => $row['jabatan'],
             'tempat_lahir'          => $row['tempat_lahir'],
+            'email'                 => $row['email'],
             'tanggal_lahir'         => \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['tanggal_lahir']),
             'alamat_domisili'       => $row['alamat_domisili'],
             'telepone'              => $row['telepone'],

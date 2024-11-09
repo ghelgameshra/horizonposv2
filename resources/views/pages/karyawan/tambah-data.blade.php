@@ -14,9 +14,9 @@
                         <input class="form-control" type="text" id="nama_lengkap" name="nama_lengkap" value="" placeholder="Johan fernandes" autofocus />
                     </div>
 
-                    <div class="mb-2 col-12 d-none">
-                        <label for="nik" class="form-label">NIK</label>
-                        <input class="form-control" type="text" id="nik" name="nik" value="0" autofocus />
+                    <div class="mb-2 col-12">
+                        <label for="email" class="form-label">Email</label>
+                        <input class="form-control" type="text" id="email" name="email" value="" placeholder="user@email.com" />
                     </div>
 
                     <div class="mb-2 col-12">
@@ -43,6 +43,7 @@
                         <label for="ktp" class="form-label">NIK KTP</label>
                         <input class="form-control" type="text" id="ktp" name="ktp" value="" placeholder="35071234567890" />
                     </div>
+
 
                     <div class="mb-2 col-12">
                         <label for="status_pernikahan" class="form-label">Status Nikah</label>
