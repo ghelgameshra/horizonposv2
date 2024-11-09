@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\KaryawanInsertRequest;
 use App\Imports\KaryawanImport;
 use App\Models\Administrasi\Karyawan;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -35,6 +36,9 @@ class KaryawanController extends Controller
         /* generate NIK by tanggal_lahir */
         $this->generateNik();
 
+        /* create user */
+        $this->createUser();
+
         return response()->json([
             'pesan' => "berhasil insert data karyawan"
         ], 201);
@@ -57,6 +61,7 @@ class KaryawanController extends Controller
 
         Karyawan::create($data);
         $this->generateNik();
+        $this->createUser();
 
         return response()->json([
             'pesan' => 'Data karyawan berhasil ditambah'
@@ -72,6 +77,22 @@ class KaryawanController extends Controller
 
             $value->update([
                 'nik'   =>  $tanggalMasuk->format('Y') . $tanggalLahir->format('ymd')
+            ]);
+        }
+    }
+
+    private function createUser(): void{
+        $notRegisterUser = DB::table('karyawan')
+        ->leftJoin('users', 'karyawan.email', '=', 'users.email')
+        ->select('karyawan.email', 'karyawan.nama_lengkap AS nama')
+        ->whereNull('users.email')
+        ->get();
+
+        foreach ($notRegisterUser as $key => $value) {
+            User::create([
+                'email'     => $value->email,
+                'name'      => $value->nama,
+                'password'  => $value->email
             ]);
         }
     }

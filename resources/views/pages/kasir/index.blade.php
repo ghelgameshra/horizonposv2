@@ -264,7 +264,6 @@ function tambahQty(plu) {
     if (value < oldValue) {
         notification('info', 'Tidak bisa input kurang');
         $(idInput).val(oldValue); // Kembalikan ke nilai sebelumnya
-        hideLoading();
         return;
     }
 

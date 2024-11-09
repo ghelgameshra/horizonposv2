@@ -21,7 +21,7 @@ class KaryawanSeeder extends Seeder
             'jabatan'               => 'IT',
             'tempat_lahir'          => 'JAKARTA',
             'tanggal_lahir'         => '2002-05-22',
-            'alamat_domisili'       => fake()->address(),
+            'alamat_domisili'       => 'Dsn. Kampung Baru Rt 002 Rw 13, Ds. Wonosari, Kec. Wonosari, Kab. Malang',
             'telepone'              => '081249418057',
             'jobdesk'               => 'Developer',
             'agama'                 => 'Islam',

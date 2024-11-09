@@ -16,6 +16,7 @@ class Karyawan extends Model
         'jabatan',
         'tempat_lahir',
         'tanggal_lahir',
+        'email',
         'alamat_domisili',
         'telepone',
         'jobdesk',

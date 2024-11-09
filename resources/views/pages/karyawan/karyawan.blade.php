@@ -114,6 +114,7 @@ $(function(){
 
     $('#addForm').on('submit', function(e){
         e.preventDefault();
+        showLoading();
 
         $.ajax({
             headers: {
@@ -136,22 +137,36 @@ $(function(){
 })
 
 function deleteData(nik){
-    $.ajax({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    Swal.fire({
+        text: "Hapus Data Karyawan ?",
+        showCancelButton: true,
+        confirmButtonText: 'Hapus',
+        customClass: {
+            confirmButton: 'btn btn-danger waves-effect waves-light',
+            cancelButton: 'btn btn-label-danger waves-effect waves-light'
         },
-        url: '{{ route('karyawan.delete') }}?nik=' + nik,
-        type: 'delete',
-        contentType: false,
-        processData: false,
+        buttonsStyling: false
+    }).then(function (result) {
+        if (result.value) {
+            showLoading();
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: '{{ route('karyawan.delete') }}?nik=' + nik,
+                type: 'delete',
+                contentType: false,
+                processData: false,
+            })
+            .done((res) =>{
+                notification('success', res.pesan);
+                reloadDataTable($('.datatables-basic'));
+            })
+            .fail((err) =>{
+                notification('error', err.responseJSON.message);
+            });
+        }
     })
-    .done((res) =>{
-        notification('success', res.pesan);
-        reloadDataTable($('.datatables-basic'));
-    })
-    .fail((err) =>{
-        notification('error', err.responseJSON.message);
-    });
 }
 
 $('#tambahData').on('click', function(){
@@ -162,6 +177,7 @@ $('#tambahData').on('click', function(){
 })
 
 $('#addFormOffCanvas').on('submit', function(e){
+    showLoading();
     e.preventDefault();
     $.ajax({
         headers: {
