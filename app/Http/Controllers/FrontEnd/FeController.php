@@ -62,4 +62,9 @@ class FeController extends Controller
     {
         return view('pages.pesanan.index');
     }
+
+    public function workOrder(): View
+    {
+        return view('pages.work-order.index');
+    }
 }

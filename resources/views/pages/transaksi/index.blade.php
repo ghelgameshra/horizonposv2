@@ -41,13 +41,25 @@
 @push('js')
 <script>
 $(function(){
+    getDataTransaksi();
+})
 
+function getDataTransaksi(){
+    showLoading();
+    $.get(`{{ route('transaksi.list') }}`)
+    .done((response) => {
+        loadDataTransaksi(response.data);
+    })
+    .fail((response) => {
+        notification('error', response.responseJSON.message);
+    })
+}
+
+function loadDataTransaksi(data){
     var table = $('.datatables-basic').DataTable({
         processing: true,
-        paging: true,
-        ajax: {
-            url: '{{ route('transaksi.list') }}',
-        },
+        destroy: true,
+        data: data,
         columns: [
             {
                 data: null, // Tidak ada data yang terkait
@@ -59,13 +71,13 @@ $(function(){
             {data: (data) =>{
                 return `
                 <div class="btn-group">
-                    <button class="btn btn-xs btn-outline-primary" onclick="showDetail('${data.invno}')">
+                    <button class="btn btn-xs btn-outline-primary" onclick="showDetail('${data.invno}')" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Lihat detail transaksi">
                         <i class="ti ti-eye d-block"></i>
                     </button>
-                    <button class="btn btn-xs btn-outline-info" onclick="reprintStruk('${data.invno}')">
+                    <button class="btn btn-xs btn-outline-info" onclick="reprintStruk('${data.invno}')" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Reprint struk">
                         <i class="ti ti-receipt d-block"></i>
                     </button>
-                    <button class="btn btn-xs btn-outline-danger" onclick="cancelSales('${data.invno}')">
+                    <button class="btn btn-xs btn-outline-danger" onclick="cancelSales('${data.invno}')" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Cancel transaksi">
                         <i class="ti ti-circle-minus d-block"></i>
                     </button>
                 </div>
@@ -87,7 +99,10 @@ $(function(){
             {data: (data) =>{return data.kasir.name}},
         ],
     });
-})
+
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+}
 
 function reprintStruk(invno){
     Swal.fire({
@@ -202,7 +217,7 @@ $('#CancelSalesForm').on('submit', function(e){
         }
     })
     .done((response) => {
-        reloadDataTable($('.datatables-basic'));
+        getDataTransaksi();
         $('#modalCancelSales').modal('hide');
         notification('success', response.pesan, null, 2000);
     })

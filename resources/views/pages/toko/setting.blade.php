@@ -7,7 +7,7 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row">
+    <div class="row gap-3">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
@@ -19,6 +19,46 @@
                         <div class="col-12 col-md-4">
                             @include('pages.toko.struk-priview')
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <small class="d-block mb-1 text-muted">Daftar Nomor Rekening</small>
+                    <form action="" id="rekeningForm">
+                        <div class="d-md-flex">
+                            <input name="nama_bank" type="text" class="form-control" placeholder="Nama Bank" autocomplete="off" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Input nama bank">
+                            <input name="nomor_rekening" type="text" class="form-control" placeholder="Nomor Rekening" autocomplete="off" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="input nomor rekening">
+                            <input name="nama_pemilik" type="text" class="form-control" placeholder="Nama Pemilik" autocomplete="off" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Input nama pemilik">
+                            <select name="default" class="form-select" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Setting default rekening">
+                                <option value="">Default ... </option>
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </select>
+                            <button class="btn btn-md btn-outline-success" type="submit" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Tambah rekening">
+                                <i class="ti ti-circle-plus d-block"></i>
+                            </button>
+                        </div>
+                    </form>
+                    <div class="table-responsive">
+                        <table class="table text-nowrap" id="tabelRekening">
+                            <thead>
+                                <tr>
+                                    <th>no</th>
+                                    <th class="text-center">
+                                        <i class="menu-icon tf-icons ti ti-settings"></i>
+                                    </th>
+                                    <th>setting default</th>
+                                    <th>nama bank</th>
+                                    <th>nomor rekening</th>
+                                    <th>nama pemilik</th>
+                                    <th>default rekening</th>
+                                </tr>
+                            </thead>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -95,8 +135,131 @@ $(function(){
     })
 
     getDataToko();
-
+    getDataRekening();
 })
+
+function getDataRekening(){
+    showLoading();
+    $.get(`{{ route('data.rekening') }}`)
+    .done((response) => {
+        loadDataRekening(response.data.rekening);
+    })
+    .fail((response) => {
+        notification('error', response.responseJSON.message);
+    })
+}
+
+function loadDataRekening(rekening){
+    $('#tabelRekening').DataTable({
+        dom: '',
+        ordering: false,
+        destroy: true,
+        data: rekening,
+        columns: [
+            {
+                data: null, // Tidak ada data yang terkait
+                render: function(data, type, row, meta) {
+                    return meta.row + 1; // Menambahkan 1 untuk nomor urut (index mulai dari 0)
+                },
+                title: 'No'
+            },
+            { data: (data) => {
+                return `
+                    <div class="btn-group">
+                    <button class="btn btn-xs btn-outline-danger" onclick="hapusRekening('${data.nomor_rekening}')" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Hapus rekening">
+                        <i class="ti ti-trash d-block"></i>
+                    </button>
+                </div>
+                `;
+            }},
+            {data: (data) =>{
+                return `
+                    <label class="switch switch-square">
+                        <input type="checkbox" class="switch-input" ${ data.default ? 'checked' : '' } onclick="changeStatusDefault('${data.nomor_rekening}')" />
+                        <span class="switch-toggle-slider">
+                            <span class="switch-on"></span>
+                            <span class="switch-off"></span>
+                        </span>
+                    </label>
+                `;
+            }},
+            { data: (data) => {
+                return data.nama_bank;
+            }},
+            { data: (data) => {
+                return data.nomor_rekening;
+            }},
+            { data: (data) => {
+                return data.nama_pemilik;
+            }},
+            { data: (data) => {
+                return data.default ? `<span class="badge text-bg-success w-100">Y</span>` : `<span class="badge text-bg-danger w-100">N</span>`;
+            }},
+        ]
+    });
+
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+}
+
+function hapusRekening(rekening){
+    showLoading();
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: `{{ route('delete.rekening') }}/${rekening}`,
+        type: 'DELETE',
+    })
+    .done((response) => {
+        notification('success', response.pesan);
+        getDataRekening();
+    })
+    .fail((response) => {
+        notification('error', response.responseJSON.message);
+    })
+}
+
+$('#rekeningForm').on('submit', function(e){
+    showLoading();
+    e.preventDefault();
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: `{{ route('create.rekening') }}`,
+        type: 'POST',
+        data: new FormData(this),
+        contentType: false,
+        processData: false,
+    })
+    .done((response) => {
+        notification('success', response.pesan);
+        $(this)[0].reset();
+        getDataRekening();
+    })
+    .fail((response) => {
+        notification('error', response.responseJSON.message);
+    })
+})
+
+function changeStatusDefault(rekening){
+    showLoading();
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: `{{ route('create.rekening') }}/${rekening}`,
+        type: 'PUT',
+    })
+    .done((response) => {
+        notification('success', response.pesan);
+        getDataRekening();
+    })
+    .fail((response) => {
+        notification('error', response.responseJSON.message);
+    })
+}
 
 function getDataToko(){
     $.get(`{{ route('toko.get') }}`)

@@ -109,10 +109,13 @@
                         <div data-i18n="Ambil Pesanan">Ambil Pesanan</div>
                     </a>
                 </li>
-                <li class="menu-item">
-                    <a href="{{ route('produk.index') }}" class="menu-link">
+                <li class="menu-item {{ Request::is('pesanan/work-order') ? 'active' : '' }}">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <div data-i18n="Work Order">Work Order</div>
                     </a>
+                    <ul class="menu-sub" id="work_order_list">
+
+                    </ul>
                 </li>
             </ul>
         </li>
@@ -232,6 +235,27 @@
 
 @push('js')
 <script>
+$(function(){
+    $.get(`{{ route('select2JenisKategori') }}`)
+    .done((response) => {
+        setListCategory(response.data);
+    })
+})
+
+function setListCategory(data){
+    $('#work_order_list').children().remove();
+    data.forEach(element => {
+        let kategori_temp = (element.text).toLowerCase();
+        if(element.text !== 'JASA' && element.text !== 'FINISHING'){
+            $('#work_order_list').append(`<li class="menu-item">
+                <a href="{{ route('workOrder.index') }}?category=${element.id}&name=${kategori_temp}" class="menu-link">
+                    <div class='text-capitalize'>${kategori_temp}</div>
+                </a>
+            </li>`)
+        }
+    });
+}
+
 $('#logOutButton').on('click', function(){
     $('#formLogOut').submit();
 })
