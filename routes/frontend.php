@@ -14,3 +14,4 @@ Route::get('transaksi/pelunasan', [FeController::class, 'pelunasan'])->name('pel
 Route::get('transaksi/reprint-transaksi', [FeController::class, 'reprintTrx'])->name('transaksi.reprint');
 Route::get('pengeluaran', [FeController::class, 'pengeluaran'])->name('pengeluaran.index');
 Route::get('pesanan/pengambilan', [FeController::class, 'pengambilan'])->name('pengambilan.index');
+Route::get('pesanan/work-order', [FeController::class, 'workOrder'])->name('workOrder.index');

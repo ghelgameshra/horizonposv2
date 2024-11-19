@@ -123,13 +123,15 @@ class TransaksiController extends Controller
     */
     private function transaksiLogNew($plu, $idTransaksi): void
     {
-        $produk = Produk::where('plu', $plu)->first();
+        $produk = Produk::with(['kategori'])->where('plu', $plu)->first();
         if($produk->stok <= 0 && !$produk->jual_minus){
             throw new HttpResponseException(response([
                 'message' => "Stok tidak mencukupi. PLU $produk->plu tidak bisa jual minus"
             ], 404));
         }
 
+        $statusOrder = 'DALAM ANTRIAN';
+        if($produk->kategori->nama_kategori === 'JASA') $statusOrder = "SELESAI";
         TransaksiLog::create([
             'id_transaksi'      => $idTransaksi,
             'plu'               => $produk->plu,
@@ -138,7 +140,7 @@ class TransaksiController extends Controller
             'harga_jual'        => $produk->harga_jual,
             'jumlah'            => 1,
             'satuan'            => $produk->satuan,
-            'status_order'      => "DALAM ANTRIAN",
+            'status_order'      => $statusOrder,
             'informasi_stok'    => "stok_awal=$produk->stok|stok_akhir=" . $produk->stok - 1
         ]);
 
@@ -353,28 +355,40 @@ class TransaksiController extends Controller
 
     public function ambil(String $invno): JsonResponse
     {
-        $data = Transaksi::where('invno', $invno)->first();
-        $statusOrder = $data->status_order;
+        $data = Transaksi::where('invno', $invno)->firstOrFail();
 
-        if ($statusOrder === "PESANAN DIAMBIL"){
-            throw new HttpResponseException(response([
-                'message' => "Pesanan dengan no $invno sudah diambil pada $data->updated_at"
+        // Ambil semua log transaksi terlebih dahulu untuk meminimalkan akses ke database
+        $transaksiLogs = TransaksiLog::where('id_transaksi', $data->id)->get();
+        $totalOrder = $transaksiLogs->count();
+        $orderSelesai = $transaksiLogs->where('status_order', 'SELESAI')->count();
+
+        // Periksa jika semua status log telah selesai dan update jika diperlukan
+        if ($totalOrder === $orderSelesai && $data->status_order !== 'SELESAI') {
+            $data->status_order = 'SELESAI';
+            $data->save();
+        }
+
+        // Validasi status order dan pembayaran
+        if ($data->status_order === 'PESANAN DIAMBIL') {
+            throw new HttpResponseException(response()->json([
+                'message' => "Pesanan dengan no $invno sudah diambil pada {$data->updated_at}"
             ], 422));
         }
 
-        if ($data->terima === 0 || $data->status_order === "CANCEL SALES"){
-            throw new HttpResponseException(response([
+        if ($data->terima === 0 || $data->status_order === 'CANCEL SALES') {
+            throw new HttpResponseException(response()->json([
                 'message' => "Pesanan dengan no $invno belum selesai pembayaran/ pesanan cancel"
             ], 422));
         }
 
-        if ($statusOrder !== "SELESAI"){
-            throw new HttpResponseException(response([
-                'message' => "Pesanan dengan no $invno belum selesai, masih " . strtolower($statusOrder)
+        if ($data->status_order !== 'SELESAI') {
+            throw new HttpResponseException(response()->json([
+                'message' => "Pesanan dengan no $invno belum selesai, masih " . strtolower($data->status_order)
             ], 422));
         }
 
-        $data->status_order = "PESANAN DIAMBIL";
+        // Set status order menjadi 'PESANAN DIAMBIL'
+        $data->status_order = 'PESANAN DIAMBIL';
         $data->save();
 
         return response()->json([

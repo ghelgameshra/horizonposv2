@@ -6,8 +6,10 @@ use App\Http\Controllers\Administrasi\KaryawanController;
 use App\Http\Controllers\Administrasi\MemberController;
 use App\Http\Controllers\Administrasi\PengeluaranController;
 use App\Http\Controllers\Administrasi\PrinterController;
+use App\Http\Controllers\Administrasi\RekeningController;
 use App\Http\Controllers\Administrasi\StrukController;
 use App\Http\Controllers\Administrasi\TokoController;
+use App\Http\Controllers\Order\WorkOrderController;
 use App\Http\Controllers\Produk\KategoriController;
 use App\Http\Controllers\Produk\ProdukController;
 use App\Http\Controllers\Produk\PromoController;
@@ -141,3 +143,20 @@ Route::get('antrian-customer', [AntrianController::class, 'data'])->name('antria
 Route::get('antrian-customer-repeat', [AntrianController::class, 'repeat'])->name('antrian.repeat');
 Route::post('antrian-customer', [AntrianController::class, 'create'])->name('antrian.create');
 Route::put('antrian-customer', [AntrianController::class, 'update'])->name('antrian.update');
+
+
+/*
+    Work Order Route
+ */
+Route::get('work-order/data/{categoryId?}/{progress?}', [WorkOrderController::class, 'data'])->name('workOrder.data');
+Route::get('status-order', [WorkOrderController::class, 'statusOrder'])->name('statusOrder');
+Route::put('work-order/next-progress/{id?}/{nextProgress?}', [WorkOrderController::class, 'updateProgress'])->name('workOrder.updateProgress');
+
+/*
+    Rekening Route
+*/
+Route::get('rekening-list', [RekeningController::class, 'data'])->name('data.rekening');
+Route::get('rekening', [RekeningController::class, 'defaultRekening'])->name('get.defaultRekening');
+Route::post('rekening', [RekeningController::class, 'store'])->name('create.rekening');
+Route::put('rekening/{nomorRekening?}', [RekeningController::class, 'update'])->name('update.rekening');
+Route::delete('rekening/{nomorRekening?}', [RekeningController::class, 'destroy'])->name('delete.rekening');
