@@ -416,6 +416,12 @@ class TransaksiController extends Controller
             ], 422));
         }
 
+        if( Carbon::parse($transaksi->tanggal_transaksi) !== now()->format('Y-m-d')){
+            throw new HttpResponseException(response([
+                'message' => "Tidak bisa cancel transaksi yang sudah lebih hari"
+            ], 422));
+        }
+
         $transaksi->update([
             'status_order'  => 'CANCEL SALES',
         ]);

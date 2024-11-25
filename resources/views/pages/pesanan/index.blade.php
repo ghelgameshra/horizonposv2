@@ -60,6 +60,13 @@ $(function(){
     })
     .fail((response) => {
         notification('info', response.responseJSON.message, null, 5000);
+
+        const data = {
+            "nama_bank": "AAAA",
+            "nomor_rekening": "0000-000-000",
+            "nama_pemilik": "LOREM"
+        }
+        localStorage.setItem("defaultRekening", JSON.stringify(data));
     })
 })
 

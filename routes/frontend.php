@@ -15,3 +15,4 @@ Route::get('transaksi/reprint-transaksi', [FeController::class, 'reprintTrx'])->
 Route::get('pengeluaran', [FeController::class, 'pengeluaran'])->name('pengeluaran.index');
 Route::get('pesanan/pengambilan', [FeController::class, 'pengambilan'])->name('pengambilan.index');
 Route::get('pesanan/work-order', [FeController::class, 'workOrder'])->name('workOrder.index');
+Route::get('tutup-harian', [FeController::class, 'tutupHarian'])->name('tutupHarian.index');
