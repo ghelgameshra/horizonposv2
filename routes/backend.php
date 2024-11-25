@@ -9,6 +9,7 @@ use App\Http\Controllers\Administrasi\PrinterController;
 use App\Http\Controllers\Administrasi\RekeningController;
 use App\Http\Controllers\Administrasi\StrukController;
 use App\Http\Controllers\Administrasi\TokoController;
+use App\Http\Controllers\Administrasi\TutupHarianController;
 use App\Http\Controllers\Order\WorkOrderController;
 use App\Http\Controllers\Produk\KategoriController;
 use App\Http\Controllers\Produk\ProdukController;
@@ -160,3 +161,11 @@ Route::get('rekening', [RekeningController::class, 'defaultRekening'])->name('ge
 Route::post('rekening', [RekeningController::class, 'store'])->name('create.rekening');
 Route::put('rekening/{nomorRekening?}', [RekeningController::class, 'update'])->name('update.rekening');
 Route::delete('rekening/{nomorRekening?}', [RekeningController::class, 'destroy'])->name('delete.rekening');
+
+
+/*
+    Route Tutup Harian
+*/
+Route::get('data-tutup-harian', [TutupHarianController::class, 'data'])->name('data.tutupHarian');
+Route::post('tutup-harian', [TutupHarianController::class, 'store'])->name('create.tutupHarian');
+Route::get('check-tutup-harian', [TutupHarianController::class, 'checkHarian'])->name('check.tutupHarian');

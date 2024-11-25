@@ -163,8 +163,8 @@
             </a>
         </li>
 
-        <li class="menu-item">
-            <a href="{{ route('kasir.index') }}" class="menu-link">
+        <li class="menu-item {{ Request::is('tutup-harian') ? 'active' : '' }}">
+            <a href="{{ route('tutupHarian.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-checkup-list"></i>
                 <div data-i18n="Tutup Harian">Tutup Harian</div>
             </a>
@@ -201,6 +201,28 @@
                     <a href="{{ route('member.index') }}" class="menu-link">
                         <div data-i18n="Server">Server</div>
                     </a>
+                </li>
+                <li class="menu-item {{ Request::is('pesanan/work-order') ? 'active' : '' }}">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <div data-i18n="User">User</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item">
+                            <a href="#" class="menu-link">
+                                <div class='text-capitalize'>User Lists</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#" class="menu-link">
+                                <div class='text-capitalize'>User Access</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#" class="menu-link">
+                                <div class='text-capitalize'>User Roles</div>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </li>

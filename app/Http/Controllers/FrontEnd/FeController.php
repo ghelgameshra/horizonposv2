@@ -4,6 +4,7 @@ namespace App\Http\Controllers\FrontEnd;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class FeController extends Controller
@@ -13,8 +14,16 @@ class FeController extends Controller
         return view('pages.produk.produk');
     }
 
-    public function kasir(): View
+    /*
+        Redirect ke halaman tutup harian ketika sudah tutup harian
+    */
+    public function kasir()
     {
+        $tutupHarian = DB::table('tutup_harian')->whereDate('tanggal_harian', now()->format('Y-m-d'))->first();
+        if($tutupHarian){
+            return redirect()->route('tutupHarian.index');
+        }
+
         return view('pages.kasir.index');
     }
 
@@ -66,5 +75,10 @@ class FeController extends Controller
     public function workOrder(): View
     {
         return view('pages.work-order.index');
+    }
+
+    public function tutupHarian(): View
+    {
+        return view('pages.tutup-harian.index');
     }
 }
