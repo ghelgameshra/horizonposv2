@@ -44,13 +44,7 @@
 <script>
 $(function(){
     showLoading();
-    $.get(`{{ route('transaksi.list') }}`)
-    .done((response) => {
-        loadListTransaksi(response.data);
-    })
-    .fail((response) => {
-        notification('error', response.responseJSON.message);
-    })
+    initial();
 
     /* Ambil data rekening */
     $.get(`{{ route('get.defaultRekening') }}`)
@@ -69,6 +63,16 @@ $(function(){
         localStorage.setItem("defaultRekening", JSON.stringify(data));
     })
 })
+
+function initial(){
+    $.get(`{{ route('transaksi.list') }}`)
+    .done((response) => {
+        loadListTransaksi(response.data);
+    })
+    .fail((response) => {
+        notification('error', response.responseJSON.message);
+    })
+}
 
 function loadListTransaksi(data){
     var table = $('.datatables-basic').DataTable({
@@ -265,7 +269,7 @@ function ambilPesanan(){
     })
     .done((res) =>{
         notification('success', res.pesan, null, 3000);
-        $('.datatables-basic').DataTable().ajax.reload();
+        initial();
     })
     .fail((err) =>{
         notification('error', err.responseJSON.message, null, 3500);

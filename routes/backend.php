@@ -10,6 +10,7 @@ use App\Http\Controllers\Administrasi\RekeningController;
 use App\Http\Controllers\Administrasi\StrukController;
 use App\Http\Controllers\Administrasi\TokoController;
 use App\Http\Controllers\Administrasi\TutupHarianController;
+use App\Http\Controllers\Auth\UserController;
 use App\Http\Controllers\Order\WorkOrderController;
 use App\Http\Controllers\Produk\KategoriController;
 use App\Http\Controllers\Produk\ProdukController;
@@ -169,3 +170,9 @@ Route::delete('rekening/{nomorRekening?}', [RekeningController::class, 'destroy'
 Route::get('data-tutup-harian', [TutupHarianController::class, 'data'])->name('data.tutupHarian');
 Route::post('tutup-harian', [TutupHarianController::class, 'store'])->name('create.tutupHarian');
 Route::get('check-tutup-harian', [TutupHarianController::class, 'checkHarian'])->name('check.tutupHarian');
+
+Route::get('user', [UserController::class, 'get'])->name('get.user');
+Route::put('user-table/{id?}', [UserController::class, 'changeTable'])->name('changeTable.user');
+Route::get('role-permission/{roleId?}', [UserController::class, 'rolePermission'])->name('get.rolePermission');
+Route::put('role-permission/{roleId?}', [UserController::class, 'updatePermissions'])->name('updatePermissions');
+Route::put('user-role/{userId?}', [UserController::class, 'updateUserRole'])->name('updateUserRole');
