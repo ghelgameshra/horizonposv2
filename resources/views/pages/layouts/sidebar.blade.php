@@ -31,6 +31,7 @@
     <div class="menu-inner-shadow"></div>
 
     <ul class="menu-inner py-1">
+        @can('show dashboard')
         <!-- Dashboards -->
         <li class="menu-item {{ Request::is('dashboard') ? 'active' : '' }}">
             <a href="{{ route('dashboard') }}" class="menu-link">
@@ -38,15 +39,19 @@
                 <div data-i18n="Dashboards">Dashboards</div>
             </a>
         </li>
+        @endcan
 
+        @can('show kasir')
         <li class="menu-item">
             <a href="{{ route('kasir.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-calculator"></i>
                 <div data-i18n="Kasir">Kasir</div>
             </a>
         </li>
+        @endcan
 
         <!-- Layouts -->
+        @can('show master')
         <li class="menu-item {{ Request::is('*master/*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ti ti-database"></i>
@@ -54,29 +59,39 @@
             </a>
 
             <ul class="menu-sub">
+                @can('show produk')
                 <li class="menu-item {{ Request::is('master/produk') ? 'active' : '' }}">
                     <a href="{{ route('produk.index') }}" class="menu-link">
                         <div data-i18n="Produk & Kategori">Produk & Kategori</div>
                     </a>
                 </li>
+                @endcan
+                @can('show member')
                 <li class="menu-item {{ Request::is('master/member') ? 'active' : '' }}">
                     <a href="{{ route('member.index') }}" class="menu-link">
                         <div data-i18n="Member">Member</div>
                     </a>
                 </li>
+                @endcan
+                @can('show promosi')
                 <li class="menu-item {{ Request::is('master/promosi') ? 'active' : '' }}">
                     <a href="{{ route('promosi.index') }}" class="menu-link">
                         <div data-i18n="Promosi">Promosi</div>
                     </a>
                 </li>
+                @endcan
+                @can('show karyawan')
                 <li class="menu-item {{ Request::is('master/karyawan') ? 'active' : '' }}">
                     <a href="{{ route('karyawan.index') }}" class="menu-link">
                         <div data-i18n="Pegawai">Pegawai</div>
                     </a>
                 </li>
+                @endcan
             </ul>
         </li>
+        @endcan
 
+        @can('show transaksi')
         <li class="menu-item {{ Request::is('*transaksi/*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ti ti-report-analytics"></i>
@@ -84,19 +99,25 @@
             </a>
 
             <ul class="menu-sub">
+                @can('show pelunasan')
                 <li class="menu-item {{ Request::is('transaksi/pelunasan') ? 'active' : '' }}">
                     <a href="{{ route('pelunasan.index') }}" class="menu-link">
                         <div data-i18n="Pelunasan">Pelunasan</div>
                     </a>
                 </li>
+                @endcan
+                @can('show reprint')
                 <li class="menu-item {{ Request::is('transaksi/reprint-transaksi') ? 'active' : '' }}">
                     <a href="{{ route('transaksi.reprint') }}" class="menu-link">
                         <div data-i18n="Reprint & Cancel">Reprint & Cancel</div>
                     </a>
                 </li>
+                @endcan
             </ul>
         </li>
+        @endcan
 
+        @can('show pesanan')
         <li class="menu-item {{ Request::is('*pesanan/*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ti ti-arrows-sort"></i>
@@ -104,11 +125,14 @@
             </a>
 
             <ul class="menu-sub">
+                @can('show ambil pesanan')
                 <li class="menu-item {{ Request::is('pesanan/pengambilan') ? 'active' : '' }}">
                     <a href="{{ route('pengambilan.index') }}" class="menu-link">
                         <div data-i18n="Ambil Pesanan">Ambil Pesanan</div>
                     </a>
                 </li>
+                @endcan
+                @can('show work order')
                 <li class="menu-item {{ Request::is('pesanan/work-order') ? 'active' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <div data-i18n="Work Order">Work Order</div>
@@ -117,10 +141,12 @@
 
                     </ul>
                 </li>
+                @endcan
             </ul>
         </li>
+        @endcan
 
-
+        @can('show laporan')
         <li class="menu-item">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ti ti-report"></i>
@@ -155,26 +181,32 @@
                 </li>
             </ul>
         </li>
+        @endcan
 
+        @can('show pengeluaran')
         <li class="menu-item {{ Request::is('pengeluaran') ? 'active' : '' }}">
             <a href="{{ route('pengeluaran.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-coins"></i>
                 <div data-i18n="Pengeluaran">Pengeluaran</div>
             </a>
         </li>
+        @endcan
 
+        @can('show tutup harian')
         <li class="menu-item {{ Request::is('tutup-harian') ? 'active' : '' }}">
             <a href="{{ route('tutupHarian.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-checkup-list"></i>
                 <div data-i18n="Tutup Harian">Tutup Harian</div>
             </a>
         </li>
+        @endcan
 
         <!-- Apps & Pages -->
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text" data-i18n="Apps & Pages">Apps &amp; Pages</span>
         </li>
 
+        @can('show pengaturan')
         <li class="menu-item {{ Request::is('*pengaturan/*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ti ti-settings"></i>
@@ -182,50 +214,42 @@
             </a>
 
             <ul class="menu-sub">
+                @can('show lisensi')
                 <li class="menu-item">
                     <a href="{{ route('member.index') }}" class="menu-link">
                         <div data-i18n="Lisensi">Lisensi</div>
                     </a>
                 </li>
+                @endcan
                 <li class="menu-item {{ Request::is('pengaturan/toko') ? 'active open' : '' }}">
                     <a href="{{ route('toko.index') }}" class="menu-link">
                         <div data-i18n="Toko">Toko</div>
                     </a>
                 </li>
+                @can('show printer')
                 <li class="menu-item {{ Request::is('pengaturan/printer') ? 'active open' : '' }}">
                     <a href="{{ route('printer.index') }}" class="menu-link">
                         <div data-i18n="Printer">Printer</div>
                     </a>
                 </li>
+                @endcan
+                @can('show server')
                 <li class="menu-item">
                     <a href="{{ route('member.index') }}" class="menu-link">
                         <div data-i18n="Server">Server</div>
                     </a>
                 </li>
-                <li class="menu-item {{ Request::is('pesanan/work-order') ? 'active' : '' }}">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                @endcan
+                @can('show user')
+                <li class="menu-item {{ Request::is('pengaturan/user') ? 'active open' : '' }}">
+                    <a href="{{ route('user.index') }}" class="menu-link">
                         <div data-i18n="User">User</div>
                     </a>
-                    <ul class="menu-sub">
-                        <li class="menu-item">
-                            <a href="#" class="menu-link">
-                                <div class='text-capitalize'>User Lists</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="#" class="menu-link">
-                                <div class='text-capitalize'>User Access</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="#" class="menu-link">
-                                <div class='text-capitalize'>User Roles</div>
-                            </a>
-                        </li>
-                    </ul>
                 </li>
+                @endcan
             </ul>
         </li>
+        @endcan
 
         <li class="menu-item">
             <a href="app-email.html" class="menu-link">
@@ -241,11 +265,10 @@
             </a>
         </li>
 
-
         <li class="menu-header small text-uppercase {{ Request::is('kasir') ? '' : 'd-none' }}">
             <span class="menu-header-text" data-i18n="User">User</span>
         </li>
-        <li class="menu-item {{ Request::is('kasir') ? '' : 'd-none' }}">
+        <li class="menu-item {{ Request::is('kasir') || Request::is('user-permission-failed') ? '' : 'd-none' }}">
             <a href="#" class="menu-link" id="logOutButton">
                 <i class="menu-icon tf-icons ti ti-logout"></i>
                 <div data-i18n="Log Out">Log Out</div>

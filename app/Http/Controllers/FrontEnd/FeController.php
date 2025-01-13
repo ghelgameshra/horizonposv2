@@ -81,4 +81,9 @@ class FeController extends Controller
     {
         return view('pages.tutup-harian.index');
     }
+
+    public function user(): View
+    {
+        return view('pages.user.index');
+    }
 }

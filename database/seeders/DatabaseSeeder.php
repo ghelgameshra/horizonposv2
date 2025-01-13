@@ -27,6 +27,9 @@ class DatabaseSeeder extends Seeder
             TokoSeeder::class,
             UserApiSeeder::class,
             UserSeeder::class,
+
+            PermissionsSeeder::class,
+            RolesSeeder::class
         ]);
     }
 }
