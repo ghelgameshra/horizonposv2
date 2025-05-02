@@ -28,7 +28,7 @@
                                 <button class="btn btn-sm flex-fill btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasEnd" aria-controls="offcanvasEnd" id="tambahData">
                                     + Karyawan
                                 </button>
-                                <button class="btn btn-sm flex-fill btn-success">Export Excel</button>
+                                <a class="btn btn-sm flex-fill btn-success" href="{{ route('karyawan.export') }}">Export</a>
                                 <button class="btn btn-sm flex-fill btn-warning dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Download
                                 </button>
@@ -94,7 +94,7 @@ $(function(){
             {data: (data) =>{
                 return `
                 <div class="btn-group">
-                    <button class="btn btn-xs btn-outline-warning" onclick="editData('${data.nik}')">
+                    <button class="btn btn-xs btn-outline-warning" data-bs-toggle="offcanvas" data-bs-target="#offcanvasEnd" aria-controls="offcanvasEnd" onclick="showDetail('${data.nik}')">
                         <i class="ti ti-edit d-block"></i>
                     </button>
                     <button class="btn btn-xs btn-outline-danger" onclick="deleteData('${data.nik}')">
@@ -129,6 +129,7 @@ $(function(){
         .done((res) =>{
             notification('success', res.pesan);
             reloadDataTable($('.datatables-basic'));
+            $('#addForm')[0].reset();
         })
         .fail((err) =>{
             notification('error', err.responseJSON.message);
@@ -183,7 +184,7 @@ $('#addFormOffCanvas').on('submit', function(e){
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
-        url: '{{ route('karyawan.insert') }}',
+        url: `{{ route('karyawan.insert') }}`,
         type: 'POST',
         data: new FormData(this),
         contentType: false,
@@ -205,16 +206,59 @@ $('#addFormOffCanvas').on('submit', function(e){
     });
 });
 
-function editData(nik){
+
+async function showDetail(nik){
     notification('info', 'sedang ambil data');
 
-    $.get(`{{ url('karyawan/${nik}') }}`)
-    .done((res) => {
-        console.log(res.data);
-    })
-    .fail((err) => {
-        notification('error', err.responseJSON.message);
-    })
+    try {
+        const response = await $.get(`{{ url('karyawan/${nik}') }}`);
+        if(!response) {
+            notification('error', response.responseJSON.message);
+        }
+
+        showModal(response);
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+function showModal(data) {
+    const employee = data.data;
+    showSelect2('jabatan', 'addFormOffCanvas', `{{ route('select2Jabatan') }}`);
+    showSelect2('agama', 'addFormOffCanvas', `{{ route('select2Agama') }}`);
+    showSelect2('pendidikan_terakhir', 'addFormOffCanvas', `{{ route('select2Pendidikan') }}`);
+
+    $('#offcanvasEndLabel').text("Ubah Data Karyawan");
+    $('#addFormOffCanvas input[name="nama_lengkap"]').val(employee.nama_lengkap);
+    $('#addFormOffCanvas input[name="email"]').val(employee.email);
+    $('#addFormOffCanvas input[name="nik"]').val(employee.nik);
+    $('#addFormOffCanvas input[name="tempat_lahir"]').val(employee.tempat_lahir);
+    $('#addFormOffCanvas input[name="tanggal_lahir"]').val(employee.tanggal_lahir);
+    $('#addFormOffCanvas textarea[name="alamat_domisili"]').val(employee.alamat_domisili);
+    $('#addFormOffCanvas input[name="telepone"]').val(employee.telepone);
+    $('#addFormOffCanvas input[name="jobdesk"]').val(employee.jobdesk);
+    $('#addFormOffCanvas input[name="ktp"]').val(employee.ktp);
+    $('#addFormOffCanvas select[name="status_pernikahan"]').val(employee.status_pernikahan);
+    $('#addFormOffCanvas input[name="tanggal_masuk"]').val(employee.tanggal_masuk);
+
+    // Jika select-nya pakai Select2
+    setSelectValue('#jabatan', employee.jabatan);
+    setSelectValue('#agama', employee.agama);
+    setSelectValue('#pendidikan_terakhir', employee.pendidikan_terakhir);
+
+    $('#submitAddForm').text("Ubah Data");
+}
+
+function setSelectValue(selector, value) {
+    const select = $(selector);
+
+    // Jika opsi belum tersedia, tambahkan manual
+    if (select.find(`option[value="${value}"]`).length === 0 && value) {
+        select.append(`<option value="${value}" selected>${value}</option>`);
+    }
+
+    select.val(value).trigger('change');
 }
 </script>
 @endpush

@@ -17,6 +17,7 @@ class KaryawanSeeder extends Seeder
         DB::table('karyawan')->truncate();
         Karyawan::create([
             'nama_lengkap'          => 'RIZKY ANDRIAWAN',
+            'email'                 => 'rizkyandriawan33478@gmail.com',
             'nik'                   => '2015451256',
             'jabatan'               => 'IT',
             'tempat_lahir'          => 'JAKARTA',

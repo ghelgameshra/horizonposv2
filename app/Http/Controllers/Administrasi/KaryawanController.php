@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Administrasi;
 
+use App\Exports\KaryawanExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\KaryawanInsertRequest;
 use App\Imports\KaryawanImport;
@@ -59,14 +60,31 @@ class KaryawanController extends Controller
         $data['nama_lengkap'] = strtoupper($data['nama_lengkap']);
         $data['alamat_domisili'] = ucwords($data['alamat_domisili']);
 
-        Karyawan::create($data);
-        $this->generateNik();
-        $this->createUser();
+        // Update jika nik sudah ada, insert jika belum
+        $karyawan = Karyawan::updateOrCreate([
+            'nik'   => $data['nik'],
+            'ktp'   => $data['ktp'],
+            'telepone' => $data['telepone']
+        ], // Kondisi pencarian
+            $data                     // Data untuk insert atau update
+        );
+
+        // Hanya generate nik dan user saat insert
+        if ($karyawan->wasRecentlyCreated) {
+            $this->generateNik();
+            $this->createUser();
+            $pesan = 'Data karyawan berhasil ditambah';
+            $status = 201;
+        } else {
+            $pesan = 'Data karyawan berhasil diupdate';
+            $status = 200;
+        }
 
         return response()->json([
-            'pesan' => 'Data karyawan berhasil ditambah'
-        ], 201);
+            'pesan' => $pesan
+        ], $status);
     }
+
 
     private function generateNik(): void
     {
@@ -81,10 +99,11 @@ class KaryawanController extends Controller
         }
     }
 
-    private function createUser(): void{
+    private function createUser(): void
+    {
         $notRegisterUser = DB::table('karyawan')
         ->leftJoin('users', 'karyawan.email', '=', 'users.email')
-        ->select('karyawan.email', 'karyawan.nama_lengkap AS nama')
+        ->select('karyawan.email', 'karyawan.nama_lengkap AS nama', 'karyawan.nik', 'karyawan.jobdesk')
         ->whereNull('users.email')
         ->get();
 
@@ -92,7 +111,9 @@ class KaryawanController extends Controller
             User::create([
                 'email'     => $value->email,
                 'name'      => $value->nama,
-                'password'  => $value->email
+                'password'  => $value->email,
+                'nik'       => $value->nik,
+                'job'       => $value->jobdesk
             ]);
         }
     }
@@ -105,5 +126,10 @@ class KaryawanController extends Controller
             'pesan' => "berhasil ambil data detail karyawan nik $nik",
             'data'  => $data
         ], 200);
+    }
+
+    public function export()
+    {
+        return Excel::download(new KaryawanExport, "employees_" . now()->format('Y_m_d_h_i_s') . ".xlsx");
     }
 }

@@ -416,9 +416,10 @@ class TransaksiController extends Controller
             ], 422));
         }
 
-        if( Carbon::parse($transaksi->tanggal_transaksi) !== now()->format('Y-m-d')){
+        if (!Carbon::parse($transaksi->tanggal_transaksi)->isSameDay(now())) {
             throw new HttpResponseException(response([
-                'message' => "Tidak bisa cancel transaksi yang sudah lebih hari"
+                'message' => "Tidak bisa cancel transaksi yang sudah lebih hari",
+                'data'    => $transaksi->tanggal_transaksi . " | " . now()->toDateString()
             ], 422));
         }
 

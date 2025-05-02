@@ -65,7 +65,7 @@
                                 </div>
                                 <div class="flex-grow-1">
                                     <span class="fw-medium d-block">{{ auth()->user()->name }}</span>
-                                    <small class="text-muted">Admin</small>
+                                    <small class="text-muted">{{ auth()->user()->job }}</small>
                                 </div>
                             </div>
                         </a>
@@ -74,16 +74,16 @@
                         <div class="dropdown-divider"></div>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="{{ route('profile.edit') }}">
-                            <i class="ti ti-user-check me-2 ti-sm"></i>
-                            <span class="align-middle">My Profile</span>
+                        <a class="dropdown-item" href="#">
+                            <i class="ti ti-id me-2 ti-sm"></i>
+                            <span class="align-middle">{{ auth()->user()->nik }}</span>
                         </a>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                        <p class="dropdown-item">
                             <i class="ti ti-settings me-2 ti-sm"></i>
                             <span class="align-middle">Settings</span>
-                        </a>
+                        </p>
                     </li>
                     <li>
                         <div class="dropdown-divider"></div>

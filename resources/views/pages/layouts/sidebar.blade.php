@@ -19,7 +19,7 @@
                         fill="#7367F0" />
                 </svg>
             </span>
-            <span class="app-brand-text demo menu-text fw-bold">Vuexy</span>
+            <span class="app-brand-text demo menu-text fw-bold">POS APP</span>
         </a>
 
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
@@ -214,13 +214,6 @@
             </a>
 
             <ul class="menu-sub">
-                @can('show lisensi')
-                <li class="menu-item">
-                    <a href="{{ route('member.index') }}" class="menu-link">
-                        <div data-i18n="Lisensi">Lisensi</div>
-                    </a>
-                </li>
-                @endcan
                 <li class="menu-item {{ Request::is('pengaturan/toko') ? 'active open' : '' }}">
                     <a href="{{ route('toko.index') }}" class="menu-link">
                         <div data-i18n="Toko">Toko</div>
@@ -230,13 +223,6 @@
                 <li class="menu-item {{ Request::is('pengaturan/printer') ? 'active open' : '' }}">
                     <a href="{{ route('printer.index') }}" class="menu-link">
                         <div data-i18n="Printer">Printer</div>
-                    </a>
-                </li>
-                @endcan
-                @can('show server')
-                <li class="menu-item">
-                    <a href="{{ route('member.index') }}" class="menu-link">
-                        <div data-i18n="Server">Server</div>
                     </a>
                 </li>
                 @endcan
@@ -251,19 +237,19 @@
         </li>
         @endcan
 
-        <li class="menu-item">
+        {{-- <li class="menu-item">
             <a href="app-email.html" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-lifebuoy"></i>
                 <div data-i18n="Bantuan">Bantuan</div>
             </a>
-        </li>
+        </li> --}}
 
-        <li class="menu-item">
+        {{-- <li class="menu-item">
             <a href="app-chat.html" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-messages"></i>
                 <div data-i18n="Chat">Chat</div>
             </a>
-        </li>
+        </li> --}}
 
         <li class="menu-header small text-uppercase {{ Request::is('kasir') ? '' : 'd-none' }}">
             <span class="menu-header-text" data-i18n="User">User</span>
