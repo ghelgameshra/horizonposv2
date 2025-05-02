@@ -30,10 +30,10 @@ class KaryawanImport implements ToModel, WithUpserts, WithHeadingRow, WithBatchI
             'tanggal_lahir'         => \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['tanggal_lahir']),
             'alamat_domisili'       => $row['alamat_domisili'],
             'telepone'              => $row['telepone'],
-            'jobdesk'               => $row['jobdesk'],
-            'agama'                 => $row['agama'],
+            'jobdesk'               => strtoupper($row['jobdesk']),
+            'agama'                 => strtoupper($row['agama']),
             'ktp'                   => $row['ktp'],
-            'status_pernikahan'     => $row['status_pernikahan'],
+            'status_pernikahan'     => strtoupper($row['status_pernikahan']) === 'Y' ? true : false,
             'pendidikan_terakhir'   => $row['pendidikan_terakhir'],
             'tanggal_masuk'         => \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['tanggal_masuk']),
         ]);

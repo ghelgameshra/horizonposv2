@@ -9,6 +9,7 @@
             <hr>
             <div class="offcanvas-body mx-0 flex-grow-0">
                 <form action="" id="addFormOffCanvas" method="POST" style="margin-top: -20px" class="needs-validation">
+                    <input class="form-control" type="text" id="nik" name="nik" value="" hidden />
                     <div class="mb-2 col-12">
                         <label for="nama_lengkap" class="form-label">Nama Lengkap</label>
                         <input class="form-control" type="text" id="nama_lengkap" name="nama_lengkap" value="" placeholder="Johan fernandes" autofocus />
@@ -77,7 +78,7 @@
                         </select>
                     </div>
                     <div class="btn-group d-flex">
-                        <button type="submit" class="btn btn-sm flex-fill btn-primary d-grid w-100">+ Tambah</button>
+                        <button type="submit" class="btn btn-sm flex-fill btn-primary d-grid w-100" id="submitAddForm">+ Tambah</button>
                         <button type="button" class="btn btn-sm flex-fill btn-label-secondary d-grid w-100" data-bs-dismiss="offcanvas">
                             Cancel
                         </button>

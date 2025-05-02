@@ -65,6 +65,7 @@ Route::delete('promo', [PromoController::class, 'destroy'])->name('promo.delete'
     Karyawan Route
 */
 Route::get('karyawan/{nik}', [KaryawanController::class, 'detail'])->name('karyawan.detail');
+Route::get('karyawan-export', [KaryawanController::class, 'export'])->name('karyawan.export');
 Route::post('karyawan', [KaryawanController::class, 'upsert'])->name('karyawan.upsert');
 Route::post('karyawan-baru', [KaryawanController::class, 'insert'])->name('karyawan.insert');
 Route::delete('karyawan', [KaryawanController::class, 'delete'])->name('karyawan.delete');
