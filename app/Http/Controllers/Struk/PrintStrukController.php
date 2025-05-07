@@ -33,6 +33,12 @@ class PrintStrukController extends Controller
         ->where('jenis_printer', 'STRUK')
         ->where('default_printer', true)->first();
 
+        if($this->transaksi->status_order === "CANCEL SALES") {
+            throw new HttpResponseException(response([
+                'message'   => 'Pesanan cancel sales tidak bisa print struk'
+            ], 422));
+        }
+
         try {
             $protocol = $this->printerStruk->protocol_printer;
             $username = Crypt::decryptString($this->printerStruk->username_printer);
@@ -57,7 +63,6 @@ class PrintStrukController extends Controller
     public function print(): void
     {
         $this->printer = new Printer($this->connector);
-        $this->printer->cut();
         $header = $this->settingStruk->where('key', 'HEDS')->first();
         $body = $this->settingStruk->where('key', 'ISIS')->first();
         $footer = $this->settingStruk->where('key', 'FOOS')->first();
@@ -86,7 +91,6 @@ class PrintStrukController extends Controller
 
     private function printBody(): void
     {
-        $this->printer->text("\n");
         $this->printer->text("================================\n");
         $this->printer->setJustification(Printer::JUSTIFY_LEFT);
         $this->printer->text( str_pad("Tanggal", 10, ' ', STR_PAD_RIGHT) );
@@ -118,11 +122,10 @@ class PrintStrukController extends Controller
         $subtotal = number_format($this->transaksi->subtotal, 0, ',', '.');
         $diskon = number_format($this->transaksi->diskon, 0, ',', '.');
         $total = number_format($this->transaksi->total, 0, ',', '.');
-        $terima = number_format(($this->transaksi->terima - $this->transaksi->uang_muka), 0, ',', '.');
+        $terima = number_format(($this->transaksi->uang_muka - $this->transaksi->total), 0, ',', '.');
         $kembali = number_format($this->transaksi->kembali, 0, ',', '.');
         $uangMuka = number_format($this->transaksi->uang_muka, 0, ',', '.');
 
-        $this->printer->text("\n");
         $this->printer->text("================================\n");
         $this->printer->setEmphasis(true);
         $this->printer->text( str_pad("Subtotal", 10, ' ', STR_PAD_RIGHT) );
@@ -136,16 +139,42 @@ class PrintStrukController extends Controller
         $this->printer->text( str_pad("Total", 10, ' ', STR_PAD_RIGHT) );
         $this->printer->text(": Rp." . $total . "\n");
 
-        if($this->transaksi->uang_muka > 0){
+        if($this->transaksi->uang_muka > 0 && $this->transaksi->tipe_bayar_pelunasan === null){
             $this->printer->text( str_pad("DP", 10, ' ', STR_PAD_RIGHT) );
             $this->printer->text(": Rp." . $uangMuka . "\n");
             $this->printer->text( str_pad("Tipe Bayar", 10, ' ', STR_PAD_RIGHT) );
             $this->printer->text(": " . $this->transaksi->tipe_bayar . "\n");
             $this->printer->text( str_pad("Pelunasan", 10, ' ', STR_PAD_RIGHT) );
             $this->printer->text(": Rp." . $terima . "\n");
+            $this->printer->text( str_pad("status", 10, ' ', STR_PAD_RIGHT) );
+            $this->printer->text(": " . "BELUM LUNAS" . "\n");
+        }
+
+        $kurangBayar = number_format($this->transaksi->uang_muka - $this->transaksi->total, 0, ',', '.');
+        $kembaliKurangBayar = number_format($this->transaksi->terima - $this->transaksi->total, 0, ',', '.');
+        if($this->transaksi->uang_muka > 0 && $this->transaksi->terima > 0){
+            $terimaPelunasan = number_format($this->transaksi->terima - $this->transaksi->uang_muka, 0, ',', '.');
+
+            $this->printer->text( str_pad("DP", 10, ' ', STR_PAD_RIGHT) );
+            $this->printer->text(": Rp." . $uangMuka . "\n");
             $this->printer->text( str_pad("Tipe Bayar", 10, ' ', STR_PAD_RIGHT) );
+            $this->printer->text(": " . $this->transaksi->tipe_bayar . "\n");
+            $this->printer->text( str_pad("Pelunasan", 10, ' ', STR_PAD_RIGHT) );
+            $this->printer->text(": Rp." . $kurangBayar . "\n");
+            $this->printer->text( str_pad("Terima", 10, ' ', STR_PAD_RIGHT) );
+            $this->printer->text(": Rp." . $terimaPelunasan . "\n");
+            $this->printer->text( str_pad("Kembali", 10, ' ', STR_PAD_RIGHT) );
+            $this->printer->text(": Rp." . $kembaliKurangBayar . "\n");
+            $this->printer->text( str_pad("Pelunasan", 10, ' ', STR_PAD_RIGHT) );
             $this->printer->text(": " . $this->transaksi->tipe_bayar_pelunasan . "\n");
-        } else {
+            $this->printer->text( str_pad("status", 10, ' ', STR_PAD_RIGHT) );
+            $this->printer->text(": " . "LUNAS" . "\n");
+        }
+
+        if($this->transaksi->uang_muka === 0 && $this->transaksi->terima > 0) {
+            $terima = number_format(($this->transaksi->terima), 0, ',', '.');
+            $kembali = number_format(($this->transaksi->terima - $this->transaksi->total), 0, ',', '.');
+
             $this->printer->text( str_pad("Terima", 10, ' ', STR_PAD_RIGHT) );
             $this->printer->text(": Rp." . $terima . "\n");
             $this->printer->text( str_pad("Kembali", 10, ' ', STR_PAD_RIGHT) );
@@ -155,7 +184,6 @@ class PrintStrukController extends Controller
         }
         $this->printer->setEmphasis(false);
         $this->printer->text("================================\n");
-        $this->printer->text("\n");
     }
 
     private function printFooter(): void
@@ -181,7 +209,7 @@ class PrintStrukController extends Controller
     {
         $text = $this->toko->qr_wa_text;
         if(!$this->toko->qr_wa_text){
-            $text = 'https://wa.me/qr/JVD7HJNTTDKMI1';
+            $text = 'https://wa.me/qr/QPPU3B7C6PMUM1';
         }
         $this->printer->setJustification(Printer::JUSTIFY_CENTER);
         $this->printer -> qrCode($text);

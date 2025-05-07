@@ -15,6 +15,7 @@ use App\Http\Controllers\Order\WorkOrderController;
 use App\Http\Controllers\Produk\KategoriController;
 use App\Http\Controllers\Produk\ProdukController;
 use App\Http\Controllers\Produk\PromoController;
+use App\Http\Controllers\Produk\SatuanJualController;
 use App\Http\Controllers\Select2\Select2Controller;
 use App\Http\Controllers\Struk\TestPrinterController;
 use App\Http\Controllers\Transaksi\PelunasanController;
@@ -76,8 +77,9 @@ Route::delete('karyawan', [KaryawanController::class, 'delete'])->name('karyawan
 Route::get('kasir/transaksi-baru-detail', [TransaksiController::class, 'transaksiBaruDetail'])->name('transaksiBaruDetail');
 Route::post('kasir/transaksi-baru/{user?}', [TransaksiController::class, 'transaksiBaru'])->name('transaksiBaru');
 Route::post('kasir/transaksi-baru-log', [TransaksiController::class, 'transaksiLog'])->name('transaksiLog');
-Route::delete('kasir/transaksi-baru-log', [TransaksiController::class, 'transaksiLogDelete'])->name('transaksiLogDelete');
-Route::post('kasir/transaksi-tambah-qty', [TransaksiController::class, 'tambahQty'])->name('tambahQty');
+Route::delete('kasir/transaksi-baru-log/{id?}', [TransaksiController::class, 'transaksiLogDelete'])->name('transaksiLogDelete');
+Route::put('kasir/transaksi-tambah-qty/{id?}/{plu?}/{qty?}', [TransaksiController::class, 'tambahQty'])->name('tambahQty');
+Route::put('kasir/transaksi-addfilesize/{id_transaksi_log?}', [TransaksiController::class, 'addfilesize'])->name('addfilesize');
 Route::post('kasir/transaksi-cek-promo', [TransaksiController::class, 'cekPromo'])->name('cekPromo');
 Route::put('kasir/transaksi-baru', [TransaksiController::class, 'transaksiSelesai'])->name('transaksiSelesai');
 
@@ -177,3 +179,11 @@ Route::put('user-table/{id?}', [UserController::class, 'changeTable'])->name('ch
 Route::get('role-permission/{roleId?}', [UserController::class, 'rolePermission'])->name('get.rolePermission');
 Route::put('role-permission/{roleId?}', [UserController::class, 'updatePermissions'])->name('updatePermissions');
 Route::put('user-role/{userId?}', [UserController::class, 'updateUserRole'])->name('updateUserRole');
+
+/*
+    Setting satuan jual
+*/
+Route::get('produk-satuan-jual', [SatuanJualController::class, 'data'])->name('satuanJual.data');
+Route::post('produk-satuan-jual', [SatuanJualController::class, 'insert'])->name('satuanJual.insert');
+Route::delete('produk-satuan-jual/{id?}', [SatuanJualController::class, 'destroy'])->name('satuanJual.destroy');
+Route::put('produk-satuan-jual/update-status/{id?}/{namaConfig?}', [SatuanJualController::class, 'updateConfig'])->name('satuanJual.updateConfig');

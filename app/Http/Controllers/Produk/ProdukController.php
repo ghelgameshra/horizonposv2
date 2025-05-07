@@ -26,6 +26,8 @@ class ProdukController extends Controller
             'addid' => env('DB_USERNAME') . "@" . $request->ip() . ':' . Auth::user()->email
         ]);
 
+        DB::table('INSERT IGNORE INTO ref_jenis_satuan (nama_satuan, created_at, updated_at) SELECT DISTINCT satuan, now(), now() FROM produk WHERE satuan IS NOT NULL');
+
         return response()->json([
             'pesan' => "berhasil tambah data produk"
         ], 200);
@@ -59,6 +61,7 @@ class ProdukController extends Controller
         $data['addno']          = $lastAddNo;
 
         Produk::create($data);
+        DB::table('INSERT IGNORE INTO ref_jenis_satuan (nama_satuan, created_at, updated_at) SELECT DISTINCT satuan, now(), now() FROM produk WHERE satuan IS NOT NULL');
 
         return response()->json([
             'pesan' => 'data produk berhasil ditambah'
@@ -139,6 +142,7 @@ class ProdukController extends Controller
 
         $produk = Produk::where('plu', $plu)->first();
         $produk->update($data);
+        DB::table('INSERT IGNORE INTO ref_jenis_satuan (nama_satuan, created_at, updated_at) SELECT DISTINCT satuan, now(), now() FROM produk WHERE satuan IS NOT NULL');
 
         return response()->json([
             'pesan' => 'berhasil ambil detail produk',

@@ -166,7 +166,7 @@ function setDataOrder(data, nama_status){
                 return data.namafile.split(' ').slice(0, 2).join(' ');
             }},
             {data: (data) =>{
-                return data.nama_produk.split(' ').slice(0, 2).join(' ');
+                return data.nama_produk;
             }},
             {data: (data) =>{
                 return data.kategori;

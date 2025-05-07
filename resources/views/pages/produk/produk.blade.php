@@ -23,12 +23,17 @@
                                 <button class="btn btn-primary" type="submit">Upload</button>
                             </form>
                         </div>
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-8">
                             <div class="input-group d-flex">
                                 <button class="btn btn-sm flex-fill btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasEnd" aria-controls="offcanvasEnd" id="tambahProdukButton">
                                     + Produk
                                 </button>
-                                <button class="btn btn-sm flex-fill btn-success">Export Excel</button>
+                                <button class="btn btn-sm flex-fill btn-info" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasEndKategori" aria-controls="offcanvasEndKategori" id="tambahKategoriButton">
+                                    + Kategori
+                                </button>
+                                <button class="btn btn-sm flex-fill btn-success" type="button" id="openSatuanJual">
+                                    + Satuan Jual
+                                </button>
                                 <button class="btn btn-sm flex-fill btn-warning dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Download
                                 </button>
@@ -36,13 +41,6 @@
                                     <li><a class="dropdown-item" href="{{ url('template/template_upload_produk.xlsx') }}">Template produk</a></li>
                                     <li><a class="dropdown-item" href="#">Panduan setting</a></li>
                                 </ul>
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-2">
-                            <div class="input-group d-flex">
-                                <button class="btn btn-sm flex-fill btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasEndKategori" aria-controls="offcanvasEndKategori" id="tambahKategoriButton">
-                                    + Kategori
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -71,6 +69,7 @@
         </div>
     </div>
 </div>
+@include('pages.produk.modal-satuan-jual')
 @include('pages.produk.tambah-data')
 @include('pages.produk.tambah-kategori')
 @endsection
@@ -296,7 +295,7 @@ function changeStatusJual(plu){
         processData: false,
     })
     .done((res) =>{
-        notification('success', res.pesan, null, 30000);
+        notification('success', res.pesan, null, 2000);
 
         setTimeout(() => {
             reloadDataTable($('.datatables-basic'));

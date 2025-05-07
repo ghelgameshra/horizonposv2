@@ -80,10 +80,10 @@
                         </a>
                     </li>
                     <li>
-                        <p class="dropdown-item">
+                        <a class="dropdown-item" href="{{ route('profile.edit') }}">
                             <i class="ti ti-settings me-2 ti-sm"></i>
                             <span class="align-middle">Settings</span>
-                        </p>
+                        </a>
                     </li>
                     <li>
                         <div class="dropdown-divider"></div>

@@ -17,14 +17,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
-
 class TransaksiController extends Controller
 {
     public function getTransaksi(Request $request): JsonResponse
     {
         $data = Transaksi::with('kasir')->where('tipe_bayar', '!=', null)->orderBy('created_at', 'desc')->get();
         return response()->json([
-            'data'  => $data
+            'data'      => $data
         ]);
     }
 
@@ -46,9 +45,12 @@ class TransaksiController extends Controller
             $this->updateTransaksi($transaksiLog, $dataTransaksi);
         }
 
+        $satuan = DB::table('ref_satuan')->select(["nama_satuan","input_namafile","input_ukuran"])->get();
+
         return response()->json([
-            'pesan' => 'berhasil ambil data transaksi',
-            'data'  => $dataTransaksi
+            'pesan'     => 'berhasil ambil data transaksi',
+            'data'      => $dataTransaksi,
+            'satuan'    => $satuan
         ], 200);
     }
 
@@ -78,7 +80,7 @@ class TransaksiController extends Controller
     public function transaksiBaruDetail(Request $request): JsonResponse
     {
         $data = DB::table('transaksi_log')->where('id_transaksi', $request->id_transaksi)
-        ->select(['plu', 'nama_produk', 'harga_jual', 'jumlah', 'total', 'ukuran', 'satuan', 'namafile'])->get();
+        ->select(['plu', 'nama_produk', 'harga_jual', 'jumlah', 'total', 'ukuran', 'satuan', 'namafile', 'id'])->get();
 
         return response()->json([
             'pesan' => 'berhasil ambil data detail transaksi',
@@ -108,9 +110,13 @@ class TransaksiController extends Controller
         if(!$transaksiLog){
             $this->transaksiLogNew($request->plu, $request->idTransaksi);
         } else {
-            $transaksiLog->update([
-                'jumlah' => $transaksiLog->jumlah + 1
-            ]);
+            if(in_array($transaksiLog->satuan, ['LUAS', 'KELILING'])) {
+                $this->transaksiLogNew($request->plu, $request->idTransaksi);
+            } else {
+                $transaksiLog->update([
+                    'jumlah' => $transaksiLog->jumlah + 1
+                ]);
+            }
         }
 
         return response()->json([
@@ -149,76 +155,94 @@ class TransaksiController extends Controller
         ]);
     }
 
-    /*
-        tambah QTY
-    */
-    public function tambahQty(Request $request): JsonResponse
+    public function addfilesize(int $id_transaksi_log, Request $request): JsonResponse
     {
-        $request->validate([
-            'id_transaksi'  => ['required', 'numeric'],
-            'plu'           => ['required', 'string'],
-            'qtyTambah'     => ['required', 'numeric', 'max:99999'],
-            'nama_file'     => ['nullable', 'string', 'max:50'],
-            'ukuran'        => ['nullable', 'string', 'max:50']
+        $validated = $request->validate([
+            'fileName'  => 'required|string|max:50',
+            'size'      => 'nullable|string|max:50'
         ]);
 
-        $transaksiLog = TransaksiLog::where('plu', $request->plu)->where('id_transaksi', $request->id_transaksi)->first();
-        $produk = Produk::where('plu', $request->plu)->first();
-        if($transaksiLog->satuan === 'UNIT'){
+        $transaksiLog = TransaksiLog::findOrFail($id_transaksi_log);
 
-            $qtyTambahAkhir = $request->qtyTambah - $transaksiLog->jumlah;
-            $qtyAkhirProduk = $produk->stok - $qtyTambahAkhir;
-
-            $transaksiLog->update([
-                'jumlah'        => DB::raw('jumlah + ' . $qtyTambahAkhir), // Tambah 1 pada jumlah
-                'informasi_stok'=> "stok_awal=" . $produk->stok + 1 . "|stok_akhir=$qtyAkhirProduk"
-            ]);
-
-            $produk->update([
-                'stok' => $produk->stok - $qtyTambahAkhir
-            ]);
-        } else {
-            $this->updateQty($transaksiLog, $produk, $request->qtyTambah, $request->nama_file, $request->ukuran);
-        }
-
-        return response()->json([
-            'pesan' => "berhasil tambah Qty $request->qtyTambah PLU $request->plu",
-        ], 201);
-    }
-
-    /*
-        tambah QTY produk dengan satuan luas atau keliling
-     */
-    private function updateQty($transaksiLog, $produk, $qtyTambah, $namaFile, $ukuran): void
-    {
-        // /* nama_file dan ukuran tidak boleh kosong salah satu */
-        /* update nama file dan ukuran */
-        $ukuran = str_replace(['x', 'X'], 'X', $ukuran);
-        $ukuran = preg_replace('/X+/', 'X', $ukuran);
-        $ukuranBaru = explode('X', $ukuran);
-        $hargaMeter = 0;
-
-        if($produk->satuan === 'LUAS'){
-            /* harga_jual x (110cm/100) x (100cm/100) => 110cm/100 : ubah CM ke Meter P*L=LUAS */
-            $hargaMeter = $produk->harga_jual * ($ukuranBaru[0]/100 * $ukuranBaru[1]/100);
-        }
-
-        if($produk->satuan === 'KELILING'){
-            /* harga_jual x ( (110cm/100) + (100cm/100) x 2 ) => 110cm/100 : ubah CM ke Meter P+L*2=KELILING */
-            $hargaMeter = $produk->harga_jual * (($ukuranBaru[0]/100 + $ukuranBaru[1]/100) * 2);
-        }
-
-        $qtyTambahAkhir = $qtyTambah - $transaksiLog->jumlah;
-        $qtyAkhirProduk = $produk->stok - $qtyTambahAkhir;
+        $ukuran = isset($validated['size']) && stripos($validated['size'], 'X') !== false
+            ? strtoupper($validated['size'])
+            : null;
 
         $transaksiLog->update([
-            'harga_ukuran'  => $hargaMeter,
-            'ukuran'        => $ukuran,
-            'namafile'      => strtoupper($namaFile),
-            'jumlah'        => DB::raw('jumlah + ' . $qtyTambahAkhir), // Tambah 1 pada jumlah
-            'informasi_stok'=> "stok_awal=" . $produk->stok + 1 . "|stok_akhir=$qtyAkhirProduk"
+            'namafile'  => strtoupper($validated['fileName']),
+            'ukuran'    => $ukuran
+        ]);
+
+        $this->hitungSubtotalTransaksiLog($transaksiLog);
+
+        return response()->json([
+            'message' => 'Berhasil set namafile',
+            'data'    => $transaksiLog,
+            'input'   => $validated
         ]);
     }
+
+    private function hitungSubtotalTransaksiLog(TransaksiLog $log): void
+    {
+        $satuan = strtoupper($log->satuan);
+        $hargaUkuran = $total = $log->harga_jual;
+
+        if (in_array($satuan, ['LUAS', 'KELILING'], true) && $log->ukuran) {
+            $ukuran = explode('X', strtoupper($log->ukuran));
+            if (count($ukuran) === 2 && is_numeric($ukuran[0]) && is_numeric($ukuran[1])) {
+                $panjang = $ukuran[0] / 100;
+                $lebar   = $ukuran[1] / 100;
+
+                $hargaUkuran = match($satuan) {
+                    'LUAS'      => $panjang * $lebar * $log->harga_jual,
+                    'KELILING'  => ($panjang + $lebar) * 2 * $log->harga_jual,
+                };
+
+                $total = $hargaUkuran * $log->jumlah;
+            }
+        } else {
+            $total = $hargaUkuran * $log->jumlah;
+        }
+
+        $log->update([
+            'harga_ukuran' => $hargaUkuran,
+            'total'        => $total
+        ]);
+    }
+
+
+    public function tambahQty(int $id, string $plu, int $qty): JsonResponse
+    {
+        $transaksiLog = TransaksiLog::findOrFail($id);
+        $produk = Produk::where('plu', $plu)->firstOrFail();
+
+        $stokTersedia = $produk->stock;
+        $jumlahSebelumnya = $transaksiLog->jumlah;
+        $selisihQty = $qty - $jumlahSebelumnya;
+
+        if (!$produk->jual_minus && $selisihQty > $stokTersedia) {
+            throw new HttpResponseException(response()->json([
+                'message' => "Stok produk dengan PLU '{$produk->plu}' tidak mencukupi. Tersedia: {$stokTersedia}, Tambahan: {$selisihQty}"
+            ], 422));
+        }
+
+        // Update stok produk
+        $produk->decrement('stok', $selisihQty);
+
+        // Update transaksi log
+        $transaksiLog->update([
+            'jumlah' => $qty,
+            'informasi_stok' => "stok_awal=" . ($stokTersedia + $selisihQty) . "|stok_akhir=" . $produk->stok
+        ]);
+
+        $this->hitungSubtotalTransaksiLog($transaksiLog);
+
+        return response()->json([
+            'message' => "Berhasil tambah QTY $qty untuk PLU $plu",
+            'data' => compact('plu', 'qty', 'transaksiLog')
+        ]);
+    }
+
 
     public function cekPromo(Request $request): JsonResponse
     {
@@ -270,19 +294,19 @@ class TransaksiController extends Controller
     /*
         hapus transaksi log
     */
-    public function transaksiLogDelete(Request $request): JsonResponse
+    public function transaksiLogDelete(int $id): JsonResponse
     {
-        $transaksiLog = TransaksiLog::where('plu', $request->plu)->where('id_transaksi', $request->idTransaksi)->first();
+        $transaksiLog = TransaksiLog::where('id', $id)->first();
 
         /* update stok produk */
-        Produk::where('plu', $request->plu)->update([
+        Produk::where('plu', $transaksiLog->plu)->update([
             'stok'  => DB::raw('stok + ' . $transaksiLog->jumlah)
         ]);
 
         $transaksiLog->delete();
 
         return response()->json([
-            'pesan' => "PLU $request->plu dihapus",
+            'pesan' => "PLU $transaksiLog->plu dihapus",
         ], 200);
     }
 

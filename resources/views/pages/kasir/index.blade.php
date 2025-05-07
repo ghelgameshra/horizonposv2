@@ -62,6 +62,8 @@ function getTransaksi(){
     .done((res) =>{
         const total = res.data['subtotal'];
 
+        localStorage.setItem("configSatuan", JSON.stringify(res.satuan));
+
         $('#total_view').val(`${formatRupiah(total)}`);
         $('#id_transaksi').val(res.data['id']);
 
@@ -85,6 +87,39 @@ function getTransaksiDetail(id){
     })
 }
 
+function generateInputGroup(data) {
+    const configSatuan = JSON.parse(localStorage.getItem("configSatuan") || "[]");
+    const config = configSatuan.find(c => c.nama_satuan === data.satuan);
+
+    // Default fallback jika config tidak ditemukan
+    const inputNamaFileEnabled = config?.input_namafile === 1;
+    const inputUkuranEnabled = config?.input_ukuran === 1;
+
+    const inputNamaFile = `
+        <input type="text" class="form-control" placeholder="nama file"
+            name="namaFilePlu_${data.plu}_${data.id}"
+            id="namaFilePlu_${data.plu}_${data.id}"
+            value="${data.namafile || ''}" autocomplete="off"
+            ${inputNamaFileEnabled ? 'required' : 'disabled'}
+            onchange="addFileSize('${data.id}', '${data.plu}')">
+    `;
+
+    const inputUkuran = inputUkuranEnabled ? `
+        <input type="text" class="form-control" placeholder="100x100"
+            name="ukuranPlu_${data.plu}_${data.id}"
+            id="ukuranPlu_${data.plu}_${data.id}"
+            value="${data.ukuran || ''}" autocomplete="off"
+            required
+            onchange="addFileSize('${data.id}', '${data.plu}')">
+    ` : '';
+
+    return `
+        <div class="input-group input-group-sm text-center">
+            ${inputNamaFile}
+            ${inputUkuran}
+        </div>
+    `;
+}
 
 /* load data detail */
 function loadDataSales(data){
@@ -106,18 +141,13 @@ function loadDataSales(data){
             }},
             {data: (data) =>{return data.plu}},
             {data: (data) =>{
-                return `
-                    <div class="input-group input-group-sm text-center">
-                        <input type="text" class="form-control" placeholder="nama file" name="namaFilePlu_${data.plu}" id="namaFilePlu_${data.plu}" value="${data.namafile ? data.namafile : ''}" autocomplete="off" ${data.satuan === 'UNIT' ? 'disabled' : 'required' }>
-                        <input type="text" class="form-control" placeholder="100x100" name="ukuranPlu_${data.plu}" id="ukuranPlu_${data.plu}" value="${data.ukuran ? data.ukuran : ''}" autocomplete="off" ${data.satuan === 'UNIT' ? 'disabled' : 'required' } onchange="tambahQty('${data.plu}')">
-                    </div>
-                `
+                return generateInputGroup(data);
             }},
             {data: (data) =>{return formatRupiah(data.harga_jual)}},
             {data: (data) =>{
                 return `
                     <div class="input-group input-group-sm text-center">
-                        <input type="text" inputmode="numeric" class="form-control" name="" id="tambahQtyPlu_${data.plu}" autocomplete="off" value="${data.jumlah}" onchange="tambahQty('${data.plu}')" data-old-value="${data.jumlah}">
+                        <input type="text" inputmode="numeric" class="form-control" name="" id="tambahQtyPlu_${data.plu}_${data.id}" autocomplete="off" value="${data.jumlah}" onchange="tambahQty('${data.id}', '${data.plu}')" data-old-value="${data.jumlah}">
                     </div>
                 `
             }},
@@ -125,13 +155,39 @@ function loadDataSales(data){
             {data: (data) =>{
                 return `
                 <div class="btn-group">
-                    <button class="btn btn-xs btn-outline-danger" onclick="deleteDataSales('${data.plu}')">
+                    <button class="btn btn-xs btn-outline-danger" onclick="deleteDataSales('${data.id}')">
                         <i class="ti ti-trash"></i>
                     </button>
                 </div>
                 `
             }},
         ],
+    });
+}
+
+function addFileSize(id, plu) {
+    const fileName = $(`#namaFilePlu_${plu}_${id}`).val();
+    const size = $(`#ukuranPlu_${plu}_${id}`).val();
+
+    showLoading();
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: `{{ route('addfilesize') }}/${id}`,
+        type: 'PUT',
+        data: {
+            fileName: fileName,
+            size: size
+        }
+    })
+    .done((res) =>{
+        notification('success', res.message, null, 1000);
+        getTransaksi();
+    })
+    .fail((err) =>{
+        notification('error', err.responseJSON.message);
+        hideLoading();
     });
 }
 
@@ -210,19 +266,14 @@ function tambahDataSales(plu){
     });
 }
 
-function deleteDataSales(plu){
-    const idTrx = $('#id_transaksi').val();
+function deleteDataSales(id){
     showLoading()
     $.ajax({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
-        url: `{{ route('transaksiLogDelete') }}`,
+        url: `{{ route('transaksiLogDelete') }}/${id}`,
         type: 'DELETE',
-        data: {
-            'plu': plu,
-            'idTransaksi': idTrx
-        }
     })
     .done((res) =>{
         notification('success', res.pesan, null, 1000);
@@ -234,24 +285,11 @@ function deleteDataSales(plu){
     });
 }
 
-function tambahQty(plu) {
+function tambahQty(id, plu) {
     showLoading()
-    let idTrx = $('#id_transaksi').val();
-    const idInput = `#tambahQtyPlu_${plu}`;
+    const idInput = `#tambahQtyPlu_${plu}_${id}`;
     let value = parseInt($(idInput).val(), 10); // Ambil nilai input
     const oldValue = parseInt($(idInput).attr('data-old-value'), 10) || 0; // Ambil nilai sebelumnya, default 0 jika tidak ada
-
-    const namaFile = $(`#namaFilePlu_${plu}`).val();
-    const ukuran = $(`#ukuranPlu_${plu}`).val();
-
-    if($(`#namaFilePlu_${plu}`).attr('required') || $(`#ukuranPlu_${plu}`).attr('required') ){
-        if(namaFile === '' || ukuran === ''){
-            notification('error', 'Inputan tidak sesuai. Nama file dan ukuran harus diisi');
-            $(`#tambahQtyPlu_${plu}`).val(oldValue);
-            hideLoading();
-            return;
-        }
-    }
 
     if (isNaN(value)) {
         // Jika inputan bukan angka, tampilkan notifikasi dan kembalikan nilai input ke yang lama
@@ -264,20 +302,20 @@ function tambahQty(plu) {
     if (value < oldValue) {
         notification('info', 'Tidak bisa input kurang');
         $(idInput).val(oldValue); // Kembalikan ke nilai sebelumnya
+        hideLoading();
         return;
     }
 
-    $.post(`{{ route('tambahQty') }}`, {
-        '_token': $('meta[name="csrf-token"]').attr('content'),
-        'id_transaksi': idTrx,
-        'plu': plu,
-        'qtyTambah': value,
-        'qtyAwal': oldValue,
-        'nama_file': namaFile,
-        'ukuran': ukuran
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: `{{ route('tambahQty') }}/${id}/${plu}/${value}`,
+        type: 'PUT',
     })
     .done((res) =>{
-        notification('success', res.pesan, null, 1000);
+
+        notification('success', res.message, null, 1000);
         getTransaksi();
     })
     .fail((err) =>{
@@ -293,7 +331,7 @@ $('#nomor_telepone').on('keyup', function(){
     var inputVal = $(this).val(); // Mendapatkan nilai input
     var charCount = inputVal.length;
 
-    if(charCount <= 6 ){
+    if(charCount <= 10 ){
         return;
     }
     showLoading();

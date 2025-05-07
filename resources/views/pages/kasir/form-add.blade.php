@@ -68,28 +68,21 @@
                             <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addDataModal">
                                 <i class="menu-icon tf-icons ti ti-search"></i>
                             </button>
-                            <input type="text" class="form-control border" placeholder="cari barang ... (ctrl+enter)">
+                            <input type="text" class="form-control border" placeholder="cari barang ... (ctrl+enter)" id="cariBarang">
                             <input type="text" class="form-control border-0 border-start text-end" value="" id="nameTag" @readonly(true)>
                         </div>
-                        <table class="datatables-basic table table-sm table-bordered table-striped text-nowrap">
-                            <thead>
-                                <tr>
-                                    <th>no</th>
-                                    <th>nama produk</th>
-                                    <th>plu</th>
-                                    <th class="text-center">nama file | ukuran</th>
-                                    <th>Harga</th>
-                                    <th style="width: 13%">qty</th>
-                                    <th>subtotal</th>
-                                    <th class="text-center">
-                                        <i class="menu-icon tf-icons ti ti-table-minus"></i>
-                                    </th>
-                                </tr>
-                            </thead>
-                        </table>
+                        @include('pages.kasir.table-selected')
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@push('js')
+<script>
+$('#cariBarang').on('focus', function(){
+    $('#addDataModal').modal('show')
+})
+</script>
+@endpush
