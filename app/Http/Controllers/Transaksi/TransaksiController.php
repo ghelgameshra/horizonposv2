@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Struk\PrintStrukController;
 use App\Http\Requests\Update\TransaksiSelesaiRequest;
 use App\Models\Produk\Produk;
-use App\Models\Produk\Promo;
 use App\Models\Transaksi\Transaksi;
 use App\Models\Transaksi\TransaksiLog;
 use Carbon\Carbon;
@@ -312,17 +311,19 @@ class TransaksiController extends Controller
 
     public function transaksiSelesai(TransaksiSelesaiRequest $request): JsonResponse
     {
-        $transaksi = Transaksi::where('id', $request->id_transaksi)->first();
-        if ($request->terima < $transaksi->total && in_array($request->tipe_bayar, ['CSH', 'TRF'])) {
+        $dataTransaksi = $request->validated();
+
+        $transaksi = Transaksi::where('id', $dataTransaksi['id_transaksi'])->first();
+        if ($request->terima < $transaksi->total && in_array($dataTransaksi['tipe_bayar'], ['CSH', 'TRF'])) {
             throw new HttpResponseException(response([
                 'message' => 'uang diterima tidak boleh lebih kecil dari total pembayaran'
             ], 422));
         }
 
-        if(in_array($request->tipe_bayar, ['DPCSH', 'DPTRF'])){
+        if(in_array($dataTransaksi['tipe_bayar'], ['DPCSH', 'DPTRF'])){
             $transaksi->update([
                 'invno'         => "INV" . now()->format('ymd') . str_pad($transaksi->id, 8, '0', STR_PAD_LEFT),
-                'nomor_telepone'=> $request->nomor_telepone,
+                'nomor_telepone'=> $dataTransaksi['nomor_telepone'],
                 'nama_customer' => strtoupper($request->nama_customer),
                 'uang_muka'     => $request->terima,
                 'tipe_bayar'    => $request->tipe_bayar,
@@ -332,7 +333,7 @@ class TransaksiController extends Controller
         } else {
             $transaksi->update([
                 'invno'         => "INV" . now()->format('ymd') . str_pad($transaksi->id, 8, '0', STR_PAD_LEFT),
-                'nomor_telepone'=> $request->nomor_telepone,
+                'nomor_telepone'=> $dataTransaksi['nomor_telepone'],
                 'nama_customer' => strtoupper($request->nama_customer),
                 'terima'        => $request->terima,
                 'kembali'       => $request->terima - $transaksi->total,
@@ -344,7 +345,7 @@ class TransaksiController extends Controller
         }
 
         if($transaksi->kode_promo){
-            $promo = Promo::where('kode_promo', $transaksi->kode_promo)->first();
+            $promo = DB::table('promo')->where('kode_promo', $transaksi->kode_promo)->first();
 
             $member = DB::table('member')->where('id', $transaksi->id_member)->first();
             $transaksi->update([

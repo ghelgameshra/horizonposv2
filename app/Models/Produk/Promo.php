@@ -8,23 +8,31 @@ use Illuminate\Database\Eloquent\Model;
 class Promo extends Model
 {
     use HasFactory;
-    protected $table = 'promo';
+    protected $table = 'promosi';
     protected $primaryKey = 'id';
-    protected $fillable = [
-        'kode_promo',
-        'item_syarat',
-        'promo_member',
-        'minimal_belanja',
-        'maksimal_belanja',
-        'potongan_persentase',
-        'potongan_langsung',
-        'potongan_minimal',
-        'potongan_maksimal',
-        'jenis_promo',
-        'mekanisme_promo',
-        'periode_awal',
-        'periode_akhir',
-        'total_penggunaan',
-        'addid',
-    ];
+    protected $guarded = [];
+
+    protected $promoMember = false;
+
+    // Mutator untuk nama_promosi
+    public function setNamaPromoAttribute($value)
+    {
+        $this->attributes['nama_promo'] = strtoupper($value);
+    }
+
+    // Mutator untuk detail_promosi
+    public function setDetailPromoAttribute($value)
+    {
+        $this->attributes['detail_promo'] = strtoupper($value);
+    }
+
+    // Mutator untuk tipe_diskon
+    public function setTipePromoAttribute($value)
+    {
+        if($value === "MEMBER") {
+            $this->promoMember = true;
+        }
+        $this->attributes['tipe_promo'] = strtoupper($value);
+        $this->attributes['promo_member'] = $this->promoMember;
+    }
 }
