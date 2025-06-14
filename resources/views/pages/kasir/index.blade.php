@@ -48,7 +48,6 @@ $(function(){;
 });
 
 function getTransaksi(){
-    showLoading();
     const user = {{ auth()->user()->id }};
     $.ajax({
         headers: {
@@ -70,7 +69,6 @@ function getTransaksi(){
         getTransaksiDetail(res.data['id']);
     })
     .fail((err) =>{
-        hideLoading();
         notification('error', err.responseJSON.message);
     })
 }
@@ -169,7 +167,6 @@ function addFileSize(id, plu) {
     const fileName = $(`#namaFilePlu_${plu}_${id}`).val();
     const size = $(`#ukuranPlu_${plu}_${id}`).val();
 
-    showLoading();
     $.ajax({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -181,15 +178,15 @@ function addFileSize(id, plu) {
             size: size
         }
     })
-    .done((res) =>{
+    .done((res) => {
         notification('success', res.message, null, 1000);
         getTransaksi();
     })
-    .fail((err) =>{
+    .fail((err) => {
         notification('error', err.responseJSON.message);
-        hideLoading();
     });
 }
+
 
 
 $('#terima').on('keyup', function(){
@@ -267,7 +264,6 @@ function tambahDataSales(plu){
 }
 
 function deleteDataSales(id){
-    showLoading()
     $.ajax({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -281,12 +277,10 @@ function deleteDataSales(id){
     })
     .fail((err) =>{
         notification('error', err.responseJSON.message);
-        hideLoading()
     });
 }
 
 function tambahQty(id, plu) {
-    showLoading()
     const idInput = `#tambahQtyPlu_${plu}_${id}`;
     let value = parseInt($(idInput).val(), 10); // Ambil nilai input
     const oldValue = parseInt($(idInput).attr('data-old-value'), 10) || 0; // Ambil nilai sebelumnya, default 0 jika tidak ada
@@ -302,7 +296,6 @@ function tambahQty(id, plu) {
     if (value < oldValue) {
         notification('info', 'Tidak bisa input kurang');
         $(idInput).val(oldValue); // Kembalikan ke nilai sebelumnya
-        hideLoading();
         return;
     }
 
@@ -322,28 +315,67 @@ function tambahQty(id, plu) {
         notification('error', err.responseJSON.message);
         hideLoading();
     });
-
 }
 
-$('#nomor_telepone').on('keyup', function(){
+let lastCheckedPhone = null;
+
+function cekPromoOnce() {
+    const currentPhone = $('#nomor_telepone').val();
+
+    // Cek jika nomor belum pernah dicek atau sudah berubah
+    if (currentPhone !== lastCheckedPhone) {
+        lastCheckedPhone = currentPhone;
+        cekPromo();
+    }
+}
+
+// Saat blur
+$('#nomor_telepone').on('blur', function() {
+    cekPromoOnce();
+});
+
+// Saat tekan Enter
+$('#nomor_telepone').on('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        $(this).blur(); // hilangkan fokus agar tidak trigger ganda
+        cekPromoOnce();
+    }
+});
+
+// Reset jika input dihapus atau diubah
+$('#nomor_telepone').on('input', function() {
+    // Kamu bisa hapus pengecekan ini kalau ingin cek ulang setiap input
+    if ($(this).val() !== lastCheckedPhone) {
+        lastCheckedPhone = null; // reset agar bisa dicek ulang saat blur/Enter
+    }
+});
+
+const cekPromo = () => {
     const idTrx = $('#id_transaksi').val();
+    const inputVal = $('#nomor_telepone').val();
+    const charCount = inputVal.length;
 
-    var inputVal = $(this).val(); // Mendapatkan nilai input
-    var charCount = inputVal.length;
-
-    if(charCount <= 10 ){
+    if (charCount <= 10) {
+        notification('error', 'Nomor telepone tidak bisa kurang dari 10 karakter', null, 900);
         return;
     }
-    showLoading();
+
+    // Siapkan timeout loading (tidak langsung ditampilkan)
+    const loadingTimeout = setTimeout(() => {
+        showLoading();
+    }, 1000); // tampilkan loading setelah 3 detik
 
     $.post(`{{ route('cekPromo') }}`, {
         '_token': $('meta[name="csrf-token"]').attr('content'),
         'id_transaksi': idTrx,
         'nomor_telepone': inputVal
     })
-    .done((res) =>{
+    .done((res) => {
+        clearTimeout(loadingTimeout); // batalkan jika respons lebih cepat
         hideLoading();
-        if(res.data['potonganHarga'] > 0){
+
+        if (res.data['potonganHarga'] > 0) {
             notification('success', res.pesan, null, 1000);
         }
 
@@ -351,19 +383,30 @@ $('#nomor_telepone').on('keyup', function(){
         $('#total_bayar_view').val(formatRupiah(res.data['subtotal']));
         $('#total_bayar').val(res.data['total']);
         $('#total_view').val(`${formatRupiah(res.data['total'])}`);
-
         $('#terima').val(res.data['total']);
         $('#terima_view').val(formatRupiah(res.data['total']));
     })
-    .fail((err) =>{
+    .fail((err) => {
+        clearTimeout(loadingTimeout);
         hideLoading();
         notification('error', err.responseJSON.message);
     });
-});
+}
 
 $('#terima').on('keyup', function(){
     var bayarView = parseInt($(this).val());
-    var kembalian = parseInt($(this).val()) - parseInt( $('#total_bayar').val() );
+    var totalBayar = $('#total_bayar').val();
+
+    var kembalian = parseInt($(this).val()) - parseInt(totalBayar);
+
+    if(bayarView > 0) {
+        $('#terima_view').val( formatRupiah(bayarView) );
+        $('#kembali_view').val( formatRupiah(kembalian) );
+    } else {
+        $('#kembali_view').val( formatRupiah(0) );
+        $('#terima_view').val( formatRupiah(0) );
+        return;
+    }
 
     if(isNaN(bayarView)){
         $('#kembali_view').val( formatRupiah(0) );
@@ -371,10 +414,13 @@ $('#terima').on('keyup', function(){
         notification('error', 'Inputan tidak sesuai. Silahkan input angka');
         return;
     }
-
-    $('#terima_view').val( formatRupiah(bayarView) );
-    $('#kembali_view').val( formatRupiah(kembalian) );
 })
+
+$('#formKasir input').on('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+    }
+});
 
 $('#formKasir').on('submit', function(e){
     e.preventDefault();
@@ -409,7 +455,7 @@ $('#formKasir').on('submit', function(e){
                     $(`#${key}`).addClass('border-danger');
                     $(`#${key}`).siblings().addClass('border-danger');
                 });
-                notification('error', err.responseJSON.message);
+                notification('error', err.responseJSON.message, null, 1200)
                 hideLoading()
                 return;
             });

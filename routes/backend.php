@@ -60,7 +60,11 @@ Route::post('member', [MemberController::class, 'insert'])->name('member.insert'
 /*
     Promo Route
 */
-Route::delete('promo', [PromoController::class, 'destroy'])->name('promo.delete');
+Route::post('promo', [PromoController::class, 'create'])->name('promo.create');
+Route::get('promo/{kodePromo?}', [PromoController::class, 'detail'])->name('promo.detail');
+Route::put('promo/update/{kodePromo?}', [PromoController::class, 'update'])->name('promo.update');
+Route::put('promo-status/{kodePromo?}', [PromoController::class, 'setStatus'])->name('promo.setStatus');
+Route::delete('promo/{kodePromo?}', [PromoController::class, 'destroy'])->name('promo.delete');
 
 /*
     Karyawan Route

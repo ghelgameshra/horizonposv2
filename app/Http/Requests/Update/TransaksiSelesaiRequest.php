@@ -22,8 +22,9 @@ class TransaksiSelesaiRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nama_customer'     => ['required', 'string', 'max:50'],
-            'nomor_telepone'    => ['required', 'string', 'max:15'],
+            'id_transaksi'      => ['required', 'string'],
+            'nama_customer'     => ['required', 'string', 'max:50', 'min:5'],
+            'nomor_telepone'    => ['required', 'string', 'max:15', 'min:10'],
             'terima'            => ['required', 'numeric'],
             'tipe_bayar'        => ['required', 'string', 'max:15']
         ];

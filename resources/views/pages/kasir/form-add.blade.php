@@ -33,7 +33,7 @@
 
                                             <span class="input-group-text" style="width: 13%">Total Bayar</span>
                                             <input type="text" class="form-control" value="Rp. 0" disabled id="total_bayar_view">
-                                            <input type="text" class="form-control" value="Rp. 0" disabled id="total_bayar" hidden>
+                                            <input type="number" class="form-control" value="0" disabled id="total_bayar" hidden>
 
                                             <span class="input-group-text" style="width: 13%">Tipe Bayar</span>
                                             <select name="tipe_bayar" id="tipe_bayar" class="form-select">
