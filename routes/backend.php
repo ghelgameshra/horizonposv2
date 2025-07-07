@@ -11,6 +11,7 @@ use App\Http\Controllers\Administrasi\StrukController;
 use App\Http\Controllers\Administrasi\TokoController;
 use App\Http\Controllers\Administrasi\TutupHarianController;
 use App\Http\Controllers\Auth\UserController;
+use App\Http\Controllers\Kasir\KasirController;
 use App\Http\Controllers\Order\WorkOrderController;
 use App\Http\Controllers\Produk\KategoriController;
 use App\Http\Controllers\Produk\ProdukController;
@@ -191,3 +192,8 @@ Route::get('produk-satuan-jual', [SatuanJualController::class, 'data'])->name('s
 Route::post('produk-satuan-jual', [SatuanJualController::class, 'insert'])->name('satuanJual.insert');
 Route::delete('produk-satuan-jual/{id?}', [SatuanJualController::class, 'destroy'])->name('satuanJual.destroy');
 Route::put('produk-satuan-jual/update-status/{id?}/{namaConfig?}', [SatuanJualController::class, 'updateConfig'])->name('satuanJual.updateConfig');
+
+
+Route::get('/kasir/produk-jual', [KasirController::class, 'getProdukJual'])->name('kasir.produk');
+Route::get('/kasir/order', [KasirController::class, 'getOrder'])->name('kasir.getOrder');
+Route::post('/kasir/add-item', [KasirController::class, 'addItemList'])->name('kasir.addItemList');
