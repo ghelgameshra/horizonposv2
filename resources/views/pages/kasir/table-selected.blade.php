@@ -8,6 +8,7 @@
             <th>Harga</th>
             <th style="width: 13%">qty</th>
             <th>subtotal</th>
+            <th>gross</th>
             <th class="text-center">
                 <i class="menu-icon tf-icons ti ti-table-minus"></i>
             </th>

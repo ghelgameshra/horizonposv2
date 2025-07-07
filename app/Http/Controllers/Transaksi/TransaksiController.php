@@ -20,66 +20,58 @@ class TransaksiController extends Controller
 {
     public function getTransaksi(Request $request): JsonResponse
     {
-        $data = Transaksi::with('kasir')->where('tipe_bayar', '!=', null)->orderBy('created_at', 'desc')->get();
-        return response()->json([
-            'data'      => $data
-        ]);
+        $data = Transaksi::with('kasir')
+            ->whereNotNull('tipe_bayar')
+            ->latest()
+            ->get();
+
+        return response()->json(['data' => $data]);
     }
 
     public function transaksiBaru($user): JsonResponse
     {
-        // Mencari transaksi yang belum dibayar dan memiliki total 0 untuk kasir tertentu
-        $dataTransaksi = Transaksi::firstOrCreate(
+        $transaksi = Transaksi::firstOrCreate(
             ['terima' => 0, 'kasir_id' => $user, 'tipe_bayar' => null],
             ['tanggal_transaksi' => now()]
         );
 
-        // Perbarui tanggal transaksi jika tidak sesuai dengan hari ini
-        if (Carbon::parse($dataTransaksi->tanggal_transaksi)->format('Y-m-d') !== now()->format('Y-m-d')) {
-            $dataTransaksi->update(['tanggal_transaksi' => now()]);
+        if (!Carbon::parse($transaksi->tanggal_transaksi)->isToday()) {
+            $transaksi->update(['tanggal_transaksi' => now()]);
         }
 
-        $transaksiLog = TransaksiLog::where('id_transaksi', $dataTransaksi->id)->get();
-        if($transaksiLog){
-            $this->updateTransaksi($transaksiLog, $dataTransaksi);
+        $logs = TransaksiLog::where('id_transaksi', $transaksi->id)->get();
+        if ($logs->isNotEmpty()) {
+            $this->updateTransaksi($logs, $transaksi);
         }
 
-        $satuan = DB::table('ref_satuan')->select(["nama_satuan","input_namafile","input_ukuran"])->get();
+        $satuan = DB::table('ref_satuan')->select('nama_satuan', 'input_namafile', 'input_ukuran')->get();
 
         return response()->json([
-            'pesan'     => 'berhasil ambil data transaksi',
-            'data'      => $dataTransaksi,
-            'satuan'    => $satuan
-        ], 200);
-    }
-
-    private function updateTransaksi($transaksiLog, $transaksi): void
-    {
-        $subtotal = 0;
-        foreach ($transaksiLog as $value) {
-            $subtotalLog = 0;
-            if($value->harga_ukuran > 0){
-                $subtotal += $value->harga_ukuran * $value->jumlah;
-                $subtotalLog = $value->harga_ukuran * $value->jumlah;
-            } else {
-                $subtotal += $value->harga_jual * $value->jumlah;
-                $subtotalLog = $value->harga_jual * $value->jumlah;
-            }
-
-            $value->update([
-                'total' => $subtotalLog
-            ]);
-        }
-
-        $transaksi->update([
-            'subtotal'  => $subtotal,
+            'pesan' => 'berhasil ambil data transaksi',
+            'data' => $transaksi,
+            'satuan' => $satuan
         ]);
     }
+
+    private function updateTransaksi($logs, $transaksi): void
+    {
+        $subtotal = 0;
+        foreach ($logs as $log) {
+            $harga = $log->harga_ukuran > 0 ? $log->harga_ukuran : $log->harga_jual;
+            $total = $harga * $log->jumlah;
+            $subtotal += $total;
+
+            $log->update(['total' => $total]);
+        }
+
+        $transaksi->update(['subtotal' => $subtotal]);
+    }
+
 
     public function transaksiBaruDetail(Request $request): JsonResponse
     {
         $data = DB::table('transaksi_log')->where('id_transaksi', $request->id_transaksi)
-        ->select(['plu', 'nama_produk', 'harga_jual', 'jumlah', 'total', 'ukuran', 'satuan', 'namafile', 'id'])->get();
+        ->select(['plu', 'nama_produk', 'harga_jual', 'jumlah', 'total', 'ukuran', 'satuan', 'namafile', 'id', 'gross'])->get();
 
         return response()->json([
             'pesan' => 'berhasil ambil data detail transaksi',
@@ -99,27 +91,23 @@ class TransaksiController extends Controller
 
     public function transaksiLog(Request $request): JsonResponse
     {
-        if(!$request->plu || !$request->idTransaksi){
-            throw new HttpResponseException(response([
-                'message' => 'silahkan pilih PLU'
-            ], 404));
-        }
+        $request->validate([
+            'plu' => 'required',
+            'idTransaksi' => 'required'
+        ]);
 
-        $transaksiLog = TransaksiLog::where('plu', $request->plu)->where('id_transaksi', $request->idTransaksi)->first();
-        if(!$transaksiLog){
+        $log = TransaksiLog::where('plu', $request->plu)
+            ->where('id_transaksi', $request->idTransaksi)
+            ->first();
+
+        if (!$log || in_array($log->satuan, ['LUAS', 'KELILING'])) {
             $this->transaksiLogNew($request->plu, $request->idTransaksi);
         } else {
-            if(in_array($transaksiLog->satuan, ['LUAS', 'KELILING'])) {
-                $this->transaksiLogNew($request->plu, $request->idTransaksi);
-            } else {
-                $transaksiLog->update([
-                    'jumlah' => $transaksiLog->jumlah + 1
-                ]);
-            }
+            $log->increment('jumlah');
         }
 
         return response()->json([
-            'pesan' => "PLU $request->plu berhasil ditambah",
+            'pesan' => "PLU {$request->plu} berhasil ditambah",
         ], 201);
     }
 
@@ -243,50 +231,18 @@ class TransaksiController extends Controller
     }
 
 
-    public function cekPromo(Request $request): JsonResponse
+    public function cekPromo(Request $request)
     {
-        $potonganHarga = 0;
-        $transaksi = Transaksi::where('id', $request->id_transaksi)->first();
-
-        /* cek diskon member */
-        if( strlen($request->nomor_telepone) >= 12 && strlen($request->nomor_telepone) <= 15 ){
-            $potonganHarga += $this->getDiskonMember($request->nomor_telepone, $transaksi);
-        }
-
-        $transaksi->update([
-            'total'     => $transaksi->subtotal - $potonganHarga,
-            'diskon'    => $potonganHarga
-        ]);
+        $promo = new getPromoController($request);
+        $potongan = $promo->checkPromo();
+        return $potongan;
 
         return response()->json([
-            'pesan'         => "Transaksi mendapatkan promo Rp. " . number_format($potonganHarga, 0, ',', '.'),
-            'data'          => [
-                'potonganHarga' => $transaksi->diskon,
-                'total'         => $transaksi->total,
-                'subtotal'      => $transaksi->subtotal
+            'pesan' => "Transaksi mendapatkan promo Rp. " . number_format($potonganMember, 0, ',', '.'),
+            'data' => [
+                'potongan' => $potonganMember
             ],
-        ], 201);
-    }
-
-    private function getDiskonMember($noTelp, $transaksi): Int
-    {
-        $potonganHarga = 0;
-        $potonganPersen = 0;
-
-        $isMember = DB::table('member')->where('telepone', $noTelp)->first();
-        $promoMember = DB::table('promo')->where('promo_aktif', true)->where('promo_member', true)->first();
-
-        if($isMember && $promoMember && $transaksi->subtotal >= $promoMember->minimal_belanja && $transaksi->subtotal <= $promoMember->maksimal_belanja){
-            $potonganPersen = $promoMember->potongan_persentase / 100;
-            $potonganHarga += $transaksi->subtotal * $potonganPersen;
-
-            $transaksi->update([
-                'kode_promo'    => $promoMember->kode_promo,
-                'id_member'     => $isMember->id
-            ]);
-        }
-
-        return $potonganHarga;
+        ], 200);
     }
 
 
