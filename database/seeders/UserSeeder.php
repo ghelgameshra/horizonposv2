@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class UserSeeder extends Seeder
 {
@@ -17,6 +18,7 @@ class UserSeeder extends Seeder
             'name'      => 'RIZKY ANDRIAWAN',
             'email'     => 'rizkyandriawan33478@gmail.com',
             'job'       => 'DEV/SUPPORT',
+            'nik'       => '2015451256',
             'password'  => bcrypt('gh3lgameshra')
         ]);
 

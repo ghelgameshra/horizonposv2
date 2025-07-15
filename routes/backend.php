@@ -12,6 +12,7 @@ use App\Http\Controllers\Administrasi\TokoController;
 use App\Http\Controllers\Administrasi\TutupHarianController;
 use App\Http\Controllers\Auth\UserController;
 use App\Http\Controllers\Kasir\KasirController;
+use App\Http\Controllers\Kasir\TransaksiController as KasirTransaksiController;
 use App\Http\Controllers\Order\WorkOrderController;
 use App\Http\Controllers\Produk\KategoriController;
 use App\Http\Controllers\Produk\ProdukController;
@@ -77,18 +78,6 @@ Route::post('karyawan-baru', [KaryawanController::class, 'insert'])->name('karya
 Route::delete('karyawan', [KaryawanController::class, 'delete'])->name('karyawan.delete');
 
 /*
-    Kasir Route
-*/
-Route::get('kasir/transaksi-baru-detail', [TransaksiController::class, 'transaksiBaruDetail'])->name('transaksiBaruDetail');
-Route::post('kasir/transaksi-baru/{user?}', [TransaksiController::class, 'transaksiBaru'])->name('transaksiBaru');
-Route::post('kasir/transaksi-baru-log', [TransaksiController::class, 'transaksiLog'])->name('transaksiLog');
-Route::delete('kasir/transaksi-baru-log/{id?}', [TransaksiController::class, 'transaksiLogDelete'])->name('transaksiLogDelete');
-Route::put('kasir/transaksi-tambah-qty/{id?}/{plu?}/{qty?}', [TransaksiController::class, 'tambahQty'])->name('tambahQty');
-Route::put('kasir/transaksi-addfilesize/{id_transaksi_log?}', [TransaksiController::class, 'addfilesize'])->name('addfilesize');
-Route::post('kasir/transaksi-cek-promo', [TransaksiController::class, 'cekPromo'])->name('cekPromo');
-Route::put('kasir/transaksi-baru', [TransaksiController::class, 'transaksiSelesai'])->name('transaksiSelesai');
-
-/*
     Pengaturan toko route
 */
 Route::get('toko', [TokoController::class, 'get'])->name('toko.get');
@@ -100,7 +89,6 @@ Route::put('toko/change-logo', [TokoController::class, 'changeLogo'])->name('tok
 /*
     Printer route
 */
-
 Route::get('printer', [PrinterController::class, 'printer'])->name('printer.get');
 Route::post('printer', [PrinterController::class, 'insert'])->name('printer.insert');
 Route::delete('printer', [PrinterController::class, 'destroy'])->name('printer.delete');
@@ -197,3 +185,10 @@ Route::put('produk-satuan-jual/update-status/{id?}/{namaConfig?}', [SatuanJualCo
 Route::get('/kasir/produk-jual', [KasirController::class, 'getProdukJual'])->name('kasir.produk');
 Route::get('/kasir/order', [KasirController::class, 'getOrder'])->name('kasir.getOrder');
 Route::post('/kasir/add-item', [KasirController::class, 'addItemList'])->name('kasir.addItemList');
+Route::delete('/kasir/remove-item/{idItem?}', [KasirController::class, 'removeItemOrder'])->name('kasir.removeItemOrder');
+Route::post('/kasir/add-item-qty/{idItem?}', [KasirController::class, 'addQty'])->name('kasir.addItemQty');
+Route::post('/kasir/reduce-item-qty/{idItem?}', [KasirController::class, 'reduceQty'])->name('kasir.reduceItemQty');
+Route::post('/kasir/set-item-filename/{idItem?}', [KasirController::class, 'setFileName'])->name('kasir.setFileName');
+Route::post('/kasir/set-item-size/{idItem?}', [KasirController::class, 'setSize'])->name('kasir.setSize');
+Route::post('/kasir/check-promo/{idTransaksi?}', [KasirTransaksiController::class, 'checkPromo'])->name('kasir.checkPromo');
+Route::post('/kasir/checkout/{idTransaksi?}', [KasirTransaksiController::class, 'checkout'])->name('kasir.checkout');

@@ -21,7 +21,6 @@ class DatabaseSeeder extends Seeder
             JenisPengeluaranSeeder::class,
             UkuranSatuanSeeder::class,
             PendidikanSeeder::class,
-            PromoSeeder::class,
             SettingStrukSeeder::class,
             StatusOrderSeeder::class,
             TokoSeeder::class,

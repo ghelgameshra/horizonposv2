@@ -32,8 +32,7 @@ class RolesSeeder extends Seeder
 
         $user = User::where('email', "administrator@email.com")->first();
         $user->syncRoles("admin");
-
-        $user = User::where('email', "ghelgameshra3347@gmail.com")->first();
+        $user = User::where('email', "rizkyandriawan33478@gmail.com")->first();
         $user->syncRoles('it');
     }
 }
