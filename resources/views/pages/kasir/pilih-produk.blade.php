@@ -1,6 +1,33 @@
 {{-- <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#addDataOffcanvas">
     Pilih Produk
 </button> --}}
+@section('css')
+<style>
+    .spin {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+@endsection
+<!-- Button Refresh Produk -->
+<button id="refreshBtn"
+    class="btn btn-primary rounded-circle shadow"
+    data-bs-toggle="tooltip"
+    data-bs-placement="top"
+    title="Refresh Produk Jual"
+    style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1055; width: 50px; height: 50px;">
+    <i id="refreshIcon" class="ti ti-refresh" style="font-size: 1.2rem;"></i>
+</button>
 
 <!-- Offcanvas Bottom -->
 <div class="offcanvas offcanvas-bottom" tabindex="-1" id="addDataOffcanvas" aria-labelledby="addDataOffcanvasLabel" style="height: 90vh;">
@@ -28,6 +55,37 @@
 
 @push('js')
 <script>
+// Inisialisasi tooltip (cukup sekali)
+document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+    new bootstrap.Tooltip(el);
+});
+
+const refreshBtn = document.getElementById('refreshBtn');
+const refreshIcon = document.getElementById('refreshIcon');
+
+refreshBtn.addEventListener('click', () => {
+    startLoadingAnimation();
+
+    downloadProdukJual().finally(() => {
+        stopLoadingAnimation();
+    });
+});
+
+// Animasi loading (rotasi)
+function startLoadingAnimation() {
+    refreshIcon.classList.remove('ti-refresh');
+    refreshIcon.classList.add('ti-loader', 'spin');
+    refreshBtn.disabled = true;
+}
+
+// Kembali ke ikon semula
+function stopLoadingAnimation() {
+    refreshIcon.classList.remove('ti-loader', 'spin');
+    refreshIcon.classList.add('ti-refresh');
+    refreshBtn.disabled = false;
+}
+
+
 $('#cariBarang').on('focus', function () {
     showOffcanvas();
 });
