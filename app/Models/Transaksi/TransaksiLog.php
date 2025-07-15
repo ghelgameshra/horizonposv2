@@ -12,23 +12,7 @@ class TransaksiLog extends Model
     use HasFactory;
     protected $table = 'transaksi_log';
     protected $primaryKey = 'id';
-    protected $fillable = [
-        'id_transaksi',
-        'namafile',
-        'plu',
-        'nama_produk',
-        'id_kategori',
-        'harga_jual',
-        'jumlah',
-        'satuan',
-        'harga_ukuran',
-        'ukuran',
-        'total',
-        'informasi_stok',
-        'worker',
-        'worker_addid',
-        'status_order',
-    ];
+    protected $guarded = [];
 
     public function kategori(): BelongsTo
     {
