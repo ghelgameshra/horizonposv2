@@ -33,10 +33,12 @@ class PrintStrukController extends Controller
         ->where('jenis_printer', 'STRUK')
         ->where('default_printer', true)->first();
 
-        if($this->transaksi->status_order && $this->transaksi->status_order === "CANCEL SALES") {
-            throw new HttpResponseException(response([
-                'message'   => 'Pesanan cancel sales tidak bisa print struk'
-            ], 422));
+        if($this->transaksi->status_order) {
+            if($this->transaksi->status_order === "CANCEL SALES") {
+                throw new HttpResponseException(response([
+                    'message'   => 'Pesanan cancel sales tidak bisa print struk'
+                ], 422));
+            }
         }
 
         try {
