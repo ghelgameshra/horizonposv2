@@ -4,6 +4,7 @@ namespace App\Models\Administrasi;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class TutupHarian extends Model
 {
@@ -27,4 +28,9 @@ class TutupHarian extends Model
         'rptotal',
         'user'
     ];
+
+    public function tutupHarianDetail(): HasOne
+    {
+        return $this->hasOne(TutupHarianDetail::class, 'id_harian', 'id');
+    }
 }

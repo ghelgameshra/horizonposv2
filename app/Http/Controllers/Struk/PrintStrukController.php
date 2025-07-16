@@ -99,6 +99,9 @@ class PrintStrukController extends Controller
         $this->printer->text( str_pad("Customer", 10, ' ', STR_PAD_RIGHT) );
         $this->printer->text(": " . $this->transaksi->nama_customer . "\n");
 
+        $this->printer->text( str_pad("Telp", 10, ' ', STR_PAD_RIGHT) );
+        $this->printer->text(": " . $this->transaksi->nomor_telepone . "\n");
+
         $this->printer->text( str_pad("Invoice", 10, ' ', STR_PAD_RIGHT) );
         $this->printer->text(": " . $this->transaksi->invno . "\n");
 
