@@ -22,18 +22,19 @@ class TutupHarianRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'rp100000'  => ['required', 'numeric'],
-            'rp75000'   => ['required', 'numeric'],
-            'rp50000'   => ['required', 'numeric'],
-            'rp20000'   => ['required', 'numeric'],
-            'rp10000'   => ['required', 'numeric'],
-            'rp5000'    => ['required', 'numeric'],
-            'rp1000'    => ['required', 'numeric'],
-            'rp2000'    => ['required', 'numeric'],
-            'rp500'     => ['required', 'numeric'],
-            'rp200'     => ['required', 'numeric'],
-            'rp100'     => ['required', 'numeric'],
-            'password'  => ['required', 'string', 'max:150']
+            'tanggal_harian'    => 'required|date',
+            'rp100000'          => 'required|numeric',
+            'rp75000'           => 'required|numeric',
+            'rp50000'           => 'required|numeric',
+            'rp20000'           => 'required|numeric',
+            'rp10000'           => 'required|numeric',
+            'rp5000'            => 'required|numeric',
+            'rp1000'            => 'required|numeric',
+            'rp2000'            => 'required|numeric',
+            'rp500'             => 'required|numeric',
+            'rp200'             => 'required|numeric',
+            'rp100'             => 'required|numeric',
+            'password'          => 'required|string|max:150'
         ];
     }
 }

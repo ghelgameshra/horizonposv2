@@ -70,7 +70,7 @@ class KasirController extends Controller
 
         if (!$produk || !$produk->bisa_jual) {
             return response()->json([
-                'errors' => 'PLU tidak ditemukan atau tidak bisa dijual!'
+                'message' => 'PLU tidak ditemukan atau tidak bisa dijual!'
             ], 400);
         }
 
@@ -90,14 +90,15 @@ class KasirController extends Controller
      */
     private function addItemOrder(Produk $produk, int $idTransaksi): void
     {
-        $item = TransaksiLog::where('id_transaksi', $idTransaksi)
-            ->whereNotIn('satuan', ['LUAS', 'KELILING'])
-            ->where('plu', $produk->plu)
-            ->first();
+        // $item = TransaksiLog::where('id_transaksi', $idTransaksi)->join('ref_satuan', 'transaksi_log.satuan', '=', 'ref_satuan.nama_satuan')->where('plu', $produk->plu)->first();
+        $item = TransaksiLog::with('refSatuan')
+        ->where('id_transaksi', $idTransaksi)
+        ->where('plu', $produk->plu)
+        ->first();
 
-        if ($item) {
-            $item->increment('jumlah');
-        } else {
+        $shouldCreateNew = !$item || $item->refSatuan->input_namafile;
+
+        if ($shouldCreateNew) {
             $item = TransaksiLog::create([
                 'id_transaksi'  => $idTransaksi,
                 'plu'           => $produk->plu,
@@ -107,13 +108,16 @@ class KasirController extends Controller
                 'harga_jual'    => $produk->harga_jual,
                 'harga_ukuran'  => $produk->jenis_ukuran === 'PCS' ? $produk->harga_jual : 0,
                 'satuan'        => $produk->satuan,
-                'status_order'  => 'DALAM ANTRIAN'
+                'status_order'  => 'DALAM ANTRIAN',
             ]);
-        }
 
-        $orderController = new OrderController();
-        $orderController->addQty($item->id, 1);
+            // Idealnya: gunakan service layer alih-alih langsung new Controller
+            app(OrderController::class)->addQty($item->id, 1);
+        } else {
+            $item->increment('jumlah');
+        }
     }
+
 
     public function removeItemOrder(int $id) : JsonResponse
     {

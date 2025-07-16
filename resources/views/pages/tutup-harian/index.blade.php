@@ -2,6 +2,7 @@
 
 @section('css')
 <link rel="stylesheet" href="{{ asset('lib') }}/assets/vendor/libs/select2/select2.css" />
+<link rel="stylesheet" href="{{ asset('lib') }}/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
 @endsection
 
 @section('content')
@@ -11,8 +12,16 @@
             <div class="col-12 col-md-7">
                 <div class="card" style="height: 100%">
                     <div class="card-header">
-                        <div class="d-flex justify-content-between">
-                            <small class="d-block mb-1 text-muted">Tutup Harian : {{ now()->locale('id')->translatedFormat('l, Y-m-d') }}</small>
+                        <div class="d-flex justify-content-between row">
+                            <div class="col-12" id="pilihTanggalHarian">
+                                <label class="form-label" for="tangga;_harian">Pilih Tanggal Harian</label>
+                                <select name="tanggal_harian" id="tanggal_harian" class="form-select">
+                                    <option value="">Pilih Tanggal</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <small class="d-block mb-1 text-muted">Tutup Harian : {{ now()->locale('id')->translatedFormat('l, Y-m-d') }}</small>
+                            </div>
                         </div>
                     </div>
                     <div class="card-body">
@@ -73,9 +82,11 @@
                                 <th class="text-center">
                                     <i class="menu-icon tf-icons ti ti-settings"></i>
                                 </th>
+                                <th>Sesuai</th>
                                 <th>id harian</th>
                                 <th>tanggal harian</th>
                                 <th>nominal harian</th>
+                                <th>Selisih Fisik</th>
                                 <th>penanggung jawab</th>
                             </tr>
                         </thead>
@@ -89,6 +100,7 @@
 
 @push('js')
 <script src="{{ asset('lib') }}/assets/vendor/libs/select2/select2.js"></script>
+<script src="{{ asset('lib') }}/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
 <script>
 $(document).ready(function () {
     $('input[inputmode="numeric"]').each(function () {
@@ -183,6 +195,24 @@ function createTableHarian(data){
                 `
             }},
             {data: (data) =>{
+                let color = 'danger';
+                let icon = 'ti ti-file-minus';
+
+                if (data.selisih_fisik === 0) {
+                    color = 'success';
+                    icon = 'ti ti-checklist';
+                } else if (data.selisih_fisik > 0) {
+                    color = 'primary';
+                    icon = 'ti ti-file-plus';
+                }
+
+                return `
+                    <span class="btn btn-xs btn-${color} d-inline-flex align-items-center">
+                        <i class="${icon}"></i>
+                    </span>
+                `;
+            }},
+            {data: (data) =>{
                 return data.invno;
             }},
             {data: (data) =>{
@@ -190,6 +220,9 @@ function createTableHarian(data){
             }},
             {data: (data) =>{
                 return formatRupiah(data.rptotal);
+            }},
+            {data: (data) =>{
+                return formatRupiah(data.selisih_fisik);
             }},
             {data: (data) =>{
                 return data.user;
@@ -205,7 +238,28 @@ function chekTutupHarian(){
     $.get(`{{ route('check.tutupHarian') }}`)
     .done((response) => {
         console.log(response.message);
+        const data = response.data;
+        const tanggalHarian = data.tanggal_harian;
+
+        if(tanggalHarian.length <= 0) {
+            return;
+        }
+
         $('#inputNominalHarian').attr('hidden', false);
+        const $select = $('#tanggal_harian');
+        $select.empty(); // Kosongkan dulu jika perlu
+
+        tanggalHarian.forEach(element => {
+            const option = $('<option>', {
+                value: element,
+                text: element
+            });
+            $select.append(option);
+        });
+
+        $select.select2({
+            dropdownParent: `#pilihTanggalHarian`
+        });
     })
     .fail((response) => {
         notification('info', response.responseJSON.message);
@@ -245,7 +299,8 @@ $('#formTutupHarian').on('submit', function(e){
             })
             .done((response) => {
                 notification('success', response.message);
-                $('#formTutupHarian').remove();
+                $('#formTutupHarian')[0].reset();
+                chekTutupHarian();
                 getDataHarian();
             })
             .fail((response) => {

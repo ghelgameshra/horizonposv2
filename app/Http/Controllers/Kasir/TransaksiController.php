@@ -38,7 +38,7 @@ class TransaksiController extends Controller
         $validated = $request->validate([
             'nomor_telepone' => ['required', 'regex:/^(\+62|0)[0-9]{9,14}$/'],
             'nama_customer'  => 'required|string|min:5|max:100',
-            'terima'         => 'required|numeric|min:1',
+            'terima'         => 'required|numeric',
             'tipe_bayar'     => 'required|string|min:1|max:10',
         ]);
 
@@ -50,7 +50,7 @@ class TransaksiController extends Controller
         // Validasi jika CASH/TRF tapi uang kurang
         if (in_array($tipeBayar, ['CSH', 'TRF']) && $terima < $total) {
             return response()->json([
-                'message' => 'Uang diterima tidak boleh lebih kecil dari total pembayaran'
+                'message' => 'Uang diterima tidak boleh lebih kecil dari total pembayaran untuk tipe bayar cash dan transfer'
             ], 422);
         }
 

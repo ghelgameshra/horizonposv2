@@ -41,6 +41,8 @@ function addItemList(plu) {
     })
     .fail((err) =>{
         notification('error', err.responseJSON.message);
+        hideLoading();
+        hideOffcanvas();
     });
 }
 
