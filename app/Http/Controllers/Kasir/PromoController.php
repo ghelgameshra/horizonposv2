@@ -96,7 +96,7 @@ class PromoController extends Controller
 
         $subtotal = $this->transaksi->subtotal;
 
-        if ($subtotal >= $this->promoMember->nominal_min_pembelian &&
+        if ($this->promoMember && $subtotal >= $this->promoMember->nominal_min_pembelian &&
             $subtotal <= $this->promoMember->nominal_maks_pembelian && $this->member) {
 
             $nilai = $this->promoMember->nilai_potongan;
