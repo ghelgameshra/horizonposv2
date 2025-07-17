@@ -132,7 +132,6 @@
     <!-- Page JS -->
     <script src="{{ asset('lib') }}/assets/vendor/libs/toastr/toastr.js"></script>
     <script src="{{ asset('lib') }}/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
-    <script src="{{ asset('js/helper.js') }}"></script>
     @stack('js')
     <script>
     function showLoading() {

@@ -3,9 +3,6 @@
 namespace App\Http\Controllers\Transaksi;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Struk\PrintStrukController;
-use App\Http\Requests\Update\TransaksiSelesaiRequest;
-use App\Models\Produk\Produk;
 use App\Models\Transaksi\Transaksi;
 use App\Models\Transaksi\TransaksiLog;
 use Carbon\Carbon;
@@ -88,14 +85,21 @@ class TransaksiController extends Controller
         ]);
 
         $user = Auth::user();
-        if(!Hash::check($request->password, $user->password)){
+        if (!Hash::check($request->password, $user->password)) {
             throw new HttpResponseException(response([
                 'message' => "Password tidak sesuai"
             ], 422));
         }
 
-        $transaksi = Transaksi::where('invno', $invno)->first();
-        if($transaksi->status_order === 'CANCEL SALES'){
+        $transaksi = Transaksi::with('transaksiLog')->where('invno', $invno)->first();
+
+        if (!$transaksi) {
+            throw new HttpResponseException(response([
+                'message' => "Transaksi tidak ditemukan"
+            ], 404));
+        }
+
+        if ($transaksi->status_order === 'CANCEL SALES') {
             throw new HttpResponseException(response([
                 'message' => "Status transaksi sudah cancel"
             ], 422));
@@ -108,12 +112,28 @@ class TransaksiController extends Controller
             ], 422));
         }
 
-        $transaksi->update([
-            'status_order'  => 'CANCEL SALES',
-        ]);
+        DB::transaction(function () use ($transaksi) {
+            // Ambil semua transaksi log yang terkait
+            $logs = $transaksi->transaksiLog; // pastikan relasi logs didefinisikan di model Transaksi
+
+            foreach ($logs as $log) {
+                $produk = $log->produk; // pastikan relasi produk didefinisikan di model TransaksiLog
+
+                if ($produk) {
+                    $produk->stok += $log->jumlah;
+                    $produk->save();
+                }
+            }
+
+            // Update status transaksi
+            $transaksi->update([
+                'status_order' => 'CANCEL SALES',
+            ]);
+        });
 
         return response()->json([
-            'pesan' => "Pesanan dengan no $invno berhasil di cancel",
+            'pesan' => "Pesanan dengan no $invno berhasil cancel",
         ]);
     }
+
 }

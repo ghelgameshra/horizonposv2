@@ -31,13 +31,13 @@ class UserSeeder extends Seeder
         User::create([
             'name'      => 'KASIR',
             'email'     => 'kasir@email.com',
-            'password'  => bcrypt('password')
+            'password'  => bcrypt('kasir@email.com')
         ]);
 
         User::create([
             'name'      => 'OPERATOR',
             'email'     => 'operator@email.com',
-            'password'  => bcrypt('password')
+            'password'  => bcrypt('kasir@email.com')
         ]);
     }
 }

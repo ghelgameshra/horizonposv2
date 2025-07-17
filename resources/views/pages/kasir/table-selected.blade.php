@@ -5,7 +5,10 @@
             <th>nama produk</th>
             <th class="text-center">nama file | ukuran</th>
             <th>Harga</th>
-            <th>qty</th>
+            <th class="d-flex gap-1 align-items-center justify-content-center">
+                <span>Qty Item</span>
+                <i class="menu-icon tf-icons ti ti-stack-2"></i>
+            </th>
             <th>subtotal</th>
             <th>gross</th>
             <th class="text-center">

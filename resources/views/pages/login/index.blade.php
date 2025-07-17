@@ -52,6 +52,7 @@
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{{ asset('lib') }}/assets/js/config.js"></script>
     <link rel="stylesheet" href="{{ asset('lib') }}/assets/vendor/libs/toastr/toastr.css" />
+    @vite(['resources/js/app.js'])
 </head>
 
 <body>
@@ -155,7 +156,6 @@
     <script src="{{ asset('lib') }}/assets/js/main.js"></script>
 
     <!-- Page JS -->
-    <script src="{{ asset('js/helper.js') }}"></script>
     <script src="{{ asset('lib') }}/assets/vendor/libs/toastr/toastr.js"></script>
     <script>
     function showLoading() {
