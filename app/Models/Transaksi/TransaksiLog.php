@@ -3,6 +3,7 @@
 namespace App\Models\Transaksi;
 
 use App\Models\Produk\Kategori;
+use App\Models\Produk\Produk;
 use App\Models\Produk\RefSatuan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,5 +25,10 @@ class TransaksiLog extends Model
     public function refSatuan(): HasOne
     {
         return $this->hasOne(RefSatuan::class, 'nama_satuan', 'satuan');
+    }
+
+    public function produk(): BelongsTo
+    {
+        return $this->belongsTo(Produk::class, 'plu');
     }
 }

@@ -97,6 +97,7 @@ class KasirController extends Controller
         ->first();
 
         $shouldCreateNew = !$item || $item->refSatuan->input_namafile;
+        $shouldFinish = in_array($produk->kategori->nama_kategori, ["JASA", "FINISHING"]) ? 'SELESAI' : 'DALAM ANTRIAN';
 
         if ($shouldCreateNew) {
             $item = TransaksiLog::create([
@@ -108,7 +109,7 @@ class KasirController extends Controller
                 'harga_jual'    => $produk->harga_jual,
                 'harga_ukuran'  => $produk->jenis_ukuran === 'PCS' ? $produk->harga_jual : 0,
                 'satuan'        => $produk->satuan,
-                'status_order'  => 'DALAM ANTRIAN',
+                'status_order'  => $shouldFinish,
             ]);
 
             // Idealnya: gunakan service layer alih-alih langsung new Controller

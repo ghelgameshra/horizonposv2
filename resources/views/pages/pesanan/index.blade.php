@@ -157,7 +157,7 @@ const defaultRekening = JSON.parse(localStorage.getItem("defaultRekening"));
 
 const transaksiLog = data.transaksi_log.map((item, index) => {
 return `
-${index + 1}. ${item.namafile ? (item.namafile + item.nama_produk) : item.nama_produk} ${item.ukuran || '-'}
+${index + 1}. ${item.namafile ? (item.namafile + '|' + item.nama_produk) : item.nama_produk} ${item.ukuran || '-'}
 ${formatRupiah(item.total)} X ${item.jumlah} = ${formatRupiah(item.total)}`;
 }).join('\n');
 
@@ -166,13 +166,13 @@ const dataToCopy = `
 Invoice No: ${data.invno || '-'}
 Nama Customer: ${data.nama_customer || '-'}
 Nomor Telepon: ${data.nomor_telepone || '-'}
-Tanggal Transaksi: ${data.tanggal_transaksi || '-'}
+Tanggal Transaksi: ${formatTanggal(data.created_at) || '-'}
 Kasir: ${data.kasir?.name || '-'}
 
 ${transaksiLog}
 
-Diskon: ${formatRupiah(data.diskon)}
 Subtotal: ${formatRupiah(data.subtotal)}
+Diskon: ${formatRupiah(data.diskon)}
 ================
 *Total: ${formatRupiah(data.total)}*
 ================
@@ -183,6 +183,7 @@ Nomor Rekening: ${defaultRekening.nomor_rekening}
 
 *Jika Anda telah melakukan pembayaran, mohon segera mengirimkan bukti transfer agar pesanan dapat segera diproses. Terima kasih.*
 `;
+console.log(dataToCopy);
 
     $('#tabelPesanan').append(`<button id="copyButton_${data.invno}" class="d-none" data-clipboard-text="${dataToCopy}">copy</button>`);
     $(`#copyButton_${data.invno}`).click();
