@@ -163,7 +163,7 @@ function setDataOrder(data, nama_status){
                 `
             }},
             {data: (data) =>{
-                return data.namafile.split(' ').slice(0, 2).join(' ');
+                return (data.namafile) ? data.namafile.split(' ').slice(0, 2).join(' ') : '-';
             }},
             {data: (data) =>{
                 return data.nama_produk;
