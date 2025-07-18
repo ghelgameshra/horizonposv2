@@ -123,6 +123,8 @@ class TransaksiController extends Controller
                     $produk->stok += $log->jumlah;
                     $produk->save();
                 }
+                $log->status_order = 'CANCEL SALES';
+                $log->save();
             }
 
             // Update status transaksi
