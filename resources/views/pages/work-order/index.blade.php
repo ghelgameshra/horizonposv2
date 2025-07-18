@@ -97,6 +97,8 @@ function makeTableView(statusOrder) {
                                         </th>
                                         <th>Nama File</th>
                                         <th>Nama Produk</th>
+                                        <th>Invno</th>
+                                        <th>kasir</th>
                                         <th>Kategori</th>
                                         <th>Jumlah order</th>
                                         <th>Ukuran (CM)</th>
@@ -167,6 +169,12 @@ function setDataOrder(data, nama_status){
             }},
             {data: (data) =>{
                 return data.nama_produk;
+            }},
+            {data: (data) =>{
+                return data.invno;
+            }},
+            {data: (data) =>{
+                return data.kasir;
             }},
             {data: (data) =>{
                 return data.kategori;

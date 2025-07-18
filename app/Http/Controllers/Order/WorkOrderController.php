@@ -28,8 +28,24 @@ class WorkOrderController extends Controller
     public function data($categoryId, $progress): JsonResponse
     {
         $order = DB::table('transaksi_log AS t')
-        ->join('ref_kategori AS r', 't.id_kategori', 'r.id')->where('t.status_order', strtoupper($progress))
-        ->where('r.id', $categoryId)->select(['t.id', 't.namafile', 't.nama_produk', 'r.nama_kategori AS kategori', 't.ukuran', 't.status_order', 't.jumlah', 't.worker'])->get();
+            ->join('ref_kategori AS r', 't.id_kategori', '=', 'r.id')
+            ->leftJoin('transaksi AS tr', 'tr.id', '=', 't.id_transaksi') // Join untuk invno
+            ->leftJoin('users AS u', 'u.id', '=', 'tr.kasir_id') // Join untuk nama user
+            ->where('t.status_order', strtoupper($progress))
+            ->where('r.id', $categoryId)
+            ->select([
+                't.id',
+                't.namafile',
+                't.nama_produk',
+                'r.nama_kategori AS kategori',
+                't.ukuran',
+                't.status_order',
+                't.jumlah',
+                't.worker',
+                'tr.invno',
+                'u.name AS kasir'
+            ])
+            ->get();
 
         return response()->json([
             'pesan' => "berhasil ambil data $progress",
@@ -38,6 +54,7 @@ class WorkOrderController extends Controller
             ]
         ]);
     }
+
 
     public function updateProgress(Int $id, String $nextProgress, Request $request): JsonResponse
     {
