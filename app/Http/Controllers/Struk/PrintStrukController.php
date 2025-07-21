@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Struk;
 
 require __DIR__ . '../../../../../vendor/autoload.php';
+
 use App\Http\Controllers\Controller;
 use App\Models\Transaksi\Transaksi;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -30,8 +31,9 @@ class PrintStrukController extends Controller
         $this->transaksi = Transaksi::with(['transaksiLog', 'kasir'])->where('invno', $invno)->first();
 
         $this->printerStruk = DB::table('setting_printer')
-        ->where('jenis_printer', 'STRUK')
-        ->where('default_printer', true)->first();
+            ->where('jenis_printer', 'STRUK')
+            ->where('default_printer', true)
+            ->first();
 
         if ($this->transaksi?->status_order === 'CANCEL SALES') {
             throw new HttpResponseException(response([
@@ -46,11 +48,11 @@ class PrintStrukController extends Controller
             $ip = $this->printerStruk->ip_printer;
             $namaPrinter = $this->printerStruk->nama_printer;
 
-            if($protocol === "LINUXUSB"){
+            if ($protocol === "LINUXUSB") {
                 $this->connector = new FilePrintConnector($ip);
             }
 
-            if($protocol === "SMB"){
+            if ($protocol === "SMB") {
                 $this->connector = new WindowsPrintConnector("smb://$username:$password@$ip/$namaPrinter");
             }
         } catch (\Throwable $th) {
@@ -63,6 +65,7 @@ class PrintStrukController extends Controller
     public function print(): void
     {
         $this->printer = new Printer($this->connector);
+
         $header = $this->settingStruk->where('key', 'HEDS')->first();
         $body = $this->settingStruk->where('key', 'ISIS')->first();
         $footer = $this->settingStruk->where('key', 'FOOS')->first();
@@ -75,8 +78,7 @@ class PrintStrukController extends Controller
         if ($message->status) $this->printMessage();
         if ($qr->status) $this->printQr();
 
-        $this->printer->text("\n");
-        $this->printer->text("\n");
+        $this->printer->text("\n\n");
         $this->printer->close();
     }
 
@@ -93,98 +95,70 @@ class PrintStrukController extends Controller
     {
         $this->printer->text("================================\n");
         $this->printer->setJustification(Printer::JUSTIFY_LEFT);
-        $this->printer->text( str_pad("Tanggal", 10, ' ', STR_PAD_RIGHT) );
-        $this->printer->text(": " . ($this->transaksi->created_at)->locale('id')->translatedFormat("l, d F Y H:i") . "\n");
 
-        $this->printer->text( str_pad("Customer", 10, ' ', STR_PAD_RIGHT) );
-        $this->printer->text(": " . $this->transaksi->nama_customer . "\n");
+        $this->printLine("Tanggal", $this->transaksi->created_at->locale('id')->translatedFormat("D, d M Y"));
+        $this->printLine("Jam", $this->transaksi->created_at->locale('id')->translatedFormat("H:i:s"));
+        $this->printLine("Customer", $this->transaksi->nama_customer);
+        $this->printLine("Telp", $this->transaksi->nomor_telepone);
+        $this->printLine("Invoice", $this->transaksi->invno);
+        $this->printLine("Kasir", $this->transaksi->kasir->name);
 
-        $this->printer->text( str_pad("Telp", 10, ' ', STR_PAD_RIGHT) );
-        $this->printer->text(": " . $this->transaksi->nomor_telepone . "\n");
+        $this->printer->text("================================\n\n");
 
-        $this->printer->text( str_pad("Invoice", 10, ' ', STR_PAD_RIGHT) );
-        $this->printer->text(": " . $this->transaksi->invno . "\n");
+        foreach ($this->transaksi->transaksiLog as $i => $item) {
+            $harga = $item->harga_ukuran > 0 ? $item->harga_ukuran : $item->harga_jual;
+            $namaProduk = $item->namafile ? "{$item->namafile} {$item->ukuran} {$item->nama_produk}" : $item->nama_produk;
 
-        $this->printer->text( str_pad("Kasir", 10, ' ', STR_PAD_RIGHT) );
-        $this->printer->text(": " . $this->transaksi->kasir->name . "\n");
-        $this->printer->text("================================\n");
-        $this->printer->text("\n");
-
-        foreach ($this->transaksi->transaksiLog as $key => $value) {
-            $hargaTemp = "Rp." . number_format($value->harga_ukuran > 0 ? $value->harga_ukuran : $value->harga_jual, 0, ',', '.');
-            $totalTemp = "Rp." . number_format($value->total, 0, ',', '.');
-            $namaFileTemp = $value->namafile ? $value->namafile . " " . $value->ukuran . " $value->nama_produk" : $value->nama_produk;
-            $key += 1;
-            $this->printer->text("$key.$namaFileTemp\n");
-            $this->printer->text(str_pad($hargaTemp, 12, ' ', STR_PAD_RIGHT));
-            $this->printer->text(str_pad("x$value->jumlah", 6, ' ', STR_PAD_RIGHT));
-            $this->printer->text("$totalTemp\n");
-            $this->printer->text("\n");
+            $this->printer->text(($i + 1) . ". {$namaProduk}\n");
+            $this->printer->text(str_pad($this->formatRupiah($harga), 12));
+            $this->printer->text(str_pad("x{$item->jumlah}", 6));
+            $this->printer->text($this->formatRupiah($item->total) . "\n\n");
         }
-
-        $subtotal = number_format($this->transaksi->subtotal, 0, ',', '.');
-        $diskon = number_format($this->transaksi->diskon, 0, ',', '.');
-        $total = number_format($this->transaksi->total, 0, ',', '.');
-        $terima = number_format(($this->transaksi->uang_muka - $this->transaksi->total), 0, ',', '.');
-        $kembali = number_format($this->transaksi->kembali, 0, ',', '.');
-        $uangMuka = number_format($this->transaksi->uang_muka, 0, ',', '.');
 
         $this->printer->text("================================\n");
         $this->printer->setEmphasis(true);
-        $this->printer->text( str_pad("Subtotal", 10, ' ', STR_PAD_RIGHT) );
-        $this->printer->text(": Rp." . $subtotal . "\n");
 
-        if ($this->transaksi->diskon > 0){
-            $this->printer->text( str_pad("Diskon", 10, ' ', STR_PAD_RIGHT) );
-            $this->printer->text(": Rp." . $diskon . "\n");
+        $this->printLine("Subtotal", $this->formatRupiah($this->transaksi->subtotal));
+        if ($this->transaksi->diskon > 0) {
+            $this->printLine("Diskon", $this->formatRupiah($this->transaksi->diskon));
+        }
+        $this->printLine("Total", $this->formatRupiah($this->transaksi->total));
+
+        $uangMuka = $this->transaksi->uang_muka;
+        $terima = $this->transaksi->terima;
+        $total = $this->transaksi->total;
+        $tipeBayar = $this->transaksi->tipe_bayar;
+        $tipePelunasan = $this->transaksi->tipe_bayar_pelunasan;
+
+        if ($tipePelunasan === null) {
+            $this->printLine("DP", $this->formatRupiah($uangMuka));
+            $this->printLine("Tipe Bayar", $tipeBayar);
+            $this->printLine("Pelunasan", $this->formatRupiah($uangMuka - $total));
+            $this->printLine("Status", "BELUM LUNAS");
         }
 
-        $this->printer->text( str_pad("Total", 10, ' ', STR_PAD_RIGHT) );
-        $this->printer->text(": Rp." . $total . "\n");
+        if (in_array($tipeBayar, ["DPTRF", "DPCSH"]) && $tipePelunasan) {
+            $pelunasan = $total - $uangMuka;
+            $terimaPelunasan = $terima - $uangMuka;
+            $kembali = $terima - $total;
 
-        if($this->transaksi->uang_muka > 0 && $this->transaksi->tipe_bayar_pelunasan === null){
-            $this->printer->text( str_pad("DP", 10, ' ', STR_PAD_RIGHT) );
-            $this->printer->text(": Rp." . $uangMuka . "\n");
-            $this->printer->text( str_pad("Tipe Bayar", 10, ' ', STR_PAD_RIGHT) );
-            $this->printer->text(": " . $this->transaksi->tipe_bayar . "\n");
-            $this->printer->text( str_pad("Pelunasan", 10, ' ', STR_PAD_RIGHT) );
-            $this->printer->text(": Rp." . $terima . "\n");
-            $this->printer->text( str_pad("status", 10, ' ', STR_PAD_RIGHT) );
-            $this->printer->text(": " . "BELUM LUNAS" . "\n");
+            $this->printLine("DP", $this->formatRupiah($uangMuka));
+            $this->printLine("Tipe Bayar", $tipeBayar);
+            $this->printLine("Pelunasan", $this->formatRupiah($pelunasan));
+            $this->printLine("Terima", $this->formatRupiah($terimaPelunasan));
+            $this->printLine("Kembali", $this->formatRupiah($kembali));
+            $this->printLine("Pelunasan", $tipePelunasan);
+            $this->printLine("Status", "LUNAS");
         }
 
-        $kurangBayar = number_format($this->transaksi->uang_muka - $this->transaksi->total, 0, ',', '.');
-        $kembaliKurangBayar = number_format($this->transaksi->terima - $this->transaksi->total, 0, ',', '.');
-        if($this->transaksi->uang_muka > 0 && $this->transaksi->terima > 0){
-            $terimaPelunasan = number_format($this->transaksi->terima - $this->transaksi->uang_muka, 0, ',', '.');
-
-            $this->printer->text( str_pad("DP", 10, ' ', STR_PAD_RIGHT) );
-            $this->printer->text(": Rp." . $uangMuka . "\n");
-            $this->printer->text( str_pad("Tipe Bayar", 10, ' ', STR_PAD_RIGHT) );
-            $this->printer->text(": " . $this->transaksi->tipe_bayar . "\n");
-            $this->printer->text( str_pad("Pelunasan", 10, ' ', STR_PAD_RIGHT) );
-            $this->printer->text(": Rp." . $kurangBayar . "\n");
-            $this->printer->text( str_pad("Terima", 10, ' ', STR_PAD_RIGHT) );
-            $this->printer->text(": Rp." . $terimaPelunasan . "\n");
-            $this->printer->text( str_pad("Kembali", 10, ' ', STR_PAD_RIGHT) );
-            $this->printer->text(": Rp." . $kembaliKurangBayar . "\n");
-            $this->printer->text( str_pad("Pelunasan", 10, ' ', STR_PAD_RIGHT) );
-            $this->printer->text(": " . $this->transaksi->tipe_bayar_pelunasan . "\n");
-            $this->printer->text( str_pad("status", 10, ' ', STR_PAD_RIGHT) );
-            $this->printer->text(": " . "LUNAS" . "\n");
+        if($tipeBayar === $tipePelunasan) {
+            $kembali = $terima - $total;
+            $this->printLine("Terima", $this->formatRupiah($terima));
+            $this->printLine("Kembali", $this->formatRupiah($kembali));
+            $this->printLine("Tipe Bayar", $tipeBayar);
         }
 
-        if($this->transaksi->uang_muka === 0 && $this->transaksi->terima > 0) {
-            $terima = number_format(($this->transaksi->terima), 0, ',', '.');
-            $kembali = number_format(($this->transaksi->terima - $this->transaksi->total), 0, ',', '.');
 
-            $this->printer->text( str_pad("Terima", 10, ' ', STR_PAD_RIGHT) );
-            $this->printer->text(": Rp." . $terima . "\n");
-            $this->printer->text( str_pad("Kembali", 10, ' ', STR_PAD_RIGHT) );
-            $this->printer->text(": Rp." . $kembali . "\n");
-            $this->printer->text( str_pad("Tipe Bayar", 10, ' ', STR_PAD_RIGHT) );
-            $this->printer->text(": " . $this->transaksi->tipe_bayar . "\n");
-        }
         $this->printer->setEmphasis(false);
         $this->printer->text("================================\n");
     }
@@ -210,12 +184,9 @@ class PrintStrukController extends Controller
 
     private function printQr(): void
     {
-        $text = $this->toko->qr_wa_text;
-        if(!$this->toko->qr_wa_text){
-            $text = 'https://wa.me/qr/QPPU3B7C6PMUM1';
-        }
+        $text = $this->toko->qr_wa_text ?: 'https://wa.me/qr/QPPU3B7C6PMUM1';
         $this->printer->setJustification(Printer::JUSTIFY_CENTER);
-        $this->printer -> qrCode($text);
+        $this->printer->qrCode($text);
     }
 
     public function test(): void
@@ -227,10 +198,18 @@ class PrintStrukController extends Controller
         $this->printer->text($this->toko->nama_perusahaan . "\n");
         $this->printer->setEmphasis(false);
         $this->printer->text($this->toko->alamat_lengkap . "\n");
-        $this->printer->text("\n");
-        $this->printer->text("\n");
-        $this->printer->text("\n");
+        $this->printer->text("\n\n\n");
         $this->printer->close();
     }
 
+    private function printLine(string $label, string $value): void
+    {
+        $this->printer->text(str_pad($label, 10, ' ', STR_PAD_RIGHT));
+        $this->printer->text(": {$value}\n");
+    }
+
+    private function formatRupiah($value): string
+    {
+        return 'Rp.' . number_format($value, 0, ',', '.');
+    }
 }
