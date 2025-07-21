@@ -119,10 +119,8 @@ class PromoController extends Controller
             $logItem = $this->transaksiLog->firstWhere('plu', $promoDetail->plu);
             if (!$logItem) continue;
 
-            // Lewatkan jika PLU termasuk larangan
-            if (in_array($logItem->plu, $this->promoPluLarangan)) {
-                continue;
-            }
+            // Skip jika termasuk dalam PLU larangan
+            if (in_array($logItem->plu, $this->promoPluLarangan)) continue;
 
             $promoUtama = $this->promoProduk->firstWhere('kode_promo', $promoDetail->kode_promo);
             if (!$promoUtama) continue;
@@ -131,36 +129,34 @@ class PromoController extends Controller
             $hargaSatuan = $logItem->harga_ukuran > 0 ? $logItem->harga_ukuran : $logItem->harga_jual;
             $totalNominal = $qty * $hargaSatuan;
 
-            $masukSyarat = match($promoDetail->tipe) {
+            $syaratTerpenuhi = match ($promoDetail->tipe) {
                 '@' => $qty >= $promoDetail->qty_min && $qty <= $promoDetail->qty_max,
                 '$' => $totalNominal >= $promoDetail->nominal_min && $totalNominal <= $promoDetail->nominal_max,
                 default => false,
             };
 
-            if (!$masukSyarat) continue;
+            $potongan = 0;
+            if ($syaratTerpenuhi) {
+                $potongan = $promoUtama->tipe_potongan === '%'
+                    ? $totalNominal * ($promoUtama->nilai_potongan / 100)
+                    : floatval($promoUtama->nilai_potongan);
 
-            // Hitung potongan
-            $potongan = $promoUtama->tipe_potongan === '%'
-                ? $totalNominal * ($promoUtama->nilai_potongan / 100)
-                : floatval($promoUtama->nilai_potongan);
+                $this->potonganProduk[] = [
+                    'kode_promo' => $promoDetail->kode_promo,
+                    'plu'        => $promoDetail->plu,
+                    'qty'        => $qty,
+                    'harga'      => $hargaSatuan,
+                    'total'      => $totalNominal,
+                    'potongan'   => $potongan,
+                    'gross'      => $totalNominal - $potongan,
+                ];
+            }
 
             $logItem->potongan = $potongan;
             $logItem->gross = $totalNominal - $potongan;
             $logItem->save();
-
-            // Simpan detail potongan
-            $this->potonganProduk[] = [
-                'kode_promo' => $promoDetail->kode_promo,
-                'plu'        => $promoDetail->plu,
-                'qty'        => $qty,
-                'harga'      => $hargaSatuan,
-                'total'      => $totalNominal,
-                'potongan'   => $potongan,
-                'gross'      => $totalNominal - $potongan,
-            ];
         }
     }
-
 
     private function updateGross(): void
     {

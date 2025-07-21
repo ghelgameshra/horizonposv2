@@ -112,7 +112,9 @@ class PrintStrukController extends Controller
             $this->printer->text(($i + 1) . ". {$namaProduk}\n");
             $this->printer->text(str_pad($this->formatRupiah($harga), 12));
             $this->printer->text(str_pad("x{$item->jumlah}", 6));
-            $this->printer->text($this->formatRupiah($item->total) . "\n\n");
+            $this->printer->text($this->formatRupiah($item->total) . "\n");
+            ($item->potongan > 0) ? $this->printer->text("Potongan : " . $this->formatRupiah($item->potongan) . "\n") : null;
+            $this->printer->text("\n");
         }
 
         $this->printer->text("================================\n");

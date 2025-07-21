@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Kasir;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Kasir\OrderController;
+use App\Http\Controllers\Kasir\PromoController;
 use App\Models\Produk\Produk;
 use App\Models\Transaksi\TransaksiLog;
 use Illuminate\Http\JsonResponse;
@@ -11,9 +13,6 @@ use Illuminate\Support\Facades\DB;
 
 class KasirController extends Controller
 {
-    /**
-     * Mengambil daftar produk yang bisa dijual
-     */
     public function getProdukJual(): JsonResponse
     {
         $produk = Produk::with('kategori:id,nama_kategori')
@@ -35,9 +34,6 @@ class KasirController extends Controller
         ], 200);
     }
 
-    /**
-     * Mengambil data order dan satuan
-     */
     public function getOrder(): JsonResponse
     {
         $orderController = new OrderController();
@@ -47,8 +43,7 @@ class KasirController extends Controller
             ->select('nama_satuan', 'input_namafile', 'input_ukuran')
             ->get();
 
-        $promo = new PromoController('', $order['order']['id']);
-        $potongan = $promo->checkPromo();
+        $this->applyPromo($order['order']['id']);
 
         return response()->json([
             'messages' => 'success get list order',
@@ -56,9 +51,6 @@ class KasirController extends Controller
         ], 200);
     }
 
-    /**
-     * Menambahkan item ke dalam list order
-     */
     public function addItemList(Request $request): JsonResponse
     {
         $newItem = $request->validate([
@@ -76,6 +68,8 @@ class KasirController extends Controller
 
         $this->addItemOrder($produk, (int)$newItem['id_transaksi']);
 
+        $this->applyPromo((int)$newItem['id_transaksi']);
+
         $orderController = new OrderController();
         $order = $orderController->order();
 
@@ -85,16 +79,12 @@ class KasirController extends Controller
         ], 201);
     }
 
-    /**
-     * Menambahkan atau mengupdate item dalam transaksi log
-     */
     private function addItemOrder(Produk $produk, int $idTransaksi): void
     {
-        // $item = TransaksiLog::where('id_transaksi', $idTransaksi)->join('ref_satuan', 'transaksi_log.satuan', '=', 'ref_satuan.nama_satuan')->where('plu', $produk->plu)->first();
         $item = TransaksiLog::with('refSatuan')
-        ->where('id_transaksi', $idTransaksi)
-        ->where('plu', $produk->plu)
-        ->first();
+            ->where('id_transaksi', $idTransaksi)
+            ->where('plu', $produk->plu)
+            ->first();
 
         $shouldCreateNew = !$item || $item->refSatuan->input_namafile;
         $shouldFinish = in_array($produk->kategori->nama_kategori, ["JASA", "FINISHING"]) ? 'SELESAI' : 'DALAM ANTRIAN';
@@ -112,15 +102,13 @@ class KasirController extends Controller
                 'status_order'  => $shouldFinish,
             ]);
 
-            // Idealnya: gunakan service layer alih-alih langsung new Controller
             app(OrderController::class)->addQty($item->id, 1);
         } else {
             $item->increment('jumlah');
         }
     }
 
-
-    public function removeItemOrder(int $id) : JsonResponse
+    public function removeItemOrder(int $id): JsonResponse
     {
         $log = TransaksiLog::where('id', $id)->first();
         $log->delete();
@@ -133,52 +121,70 @@ class KasirController extends Controller
         $produk->save();
 
         return response()->json([
-            'message'   => "Success remove item $id",
-            'data'      => compact(['order'])
+            'message' => "Success remove item $id",
+            'data'    => compact('order')
         ]);
     }
 
     public function addQty(int $id, Request $request): JsonResponse
     {
+        $qty = $request->qty ?? 1;
+
         $orderController = new OrderController();
-        $orderController->addQty($id, $request->qty ?? 1);
+        $orderController->addQty($id, $qty);
+
+        // Ambil ID transaksi dari log
+        $log = TransaksiLog::find($id);
+        if ($log) {
+            $this->applyPromo((int)$log->id_transaksi);
+        }
 
         $order = $orderController->order();
+
         return response()->json([
-            'message'   => "Success add qty item",
-            'data'      => compact(['order'])
+            'message' => "Success add qty item",
+            'data'    => compact('order')
         ]);
     }
 
     public function reduceQty(int $id, Request $request): JsonResponse
     {
+        $qty = $request->qty ?? 1;
+
         $orderController = new OrderController();
-        $orderController->reduceQty($id, $request->qty ?? 1);
+        $orderController->reduceQty($id, $qty);
+
+        $log = TransaksiLog::find($id);
+        if ($log) {
+            $this->applyPromo((int)$log->id_transaksi);
+        }
 
         $order = $orderController->order();
+
         return response()->json([
-            'message'   => "Success add qty item",
-            'data'      => compact(['order'])
+            'message' => "Success reduce qty item",
+            'data'    => compact('order')
         ]);
     }
 
     public function setFileName(int $id, Request $request): JsonResponse
     {
         $data = $request->validate([
-            'filename'  => 'string|min:3|max:50'
+            'filename' => 'string|min:3|max:50'
         ]);
 
         $orderController = new OrderController();
         $orderController->setFileName($id, $data['filename']);
+
         return response()->json([
-            'message'   => "Success set filename",
+            'message' => "Success set filename",
         ]);
     }
 
     public function setSize(int $id, Request $request): JsonResponse
     {
         $data = $request->validate([
-            'size'  => 'string|min:3|max:50'
+            'size' => 'string|min:3|max:50'
         ]);
 
         $orderController = new OrderController();
@@ -186,8 +192,17 @@ class KasirController extends Controller
         $order = $orderController->order();
 
         return response()->json([
-            'message'   => "Success set size",
-            'data'      => compact(['order'])
+            'message' => "Success set size",
+            'data'    => compact('order')
         ]);
+    }
+
+    /**
+     * Fungsi tambahan untuk menjalankan promo
+     */
+    private function applyPromo(int $idTransaksi): void
+    {
+        $promo = new PromoController('', $idTransaksi);
+        $promo->checkPromo();
     }
 }
