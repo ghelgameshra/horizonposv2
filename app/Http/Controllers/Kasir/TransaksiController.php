@@ -43,10 +43,10 @@ class TransaksiController extends Controller
 
         $lastNumber = 0;
         if ($lastInv && str_starts_with($lastInv, $prefix)) {
-            $lastNumber = (int) substr($lastInv, -8);
+            $lastNumber = (int) substr($lastInv, -6);
         }
 
-        $nextNumber = str_pad($lastNumber + 1, 8, '0', STR_PAD_LEFT);
+        $nextNumber = str_pad($lastNumber + 1, 6, '0', STR_PAD_LEFT);
         return $prefix . $nextNumber;
     }
 
