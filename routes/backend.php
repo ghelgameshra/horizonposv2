@@ -11,6 +11,8 @@ use App\Http\Controllers\Administrasi\StrukController;
 use App\Http\Controllers\Administrasi\TokoController;
 use App\Http\Controllers\Administrasi\TutupHarianController;
 use App\Http\Controllers\Auth\UserController;
+use App\Http\Controllers\Bot\TelegramBotController;
+use App\Http\Controllers\Closing\StrukHarianController;
 use App\Http\Controllers\Kasir\KasirController;
 use App\Http\Controllers\Kasir\TransaksiController as KasirTransaksiController;
 use App\Http\Controllers\Order\WorkOrderController;
@@ -18,6 +20,7 @@ use App\Http\Controllers\Produk\KategoriController;
 use App\Http\Controllers\Produk\ProdukController;
 use App\Http\Controllers\Produk\PromoController;
 use App\Http\Controllers\Produk\SatuanJualController;
+use App\Http\Controllers\Report\ReportTelegramController;
 use App\Http\Controllers\Select2\Select2Controller;
 use App\Http\Controllers\Struk\TestPrinterController;
 use App\Http\Controllers\Transaksi\PelunasanController;
@@ -166,6 +169,8 @@ Route::delete('rekening/{nomorRekening?}', [RekeningController::class, 'destroy'
 Route::get('data-tutup-harian', [TutupHarianController::class, 'data'])->name('data.tutupHarian');
 Route::post('tutup-harian', [TutupHarianController::class, 'store'])->name('create.tutupHarian');
 Route::get('check-tutup-harian', [TutupHarianController::class, 'checkHarian'])->name('check.tutupHarian');
+Route::get('harian/reprint/{tanggalHarian?}', [StrukHarianController::class, 'reprint'])->name('harian.reprint');
+Route::get('harian/bot/{tanggalHarian?}', [StrukHarianController::class, 'sendMessage'])->name('harian.sendMessage');
 
 Route::get('user', [UserController::class, 'get'])->name('get.user');
 Route::put('user-table/{id?}', [UserController::class, 'changeTable'])->name('changeTable.user');
@@ -192,3 +197,12 @@ Route::post('/kasir/set-item-filename/{idItem?}', [KasirController::class, 'setF
 Route::post('/kasir/set-item-size/{idItem?}', [KasirController::class, 'setSize'])->name('kasir.setSize');
 Route::post('/kasir/check-promo/{idTransaksi?}', [KasirTransaksiController::class, 'checkPromo'])->name('kasir.checkPromo');
 Route::post('/kasir/checkout/{idTransaksi?}', [KasirTransaksiController::class, 'checkout'])->name('kasir.checkout');
+
+Route::get('/report/bot/telegram', [ReportTelegramController::class, 'sendToBotTelegramTest'])->name('bot.telegram.test');
+Route::get('/bot/telegram/data', [TelegramBotController::class, 'botTelegramData'])->name('bot.telegram.data');
+Route::post('/bot/telegram/change-default-bot/{id?}', [TelegramBotController::class, 'changeBotDefault'])->name('bot.telegram.change-default-bot');
+Route::post('/bot/telegram/change-status-chat/{id?}', [TelegramBotController::class, 'changeBotChatStatus'])->name('bot.telegram.change-status-chat');
+Route::post('/bot/telegram/add', [TelegramBotController::class, 'addBot'])->name('bot.telegram.addBot');
+Route::post('/bot/telegram/add-chat', [TelegramBotController::class, 'addChatBot'])->name('bot.telegram.addChatBot');
+Route::delete('/bot/telegram/delete/bot/{id?}', [TelegramBotController::class, 'deleteBot'])->name('bot.telegram.deleteBot');
+Route::delete('/bot/telegram/delete/chat/{id?}', [TelegramBotController::class, 'deleteChatBot'])->name('bot.telegram.deleteChatBot');

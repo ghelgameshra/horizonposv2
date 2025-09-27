@@ -112,9 +112,11 @@ function setTable(data){
                 title: 'No'
             },
             {data: (data) =>{
+                const name = data.name.replace(/'/g, "`");
+
                 return `
                 <div class="btn-group">
-                    <button class="btn btn-xs btn-outline-warning" onclick="editUserRole('${data.id}',"${data.name}", '${data.roles[0] ? data.roles[0].name : 'Tidak Ada Role'}')">
+                    <button class="btn btn-xs btn-outline-warning" onclick="editUserRole('${data.id}', '${name}', '${data.roles[0] ? data.roles[0].name : 'Tidak Ada Role'}')">
                         <i class="ti ti-edit d-block"></i>
                         </button>
                         <button class="btn btn-xs btn-outline-danger" onclick="deleteUser('${data.id}')">

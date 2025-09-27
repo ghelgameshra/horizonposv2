@@ -96,8 +96,8 @@ class PrintStrukController extends Controller
         $this->printer->text("================================\n");
         $this->printer->setJustification(Printer::JUSTIFY_LEFT);
 
-        $this->printLine("Tanggal", $this->transaksi->created_at->locale('id')->translatedFormat("D, d M Y"));
-        $this->printLine("Jam", $this->transaksi->created_at->locale('id')->translatedFormat("H:i:s"));
+        $this->printLine("Tanggal", $this->transaksi->updated_at->locale('id')->translatedFormat("D, d M Y"));
+        $this->printLine("Jam", $this->transaksi->updated_at->locale('id')->translatedFormat("H:i:s"));
         $this->printLine("Customer", $this->transaksi->nama_customer);
         $this->printLine("Telp", $this->transaksi->nomor_telepone);
         $this->printLine("Invoice", $this->transaksi->invno);
