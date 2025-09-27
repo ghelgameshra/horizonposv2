@@ -86,4 +86,11 @@ class FeController extends Controller
     {
         return view('pages.user.index');
     }
+
+    public function bot(String $botType): View
+    {
+        return view('pages.bot.index', [
+            'botType' => $botType
+        ]);
+    }
 }

@@ -188,12 +188,16 @@ function createTableHarian(data){
             {data: (data) =>{
                 return `
                 <div class="btn-group">
-                    <button class="btn btn-xs btn-outline-info" onclick="reprintStruk('${data.invno}')" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Reprint struk harian">
+                    <button class="btn btn-xs btn-outline-info" onclick="reprintStruk('${data.tanggal_harian}')" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Reprint struk harian">
                         <i class="ti ti-receipt d-block"></i>
+                    </button>
+                    <button class="btn btn-xs btn-outline-info" onclick="sendToBot('${data.tanggal_harian}')" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="sent harian to bot">
+                        <i class="ti ti-send d-block"></i>
                     </button>
                 </div>
                 `
             }},
+
             {data: (data) =>{
                 let color = 'danger';
                 let icon = 'ti ti-file-minus';
@@ -310,6 +314,26 @@ $('#formTutupHarian').on('submit', function(e){
         }
     });
 })
+
+function reprintStruk(tanggal){
+    $.get(`{{ route('harian.reprint') }}/${tanggal}`)
+    .done((response) => {
+        notification('success', response.message);
+    })
+    .fail((response) => {
+        notification('error', response.responseJSON.message);
+    })
+}
+
+function sendToBot(tanggal){
+    $.get(`{{ route('harian.sendMessage') }}/${tanggal}`)
+    .done((response) => {
+        notification('success', response.message);
+    })
+    .fail((response) => {
+        notification('error', response.responseJSON.message);
+    })
+}
 
 </script>
 @endpush

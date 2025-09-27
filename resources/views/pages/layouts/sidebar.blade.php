@@ -237,6 +237,23 @@
         </li>
         @endcan
 
+        @can('show pengaturan')
+        <li class="menu-item {{ Request::is('*pengaturan/*') ? 'active open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-robot"></i>
+                <div data-i18n="Bot">Bot</div>
+            </a>
+
+            <ul class="menu-sub">
+                <li class="menu-item {{ Request::is('bot/telegram') ? 'active open' : '' }}">
+                    <a href="{{ route('bot.index') }}/telegram" class="menu-link">
+                        <div data-i18n="Telegram">Telegram</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        @endcan
+
         {{-- <li class="menu-item">
             <a href="app-email.html" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-lifebuoy"></i>

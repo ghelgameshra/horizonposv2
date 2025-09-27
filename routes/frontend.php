@@ -17,6 +17,7 @@ Route::get('pesanan/pengambilan', [FeController::class, 'pengambilan'])->name('p
 Route::get('pesanan/work-order', [FeController::class, 'workOrder'])->name('workOrder.index')->middleware('permission:show work order');
 Route::get('tutup-harian', [FeController::class, 'tutupHarian'])->name('tutupHarian.index')->middleware('permission:show tutup harian');
 Route::get('pengaturan/user', [FeController::class, 'user'])->name('user.index')->middleware('permission:show user');
+Route::get('bot/{botType?}', [FeController::class, 'bot'])->name('bot.index')->middleware('permission:show pengaturan');
 
 Route::get('user-permission-failed', function(){
     return view('pages.forbidden.index');

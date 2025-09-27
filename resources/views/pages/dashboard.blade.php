@@ -117,6 +117,7 @@ function showDataDashboard(data){
     $('#pendapatanCash').text(formatRupiah(data.pendapatanCash));
     $('#pendapatanNonTunai').text(formatRupiah(data.pendapatanNonTunai));
     $('#piutang').text(formatRupiah(data.piutang));
+    $('#totalPesananDibatalkan').text(data.totalPesananDibatalkan);
 
     $('#totalProdukTerjual').text(`${data.totalProdukTerjual.toLocaleString('id-ID')} Produk Terjual`);
     $('#totalProdukJual').text(`${data.totalProdukTerjual.toLocaleString('id-ID')} Produk Terjual`);
