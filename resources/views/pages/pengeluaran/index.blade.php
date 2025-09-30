@@ -212,7 +212,7 @@ function uploadFileRef(invno) {
 
 function showImage(img, invno){
     $('#modalShowImageTitle').text(`IMG REF ${invno}`);
-    $('#modalShowImageSrc').attr('src', `{{ url('/') }}/${img}`);
+    $('#modalShowImageSrc').attr('src', `{{ url('/storage') }}/${img}`);
     $('#modalShowImage').modal('show');
 }
 
