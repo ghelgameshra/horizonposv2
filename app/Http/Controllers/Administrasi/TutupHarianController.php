@@ -72,28 +72,28 @@ class TutupHarianController extends Controller
 
     public function store(TutupHarianRequest $request): JsonResponse
     {
+        $user = Auth::user();
+        if (!Hash::check($request->password, $user->password)) {
+            throw new HttpResponseException(response([
+                'message' => "Password tidak sesuai"
+            ], 422));
+        }
+
+        // Pastikan semua pengeluaran sudah ada image
+        $pengeluaranCount = DB::table('pengeluaran')
+            ->whereDate('tanggal_pengeluaran', now()->toDateString())
+            ->whereNull('image')
+            ->count();
+
+        if ($pengeluaranCount > 0) {
+            throw new HttpResponseException(response([
+                'message' => 'Ada pengeluaran hari yang belum input image referensi'
+            ], 422));
+        }
+
         DB::beginTransaction();
 
         try {
-            $user = Auth::user();
-            if (!Hash::check($request->password, $user->password)) {
-                throw new HttpResponseException(response([
-                    'message' => "Password tidak sesuai"
-                ], 422));
-            }
-
-            // Pastikan semua pengeluaran sudah ada image
-            $pengeluaranCount = DB::table('pengeluaran')
-                ->whereDate('tanggal_pengeluaran', now()->toDateString())
-                ->whereNull('image')
-                ->count();
-
-            if ($pengeluaranCount > 0) {
-                throw new HttpResponseException(response([
-                    'message' => 'Ada pengeluaran hari yang belum input image referensi'
-                ], 422));
-            }
-
             $data = $request->validated();
             $nominals = [
                 "rp100000" => 100000,
