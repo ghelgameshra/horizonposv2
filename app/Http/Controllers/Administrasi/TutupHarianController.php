@@ -248,11 +248,14 @@ class TutupHarianController extends Controller
 
         $bot = TelegramBot::where('bot_default', true)->first();
         $botChats = TelegramBotChat::where('bot_telegram_id', $bot->id)
+            ->where('chat_title', 'LIKE', "%harian%")
             ->where('is_active', true)
             ->get();
 
         if (!$bot || $botChats->isEmpty()) {
-            return "Bot atau chat tidak ditemukan.";
+            throw new HttpResponseException(response([
+                'message' => "Bot tidak ditemukan atau tidak ada bot harian aktif"
+            ], 422));
         }
 
         $detail = $dataHarian->tutupHarianDetail;
@@ -287,6 +290,7 @@ class TutupHarianController extends Controller
             Http::post("https://api.telegram.org/bot{$bot->bot_token}/sendMessage", [
                 'chat_id' => $chat->chat_id,
                 'parse_mode' => 'Markdown',
+                'message_thread_id' => $chat->message_thread_id ?? 0,
                 'text' => $msg,
             ]);
         }
