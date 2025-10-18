@@ -92,120 +92,120 @@ class TutupHarianController extends Controller
             ], 422));
         }
 
-        DB::beginTransaction();
+        $harianExist = TutupHarian::whereDate('tanggal_harian', $data['tanggal_harian'])->count();
+        if ($harianExist > 0) {
+            throw new HttpResponseException(response([
+                'message' => "Sudah berhasil tutup harian tanggal $data[tanggal_harian]"
+            ], 422));
+        }
+
+        $nominals = [
+            "rp100000" => 100000,
+            "rp75000"  => 75000,
+            "rp50000"  => 50000,
+            "rp20000"  => 20000,
+            "rp10000"  => 10000,
+            "rp5000"   => 5000,
+            "rp2000"   => 2000,
+            "rp1000"   => 1000,
+            "rp500"    => 500,
+            "rp200"    => 200,
+            "rp100"    => 100
+        ];
+
+        $total = array_sum(array_map(
+            fn($key, $value) => isset($nominals[$key]) && is_numeric($value) ? $value * $nominals[$key] : 0,
+            array_keys($data),
+            $data
+        ));
+
+        $tanggal = Carbon::parse($data['tanggal_harian'])->format('Y-m-d');
+        $data['rptotal'] = $total;
+        $data['tanggal_harian'] = $tanggal;
+        $data['invno'] = 'HR' . Carbon::parse($tanggal)->format('ymd/') . now()->format('mdHi');
+        $data['user'] = $user->name;
+
+        $dataHarian = TutupHarian::create($data);
+
+        // Ambil semua transaksi valid
+        $transaksi = DB::table('transaksi')
+            ->whereDate('tanggal_transaksi', $tanggal)
+            ->whereNotNull('invno')
+            ->where('status_order', '!=', 'CANCEL SALES')
+            ->get();
+
+        $jumlah_sales         = $transaksi->count();
+        $pesanan_selesai      = $transaksi->where('status_order', 'SELESAI')->count();
+        $total_nominal_sales  = $transaksi->sum('total');
+        $jumlah_sales_diskon  = $transaksi->filter(fn($t) => $t->diskon > 0)->count();
+        $total_nominal_diskon = $transaksi->sum('diskon');
+
+        // Pendapatan cash
+        $jumlah_bayar_dpcsh = $transaksi->where('tipe_bayar', 'DPCSH')->count();
+        $total_bayar_dpcsh = $transaksi->where('tipe_bayar', 'DPCSH')->sum('uang_muka');
+
+        $jumlah_bayar_csh = $transaksi->where('tipe_bayar_pelunasan', 'CSH')->count();
+        $total_bayar_csh = $transaksi->filter(fn($t) => $t->tipe_bayar_pelunasan === 'CSH')
+            ->sum(fn($t) => $t->terima - $t->kembali - $t->uang_muka);
+
+        // Pendapatan transfer
+        $jumlah_bayar_dptrf = $transaksi->where('tipe_bayar', 'DPTRF')->count();
+        $total_bayar_dptrf = $transaksi->where('tipe_bayar', 'DPTRF')->sum('uang_muka');
+
+        $jumlah_bayar_trf = $transaksi->where('tipe_bayar_pelunasan', 'TRF')->count();
+        $total_bayar_trf = $transaksi->filter(fn($t) => $t->tipe_bayar_pelunasan === 'TRF')
+            ->sum(fn($t) => $t->terima - $t->kembali - $t->uang_muka);
+
+        // Piutang
+        $total_piutang = $transaksi->filter(fn($t) => is_null($t->tipe_bayar_pelunasan))
+            ->sum(fn($t) => $t->total - $t->uang_muka);
+
+        // Pesanan cancel
+        $pesanan_cancel = DB::table('transaksi')
+            ->whereDate('tanggal_transaksi', $tanggal)
+            ->where('status_order', 'CANCEL SALES')
+            ->count();
+
+        TutupHarianDetail::create([
+            'id_harian'             => $dataHarian->id,
+            'pesanan_cancel'        => $pesanan_cancel,
+            'jumlah_sales'          => $jumlah_sales,
+            'pesanan_selesai'       => $pesanan_selesai,
+            'total_nominal_sales'   => $total_nominal_sales,
+            'jumlah_sales_diskon'   => $jumlah_sales_diskon,
+            'total_nominal_diskon'  => $total_nominal_diskon,
+            'jumlah_bayar_dpcsh'    => $jumlah_bayar_dpcsh,
+            'total_bayar_dpcsh'     => $total_bayar_dpcsh,
+            'jumlah_bayar_csh'      => $jumlah_bayar_csh,
+            'total_bayar_csh'       => $total_bayar_csh,
+            'jumlah_bayar_dptrf'    => $jumlah_bayar_dptrf,
+            'total_bayar_dptrf'     => $total_bayar_dptrf,
+            'jumlah_bayar_trf'      => $jumlah_bayar_trf,
+            'total_bayar_trf'       => $total_bayar_trf,
+            'rptotal'               => $total,
+            'piutang'               => $total_piutang,
+            'selisih_fisik'         => ($total_bayar_csh + $total_bayar_dpcsh) - $total,
+        ]);
+
+        $detail = array();
+        $detail[0] = $this->createBackupStock();
+        $detail[1] = $this->sendToBot();
 
         try {
-            $nominals = [
-                "rp100000" => 100000,
-                "rp75000"  => 75000,
-                "rp50000"  => 50000,
-                "rp20000"  => 20000,
-                "rp10000"  => 10000,
-                "rp5000"   => 5000,
-                "rp2000"   => 2000,
-                "rp1000"   => 1000,
-                "rp500"    => 500,
-                "rp200"    => 200,
-                "rp100"    => 100
-            ];
-
-            $total = array_sum(array_map(
-                fn($key, $value) => isset($nominals[$key]) && is_numeric($value) ? $value * $nominals[$key] : 0,
-                array_keys($data),
-                $data
-            ));
-
-            $tanggal = Carbon::parse($data['tanggal_harian'])->format('Y-m-d');
-            $data['rptotal'] = $total;
-            $data['tanggal_harian'] = $tanggal;
-            $data['invno'] = 'HR' . Carbon::parse($tanggal)->format('ymd/') . now()->format('mdHi');
-            $data['user'] = $user->name;
-
-            $dataHarian = TutupHarian::create($data);
-
-            // Ambil semua transaksi valid
-            $transaksi = DB::table('transaksi')
-                ->whereDate('tanggal_transaksi', $tanggal)
-                ->whereNotNull('invno')
-                ->where('status_order', '!=', 'CANCEL SALES')
-                ->get();
-
-            $jumlah_sales         = $transaksi->count();
-            $pesanan_selesai      = $transaksi->where('status_order', 'SELESAI')->count();
-            $total_nominal_sales  = $transaksi->sum('total');
-            $jumlah_sales_diskon  = $transaksi->filter(fn($t) => $t->diskon > 0)->count();
-            $total_nominal_diskon = $transaksi->sum('diskon');
-
-            // Pendapatan cash
-            $jumlah_bayar_dpcsh = $transaksi->where('tipe_bayar', 'DPCSH')->count();
-            $total_bayar_dpcsh = $transaksi->where('tipe_bayar', 'DPCSH')->sum('uang_muka');
-
-            $jumlah_bayar_csh = $transaksi->where('tipe_bayar_pelunasan', 'CSH')->count();
-            $total_bayar_csh = $transaksi->filter(fn($t) => $t->tipe_bayar_pelunasan === 'CSH')
-                ->sum(fn($t) => $t->terima - $t->kembali - $t->uang_muka);
-
-            // Pendapatan transfer
-            $jumlah_bayar_dptrf = $transaksi->where('tipe_bayar', 'DPTRF')->count();
-            $total_bayar_dptrf = $transaksi->where('tipe_bayar', 'DPTRF')->sum('uang_muka');
-
-            $jumlah_bayar_trf = $transaksi->where('tipe_bayar_pelunasan', 'TRF')->count();
-            $total_bayar_trf = $transaksi->filter(fn($t) => $t->tipe_bayar_pelunasan === 'TRF')
-                ->sum(fn($t) => $t->terima - $t->kembali - $t->uang_muka);
-
-            // Piutang
-            $total_piutang = $transaksi->filter(fn($t) => is_null($t->tipe_bayar_pelunasan))
-                ->sum(fn($t) => $t->total - $t->uang_muka);
-
-            // Pesanan cancel
-            $pesanan_cancel = DB::table('transaksi')
-                ->whereDate('tanggal_transaksi', $tanggal)
-                ->where('status_order', 'CANCEL SALES')
-                ->count();
-
-            TutupHarianDetail::create([
-                'id_harian'             => $dataHarian->id,
-                'pesanan_cancel'        => $pesanan_cancel,
-                'jumlah_sales'          => $jumlah_sales,
-                'pesanan_selesai'       => $pesanan_selesai,
-                'total_nominal_sales'   => $total_nominal_sales,
-                'jumlah_sales_diskon'   => $jumlah_sales_diskon,
-                'total_nominal_diskon'  => $total_nominal_diskon,
-                'jumlah_bayar_dpcsh'    => $jumlah_bayar_dpcsh,
-                'total_bayar_dpcsh'     => $total_bayar_dpcsh,
-                'jumlah_bayar_csh'      => $jumlah_bayar_csh,
-                'total_bayar_csh'       => $total_bayar_csh,
-                'jumlah_bayar_dptrf'    => $jumlah_bayar_dptrf,
-                'total_bayar_dptrf'     => $total_bayar_dptrf,
-                'jumlah_bayar_trf'      => $jumlah_bayar_trf,
-                'total_bayar_trf'       => $total_bayar_trf,
-                'rptotal'               => $total,
-                'piutang'               => $total_piutang,
-                'selisih_fisik'         => ($total_bayar_csh + $total_bayar_dpcsh) - $total,
-            ]);
-
-            DB::commit();
-
-            $this->createBackupStock();
-            $this->sendToBot();
-
             $struk = new PrintStrukHarianController($tanggal);
             $struk->print();
-
-            return response()->json([
-                'message' => 'Berhasil tutup harian',
-            ], 201);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'message' => 'Terjadi kesalahan',
-                'error'   => $e->getMessage()
-            ], 500);
+        } catch (\Throwable $th) {
+            $detail[2] = "Gagal cetak struk harian";
+            $detail[3] = "$th";
         }
+
+        return response()->json([
+            'message'   => 'Berhasil tutup harian',
+            'detail'    => $detail
+        ], 201);
     }
 
-    private function createBackupStock(): void
+    private function createBackupStock(): String
     {
         $schema = 'backup_pos';
         $timestamp = now()->format('Y_m_d_His');
@@ -230,9 +230,11 @@ class TutupHarianController extends Controller
         } catch (\Throwable $th) {
             Log::error("Gagal membuat backup stok $schema.$tableName: " . $th->getMessage());
         }
+
+        return "success create backup";
     }
 
-    public function sendToBot($tanggalHarian = null)
+    public function sendToBot($tanggalHarian = null): String
     {
         if(!$tanggalHarian) {
             $tanggalHarian = now()->format('Y-m-d');
@@ -253,9 +255,7 @@ class TutupHarianController extends Controller
             ->get();
 
         if (!$bot || $botChats->isEmpty()) {
-            throw new HttpResponseException(response([
-                'message' => "Bot tidak ditemukan atau tidak ada bot harian aktif"
-            ], 422));
+            return "Bot tidak ditemukan atau tidak ada bot harian aktif";
         }
 
         $detail = $dataHarian->tutupHarianDetail;
@@ -295,6 +295,6 @@ class TutupHarianController extends Controller
             ]);
         }
 
-        return "Pesan laporan harian terkirim ke Telegram.";
+        return "Pesan laporan harian $tanggalHarian terkirim ke Telegram.";
     }
 }

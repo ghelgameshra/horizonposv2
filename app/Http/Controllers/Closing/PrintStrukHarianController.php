@@ -57,9 +57,7 @@ class PrintStrukHarianController extends Controller
                 $this->connector = new WindowsPrintConnector("smb://$username:$password@$ip/$namaPrinter");
             }
         } catch (\Throwable $th) {
-            throw new HttpResponseException(response([
-                'message' => 'Error: ' . $th->getMessage()
-            ], 500));
+            return 'Error: ' . $th->getMessage();
         }
     }
 
