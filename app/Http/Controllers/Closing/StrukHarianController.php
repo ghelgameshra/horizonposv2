@@ -22,10 +22,10 @@ class StrukHarianController extends Controller
     public function sendMessage($tanggalHarian = null): JsonResponse
     {
         $msg = new TutupHarianController();
-        $msg->sendToBot($tanggalHarian);
+        $status = $msg->sendToBot($tanggalHarian);
 
         return response()->json([
-            'message'   => "success send message harian $tanggalHarian"
+            'message'   => "$status"
         ]);
     }
 }
