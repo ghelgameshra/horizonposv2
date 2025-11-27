@@ -85,6 +85,7 @@
                                 <th>Sesuai</th>
                                 <th>id harian</th>
                                 <th>tanggal harian</th>
+                                <th>pengeluaran</th>
                                 <th>nominal harian</th>
                                 <th>Selisih Fisik</th>
                                 <th>penanggung jawab</th>
@@ -221,6 +222,9 @@ function createTableHarian(data){
             }},
             {data: (data) =>{
                 return data.tanggal_harian;
+            }},
+            {data: (data) =>{
+                return formatRupiah(data.pengeluaran);
             }},
             {data: (data) =>{
                 return formatRupiah(data.rptotal);

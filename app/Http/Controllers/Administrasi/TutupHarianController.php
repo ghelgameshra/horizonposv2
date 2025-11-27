@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Administrasi;
 use App\Http\Controllers\Closing\PrintStrukHarianController;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Insert\TutupHarianRequest;
+use App\Models\Administrasi\Pengeluaran;
 use App\Models\Administrasi\TutupHarian;
 use App\Models\Administrasi\TutupHarianDetail;
 use App\Models\Bot\TelegramBot;
@@ -32,9 +33,9 @@ class TutupHarianController extends Controller
                 'rptotal'        => $item->rptotal,
                 'user'           => $item->user,
                 'selisih_fisik'  => $item->tutupHarianDetail->selisih_fisik ?? 0,
+                'pengeluaran'    => ($item->tutupHarianDetail->pengeluaran_csh + $item->tutupHarianDetail->pengeluaran_trf) ?? 0,
             ];
         });
-
 
         return response()->json([
             'message'   => 'Success ambil data harian',
@@ -166,6 +167,10 @@ class TutupHarianController extends Controller
             ->where('status_order', 'CANCEL SALES')
             ->count();
 
+        $pengeluaran = Pengeluaran::where('tanggal_pengeluaran', $data['tanggal_harian'])->get();
+        $pengeluaran_cash = $pengeluaran->where('tipe_bayar', 'CSH')->sum('total');
+        $pengeluaran_trf = $pengeluaran->where('tipe_bayar', 'TRF')->sum('total');
+
         TutupHarianDetail::create([
             'id_harian'             => $dataHarian->id,
             'pesanan_cancel'        => $pesanan_cancel,
@@ -184,7 +189,9 @@ class TutupHarianController extends Controller
             'total_bayar_trf'       => $total_bayar_trf,
             'rptotal'               => $total,
             'piutang'               => $total_piutang,
-            'selisih_fisik'         => ($total_bayar_csh + $total_bayar_dpcsh) - $total,
+            'pengeluaran_csh'       => $pengeluaran_cash,
+            'pengeluaran_trf'       => $pengeluaran_trf,
+            'selisih_fisik'         => ($total_bayar_csh + $total_bayar_dpcsh) - $total - $pengeluaran_cash,
         ]);
 
         $detail = array();
@@ -260,6 +267,7 @@ class TutupHarianController extends Controller
 
         $detail = $dataHarian->tutupHarianDetail;
 
+
         // Format pesan dengan gaya yang kamu minta
         $msg = "📊 *Laporan Tutup Harian*\n\n";
         $msg .= "🧾 INVNO                 : `{$dataHarian->invno}`\n";
@@ -281,9 +289,13 @@ class TutupHarianController extends Controller
         $msg .= "├ 🔁 DPTRF : {$detail->jumlah_bayar_dptrf} transaksi, Rp " . number_format($detail->total_bayar_dptrf, 0, ',', '.') . "\n";
         $msg .= "└ 🔁 TRF   : {$detail->jumlah_bayar_trf} transaksi, Rp " . number_format($detail->total_bayar_trf, 0, ',', '.') . "\n\n";
 
-        $msg .= "📄 Piutang               : Rp " . number_format($detail->piutang, 0, ',', '.') . "\n";
-        $msg .= "💸 Uang Fisik            : Rp " . number_format($detail->rptotal, 0, ',', '.') . "\n";
-        $msg .= "📉 Selisih Fisik         : Rp " . number_format($detail->selisih_fisik, 0, ',', '.') . "\n";
+        $msg .= "💸 Pengeluaran Cash        : Rp " . number_format($detail->pengeluaran_csh, 0, ',', '.') . "\n";
+        $msg .= "💸 Pengeluaran Transfer    : Rp " . number_format($detail->pengeluaran_trf, 0, ',', '.') . "\n";
+        $msg .= '💸 Total                   : Rp ' . number_format($detail->pengeluaran_trf + $detail->pengeluaran_csh, 0, ',', '.') . "\n\n";
+
+        $msg .= "📄 Piutang                 : Rp " . number_format($detail->piutang, 0, ',', '.') . "\n";
+        $msg .= "💸 Uang Fisik              : Rp " . number_format($detail->rptotal, 0, ',', '.') . "\n";
+        $msg .= "📉 Selisih Fisik           : Rp " . number_format($detail->selisih_fisik, 0, ',', '.') . "\n";
 
         // Kirim ke semua chat aktif
         foreach ($botChats as $chat) {

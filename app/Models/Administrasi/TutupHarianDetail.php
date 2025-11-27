@@ -27,6 +27,8 @@ class TutupHarianDetail extends Model
         'jumlah_bayar_trf',
         'total_bayar_trf',
         'piutang',
+        'pengeluaran_csh',
+        'pengeluaran_trf',
         'rptotal',
         'selisih_fisik',
     ];
