@@ -7,12 +7,20 @@ use App\Http\Controllers\Kasir\OrderController;
 use App\Http\Controllers\Kasir\PromoController;
 use App\Models\Produk\Produk;
 use App\Models\Transaksi\TransaksiLog;
+use App\Services\Transaksi\HitungTotalService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class KasirController extends Controller
 {
+    private HitungTotalService $hitungService;
+
+    public function __construct(HitungTotalService $hitungService)
+    {
+        $this->hitungService = $hitungService;
+    }
+
     public function getProdukJual(): JsonResponse
     {
         $produk = Produk::with('kategori:id,nama_kategori')
@@ -133,7 +141,6 @@ class KasirController extends Controller
         $orderController = new OrderController();
         $orderController->addQty($id, $qty);
 
-        // Ambil ID transaksi dari log
         $log = TransaksiLog::find($id);
         if ($log) {
             $this->applyPromo((int)$log->id_transaksi);
@@ -181,14 +188,41 @@ class KasirController extends Controller
         ]);
     }
 
+    /**
+     * ✅ Refactor fungsi hitung ukuran pakai HitungTotalService
+     */
     public function setSize(int $id, Request $request): JsonResponse
     {
         $data = $request->validate([
-            'size' => 'string|min:3|max:50'
+            'size' => 'string|min:1|max:50'
         ]);
 
+        $log = TransaksiLog::find($id);
+        if (!$log) {
+            return response()->json(['message' => 'Data transaksi tidak ditemukan'], 404);
+        }
+
+        $ukuranInput = strtoupper(trim($data['size']));
+
+        // 🔹 Gunakan service untuk hitung total berdasarkan satuan
+        $hasil = $this->hitungService->hitung([
+            'ukuran' => $ukuranInput,
+            'satuan' => strtolower($log->satuan),
+            'harga'  => $log->harga_jual,
+            'qty'    => $log->jumlah ?: 1,
+        ]);
+
+        // 🔹 Simpan hasil hitungan
+        $log->ukuran        = $ukuranInput;
+        $log->harga_ukuran  = $hasil['nilai'] * $log->harga_jual;
+        $log->total         = $hasil['subtotal'];
+        $log->gross         = $hasil['subtotal'];
+        $log->save();
+
+        // Update total transaksi utama
         $orderController = new OrderController();
-        $orderController->setSize($id, $data['size']);
+        $orderController->order();
+
         $order = $orderController->order();
 
         return response()->json([
@@ -198,7 +232,7 @@ class KasirController extends Controller
     }
 
     /**
-     * Fungsi tambahan untuk menjalankan promo
+     * Jalankan promo
      */
     private function applyPromo(int $idTransaksi): void
     {

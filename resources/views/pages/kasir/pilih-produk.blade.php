@@ -190,7 +190,8 @@ $('#customSearchInput').on('keyup', debounce(function () {
 }, 300));
 
 
-$(document).ready(() => {
+$(document).ready(async () => {
+    await downloadProdukJual();
     const produk = localStorage.getItem('produkJual');
     if (produk) {
         try {
