@@ -106,6 +106,11 @@ class PrintStrukHarianController extends Controller
             $printer->text(" TRF   : {$detail->jumlah_bayar_trf} trx, Rp " . number_format($detail->total_bayar_trf, 0, ',', '.') . "\n");
             $printer->feed();
 
+            $printer->text("Png. Csh       : Rp " . number_format($detail->pengeluaran_csh, 0, ',', '.') . "\n");
+            $printer->text("Png. Trf       : Rp " . number_format($detail->pengeluaran_trf, 0, ',', '.') . "\n");
+            $printer->text("Png. Total     : Rp " . number_format($detail->pengeluaran_csh + $detail->pengeluaran_trf, 0, ',', '.') . "\n");
+            $printer->feed();
+
             $printer->text("Piutang        : Rp " . number_format($detail->piutang, 0, ',', '.') . "\n");
             $printer->text("Uang Fisik     : Rp " . number_format($detail->rptotal, 0, ',', '.') . "\n");
             $printer->text("Selisih Fisik  : Rp " . number_format($detail->selisih_fisik, 0, ',', '.') . "\n");

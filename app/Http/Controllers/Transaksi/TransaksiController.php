@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Transaksi;
 
 use App\Http\Controllers\Controller;
+use App\Models\Administrasi\TutupHarian;
 use App\Models\Transaksi\Transaksi;
 use App\Models\Transaksi\TransaksiLog;
 use Carbon\Carbon;
@@ -80,6 +81,13 @@ class TransaksiController extends Controller
 
     public function cancel(String $invno, Request $request): JsonResponse
     {
+        $isClosingHarian = TutupHarian::whereDate('tanggal_harian', now()->format('Y-m-d'))->count();
+        if($isClosingHarian) {
+            throw new HttpResponseException(response([
+                'message' => "Sudah tutup harian, tidak bisa cancel sales"
+            ], 422));
+        }
+
         $request->validate([
             'password' => ['required', 'string']
         ]);
