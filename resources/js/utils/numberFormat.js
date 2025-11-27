@@ -78,16 +78,18 @@ function terbilangRupiah(angka) {
         return miliaran(angka);
     } else {
         return 'Inputan terlau besar dan tidak wajar, silahkan cek inputan';
-    }
+}
 }
 
 function formatRupiah(value) {
+    const number = typeof value === "string" ? parseFloat(value.replace(",", ".")) : value;
+
     return new Intl.NumberFormat("id-ID", {
         style: "currency",
         currency: "IDR",
         currencyDisplay: "symbol", // Menampilkan simbol mata uang (Rp)
         minimumFractionDigits: 0,
-    }).format(value);
+    }).format(number);
 }
 
 export {

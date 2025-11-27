@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Produk\Produk;
 use App\Models\Transaksi\Transaksi;
 use App\Models\Transaksi\TransaksiLog;
+use App\Services\Transaksi\HitungTotalService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -17,36 +18,37 @@ class OrderController extends Controller
     private ?Transaksi $order = null;
     private ?Collection $orderLists = null;
     private $user;
+    protected HitungTotalService $hitungTotal;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->user = Auth::user();
         $this->initializeOrder();
     }
 
+    /**
+     * Inisialisasi order aktif untuk kasir login
+     */
     private function initializeOrder(): void
     {
-        // Step 1: Cari atau buat order
         $this->order = Transaksi::firstOrCreate(
             ['terima' => 0, 'kasir_id' => $this->user->id, 'tipe_bayar' => null],
             ['tanggal_transaksi' => now()]
         );
 
-        // Step 2: Update tanggal jika bukan hari ini
         if (!Carbon::parse($this->order->tanggal_transaksi)->isToday()) {
             $this->order->update(['tanggal_transaksi' => now()]);
         }
 
-        // Step 3: Ambil log, belum updateTotal di sini
         $this->loadOrderLists();
     }
 
+    /**
+     * Ambil data order dan detail log
+     */
     public function order(): array
     {
-        // Update total terbaru saat dipanggil
         $this->updateTotal($this->order->id);
 
-        // Ambil ulang order & log setelah update
         $this->order = Transaksi::find($this->order->id);
         $this->loadOrderLists();
 
@@ -72,8 +74,7 @@ class OrderController extends Controller
 
         DB::update("
             UPDATE transaksi
-                SET
-                subtotal = (
+                SET subtotal = (
                     SELECT COALESCE(SUM(gross), 0)
                     FROM transaksi_log
                     WHERE id_transaksi = ?
@@ -86,16 +87,19 @@ class OrderController extends Controller
                     ) = 0 THEN 0
                     ELSE subtotal - diskon
                 END
-                WHERE id = ?;
-
+            WHERE id = ?;
         ", [$orderId, $orderId, $orderId]);
     }
 
+    /**
+     * Tambah jumlah item dalam transaksi log
+     */
     public function addQty(int $id, int $amount): void
     {
-        $log = TransaksiLog::where('id', $id)->first();
+        $log = TransaksiLog::find($id);
         $produk = Produk::where('plu', $log->plu)->first();
-        $produk->stok = $produk->stok - $amount;
+
+        $produk->stok -= $amount;
         $produk->save();
 
         $stockAwal = $produk->stok + $amount;
@@ -105,14 +109,18 @@ class OrderController extends Controller
         $log->jumlah += $amount;
         $log->save();
 
-        $this->updateTotal($id);
+        $this->updateTotal($log->id_transaksi);
     }
 
+    /**
+     * Kurangi jumlah item dalam transaksi log
+     */
     public function reduceQty(int $id, int $amount): void
     {
-        $log = TransaksiLog::where('id', $id)->first();
+        $log = TransaksiLog::find($id);
         $produk = Produk::where('plu', $log->plu)->first();
-        $produk->stok = $produk->stok + $amount;
+
+        $produk->stok += $amount;
         $produk->save();
 
         $stockAwal = $produk->stok - $amount;
@@ -120,54 +128,55 @@ class OrderController extends Controller
 
         $log->informasi_stok = "stock_awal: $stockAwal|stock_akhir: $stockAkhir";
         $log->jumlah -= $amount;
-        $log->save();
 
-        if($log->jumlah <= 0) {
+        if ($log->jumlah <= 0) {
             $log->delete();
+        } else {
+            $log->save();
         }
 
-        $this->updateTotal($id);
+        $this->updateTotal($log->id_transaksi);
     }
 
-    public function setFileName(int $id, string $filename) : void
-    {
-        $log = TransaksiLog::where('id', $id)->first();
-        $log->namafile = strtoupper($filename);
-        $log->save();
-    }
-
-    public function setSize(int $id, string $size): void
+    /**
+     * Set nama file pada transaksi log
+     */
+    public function setFileName(int $id, string $filename): void
     {
         $log = TransaksiLog::find($id);
-
         if (!$log) {
             throw new \Exception("Data transaksi_log dengan ID $id tidak ditemukan.");
         }
 
-        $ukuranInput = strtoupper($size);
-        $hargaUkuran = 0;
+        $log->namafile = strtoupper($filename);
+        $log->save();
+    }
 
-        if (in_array($log->satuan, ['LUAS', 'KELILING'])) {
-            $ukuran = explode('X', $ukuranInput);
-
-            if (count($ukuran) === 2 && is_numeric($ukuran[0]) && is_numeric($ukuran[1])) {
-                $panjang = $ukuran[0] / 100; // cm ke meter
-                $lebar   = $ukuran[1] / 100;
-
-                $hargaUkuran = match ($log->satuan) {
-                    'LUAS'      => $panjang * $lebar * $log->harga_jual,
-                    'KELILING'  => ($panjang + $lebar) * 2 * $log->harga_jual,
-                };
-            }
+    /**
+     * Hitung ulang harga ukuran berdasarkan satuan jual
+     * menggunakan HitungTotalService
+     */
+    public function setSize(int $id, string $size): void
+    {
+        $log = TransaksiLog::find($id);
+        if (!$log) {
+            throw new \Exception("Data transaksi_log dengan ID $id tidak ditemukan.");
         }
 
-        $log->ukuran        = $ukuranInput;
-        $log->harga_ukuran  = $hargaUkuran;
-        $log->total         = $log->jumlah * $hargaUkuran;
-        $log->gross         = $log->jumlah * $hargaUkuran;
+        // Gunakan service untuk menghitung total berdasarkan satuan
+        $result = $this->hitungTotal->hitung([
+            'ukuran' => $size,
+            'satuan' => strtolower($log->satuan),
+            'harga'  => $log->harga_jual,
+            'qty'    => $log->jumlah,
+        ]);
 
+        $log->ukuran        = strtoupper($size);
+        $log->harga_ukuran  = $result['nilai'] * $log->harga_jual;
+        $log->total         = $result['subtotal'];
+        $log->gross         = $result['subtotal'];
         $log->save();
 
-        $this->updateTotal($id);
+        $this->updateTotal($log->id_transaksi);
     }
 }
